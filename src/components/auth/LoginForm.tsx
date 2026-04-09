@@ -15,10 +15,11 @@ export function LoginForm() {
     setStatus(null);
 
     const supabase = createClient();
+    const callbackPath = "/auth/callback?next=/admin";
     const redirectTo =
       process.env.NEXT_PUBLIC_SITE_URL
-        ? getSiteUrlWithPath("/auth/callback")
-        : `${window.location.origin}/auth/callback`;
+        ? getSiteUrlWithPath(callbackPath)
+        : `${window.location.origin}${callbackPath}`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
