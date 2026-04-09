@@ -1,0 +1,20 @@
+export type School = {
+  id: number;
+  name: string;
+  slug: string;
+  type: string;
+  district: string;
+  percentile: string;
+  logo: string;
+  color: string;
+  features: string[];
+  projects: string[];
+  languages: string[];
+  description: string;
+  images: string[];
+  address?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  isActive?: boolean;
+  vocationalFields?: number[];
+};
