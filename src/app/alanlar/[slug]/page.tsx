@@ -21,7 +21,7 @@ export default async function AlanDetayPage({
     .maybeSingle();
 
   if (error || !data) {
-    return <h1>Alan bulunamadi.</h1>;
+    return <h1>Alan bulunamadı.</h1>;
   }
 
   return (

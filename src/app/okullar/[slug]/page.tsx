@@ -22,7 +22,7 @@ export default async function OkulDetayPage({
     .maybeSingle();
 
   if (error || !data) {
-    return <h1>Okul bulunamadi.</h1>;
+    return <h1>Okul bulunamadı.</h1>;
   }
 
   return (

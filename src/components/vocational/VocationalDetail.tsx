@@ -29,14 +29,14 @@ export function VocationalDetail({
             className="mb-8 flex w-fit items-center gap-2 text-sm font-medium text-slate-400 transition-colors hover:text-white"
           >
             <ArrowRight className="h-4 w-4 rotate-180" />
-            Meslek Atlasi&apos;na Don
+            Meslek Atlası&apos;na Dön
           </Link>
           <div className="mb-6 flex items-center gap-4">
             <div className="rounded-xl border border-white/20 bg-white/10 p-3 text-orange-400 backdrop-blur-sm">
               <VocationalFieldIcon slug={field.slug} className="h-8 w-8" />
             </div>
             <span className="text-xs font-bold uppercase tracking-wider text-orange-400">
-              Meslek Alani Tanitimi
+              Meslek Alanı Tanıtımı
             </span>
           </div>
           <h1 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
@@ -56,13 +56,13 @@ export function VocationalDetail({
                 <div className="rounded-xl bg-blue-50 p-2">
                   <BookOpen className="h-6 w-6 text-blue-600" />
                 </div>
-                Bu Alanda Neler Ogreneceksiniz?
+                Bu Alanda Neler Öğreneceksiniz?
               </h3>
 
               <div className="space-y-10">
                 <div>
                   <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
-                    Dallar (Uzmanliklar)
+                    Dallar (Uzmanlıklar)
                   </h4>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {field.branches.map((branch) => (
@@ -74,7 +74,7 @@ export function VocationalDetail({
                           {branch}
                         </span>
                         <span className="text-sm leading-relaxed text-slate-500">
-                          Bu dalda uzmanlasarak mesleki yeterlilik
+                          Bu dalda uzmanlaşarak mesleki yeterlilik
                           kazanabilirsiniz.
                         </span>
                       </div>
@@ -105,15 +105,15 @@ export function VocationalDetail({
               </h3>
               <div className="grid gap-8 md:grid-cols-2">
                 <div>
-                  <h4 className="mb-3 font-bold text-slate-900">Is Imkanlari</h4>
+                  <h4 className="mb-3 font-bold text-slate-900">İş İmkânları</h4>
                   <p className="mb-5 rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
                     {field.career}
                   </p>
                   <ul className="space-y-3">
                     {[
-                      "Kamu Kurumlari",
-                      "Ozel Sektor Kuruluslari",
-                      "Is Yeri Acma Belgesi ile Kendi Isin",
+                      "Kamu Kurumları",
+                      "Özel Sektör Kuruluşları",
+                      "İş Yeri Açma Belgesi ile Kendi İşin",
                     ].map((item) => (
                       <li
                         key={item}
@@ -127,24 +127,24 @@ export function VocationalDetail({
                 </div>
                 <div className="space-y-4">
                   <h4 className="mb-3 font-bold text-slate-900">
-                    Akademik Ilerleme
+                    Akademik İlerleme
                   </h4>
                   <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
                     <span className="mb-1 block font-bold text-blue-900">
-                      M.T.O.K Kontenjani
+                      M.T.O.K Kontenjanı
                     </span>
                     <span className="text-sm leading-relaxed text-blue-800/80">
-                      Teknoloji fakultelerinde bu alana ozel ayrilmis
+                      Teknoloji fakültelerinde bu alana özel ayrılmış
                       kontenjanlardan faydalanabilirsiniz.
                     </span>
                   </div>
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
                     <span className="mb-1 block font-bold text-emerald-900">
-                      Ek Puan Avantaji
+                      Ek Puan Avantajı
                     </span>
                     <span className="text-sm leading-relaxed text-emerald-800/80">
-                      Alana uygun 2 yillik on lisans bolumlerine geciste ek
-                      puan imkani.
+                      Alana uygun 2 yıllık ön lisans bolumlerine geçişte ek
+                      puan imkânı.
                     </span>
                   </div>
                 </div>
@@ -155,10 +155,10 @@ export function VocationalDetail({
           <div className="lg:col-span-1">
             <div className="sticky top-28 rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
               <h3 className="mb-3 text-xl font-bold tracking-tight text-slate-900">
-                Alanin Bulundugu Okullar
+                Alanın Bulundugu Okullar
               </h3>
               <p className="mb-6 text-sm text-slate-500">
-                Mersin genelinde bu egitimi veren kurumlar:
+                Mersin genelinde bu eğitimi veren kurumlar:
               </p>
 
               <div className="space-y-4">
@@ -185,13 +185,13 @@ export function VocationalDetail({
                     </div>
                     <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs">
                       <span className="font-medium text-slate-500">
-                        Yuzdelik:
+                        Yüzdelik:
                         <span className="ml-1 font-bold text-slate-900">
                           %{school.percentile}
                         </span>
                       </span>
                       <span className="flex items-center font-semibold text-blue-600">
-                        Incele
+                        İncele
                         <ChevronRight className="ml-0.5 h-3.5 w-3.5" />
                       </span>
                     </div>

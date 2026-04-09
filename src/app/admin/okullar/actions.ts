@@ -139,7 +139,7 @@ async function syncSchoolVocationalFields(
     }
 
     if ((validFields ?? []).length !== normalizedFieldIds.length) {
-      throw new Error("Secilen meslek alanlarindan biri gecersiz.");
+      throw new Error("Seçilen meslek alanlarindan biri geçersiz.");
     }
   }
 
@@ -190,11 +190,11 @@ export async function createSchool(formData: FormData) {
   const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
   const slug = getRequiredString(formData, "slug", "Slug", redirectPath);
   const type = getRequiredString(formData, "type", "Tur", redirectPath);
-  const district = getRequiredString(formData, "district", "Ilce", redirectPath);
+  const district = getRequiredString(formData, "district", "İlçe", redirectPath);
   const percentile = getRequiredString(
     formData,
     "percentile",
-    "Yuzdelik",
+    "Yüzdelik",
     redirectPath,
   );
   const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
@@ -202,7 +202,7 @@ export async function createSchool(formData: FormData) {
   const description = getRequiredString(
     formData,
     "description",
-    "Aciklama",
+    "Açıklama",
     redirectPath,
   );
   const vocationalFieldIds = toNumberArray(
@@ -220,7 +220,7 @@ export async function createSchool(formData: FormData) {
     );
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Gorsel yukleme basarisiz oldu.";
+      error instanceof Error ? error.message : "Görsel yükleme başarısız oldu.";
     redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
   }
 
@@ -267,7 +267,7 @@ export async function createSchool(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
-  redirect("/admin?success=Okul%20basariyla%20eklendi.");
+  redirect("/admin?success=Okul%20başarıyla%20eklendi.");
 }
 
 export async function updateSchool(formData: FormData) {
@@ -280,17 +280,17 @@ export async function updateSchool(formData: FormData) {
   const id = Number(formData.get("id"));
   const redirectPath = `/admin/schools/${id}/edit`;
   if (!Number.isInteger(id) || id <= 0) {
-    redirect(`/admin?error=${encodeURIComponent("Gecersiz okul kaydi.")}`);
+    redirect(`/admin?error=${encodeURIComponent("Geçersiz okul kaydi.")}`);
   }
 
   const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
   const slug = getRequiredString(formData, "slug", "Slug", redirectPath);
   const type = getRequiredString(formData, "type", "Tur", redirectPath);
-  const district = getRequiredString(formData, "district", "Ilce", redirectPath);
+  const district = getRequiredString(formData, "district", "İlçe", redirectPath);
   const percentile = getRequiredString(
     formData,
     "percentile",
-    "Yuzdelik",
+    "Yüzdelik",
     redirectPath,
   );
   const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
@@ -298,7 +298,7 @@ export async function updateSchool(formData: FormData) {
   const description = getRequiredString(
     formData,
     "description",
-    "Aciklama",
+    "Açıklama",
     redirectPath,
   );
   const currentImage = String(formData.get("current_image") ?? "").trim();
@@ -317,7 +317,7 @@ export async function updateSchool(formData: FormData) {
     );
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Gorsel yukleme basarisiz oldu.";
+      error instanceof Error ? error.message : "Görsel yükleme başarısız oldu.";
     redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
   }
 
@@ -360,7 +360,7 @@ export async function updateSchool(formData: FormData) {
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${payload.slug}`);
-  redirect("/admin?success=Okul%20basariyla%20guncellendi.");
+  redirect("/admin?success=Okul%20başarıyla%20güncellendi.");
 }
 
 export async function deleteSchool(formData: FormData) {
@@ -373,7 +373,7 @@ export async function deleteSchool(formData: FormData) {
   const id = Number(formData.get("id"));
 
   if (!Number.isInteger(id) || id <= 0) {
-    redirect(`/admin?error=${encodeURIComponent("Gecersiz okul kaydi.")}`);
+    redirect(`/admin?error=${encodeURIComponent("Geçersiz okul kaydi.")}`);
   }
 
   const { data: school, error: schoolError } = await supabase
@@ -383,7 +383,7 @@ export async function deleteSchool(formData: FormData) {
     .maybeSingle();
 
   if (schoolError || !school) {
-    redirect(`/admin?error=${encodeURIComponent("Okul bulunamadi.")}`);
+    redirect(`/admin?error=${encodeURIComponent("Okul bulunamadı.")}`);
   }
 
   const { error: relationError } = await supabase
@@ -415,5 +415,5 @@ export async function deleteSchool(formData: FormData) {
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${school.slug}`);
-  redirect("/admin?success=Okul%20basariyla%20silindi.");
+  redirect("/admin?success=Okul%20başarıyla%20silindi.");
 }

@@ -16,20 +16,20 @@ export function Footer() {
                   Hedefim Lise
                 </span>
                 <span className="text-[11px] font-medium uppercase tracking-wider text-blue-300/80">
-                  Yolum Bilincli Tercih
+                  Yolum Bilinçli Tercih
                 </span>
               </div>
             </div>
             <p className="mb-6 max-w-sm text-sm leading-relaxed text-slate-400">
-              Ogrencilerin dogru lise tercihleri yapabilmesi amaciyla Akdeniz
-              Rehberlik ve Arastirma Merkezi koordinatorlugunde yurutulen sosyal
+              Öğrencilerin doğru lise tercihleri yapabilmesi amacıyla Akdeniz
+              Rehberlik ve Araştırma Merkezi koordinatörlüğünde yürütülen sosyal
               sorumluluk projesidir.
             </p>
           </div>
 
           <div className="md:col-span-3">
             <h4 className="mb-6 font-semibold tracking-tight text-white">
-              Proje Paydaslari
+              Proje Paydaşları
             </h4>
             <ul className="space-y-3 text-sm text-slate-400">
               {["Akdeniz RAM", "Mezitli RAM", "Tarsus RAM", "Toroslar RAM", "Yenisehir RAM"].map(
@@ -48,13 +48,13 @@ export function Footer() {
 
           <div className="md:col-span-4">
             <h4 className="mb-6 font-semibold tracking-tight text-white">
-              Iletisim & Destek
+              İletişim & Destek
             </h4>
             <ul className="space-y-4 text-sm text-slate-400">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
                 <span>
-                  Akdeniz Rehberlik ve Arastirma Merkezi
+                  Akdeniz Rehberlik ve Araştırma Merkezi
                   <br />
                   Akdeniz, Mersin
                 </span>
@@ -78,14 +78,14 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 md:flex-row">
           <p className="text-xs text-slate-500">
-            &copy; 2026 Hedefim Lise, Yolum Bilincli Tercih Projesi.
+            &copy; 2026 Hedefim Lise, Yolum Bilinçli Tercih Projesi.
           </p>
           <div className="flex gap-6 text-xs text-slate-500">
             <a href="#" className="transition-colors hover:text-white">
-              Gizlilik Politikasi
+              Gizlilik Politikası
             </a>
             <a href="#" className="transition-colors hover:text-white">
-              Kullanim Kosullari
+              Kullanım Koşulları
             </a>
           </div>
         </div>

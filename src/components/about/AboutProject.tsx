@@ -13,23 +13,23 @@ import {
 const reasons = [
   {
     title: "Hedef Belirleme",
-    desc: "Ogrenci, hangi liseye yerlesmek istedigini bilirse sinav hazirlik surecinde daha net bir hedefe odaklanir.",
+    desc: "Öğrenci, hangi liseye yerleşmek istediğini bilirse sınav hazırlık sürecinde daha net bir hedefe odaklanır.",
   },
   {
-    title: "Ilgi ve Yetenekleri Kesfetme",
-    desc: "Farkli okul turleri farkli alanlara yonlendirir. Onceden tanimak, ogrencinin kendi potansiyeline uygun yolu secmesini saglar.",
+    title: "İlgi ve Yetenekleri Keşfetme",
+    desc: "Farklı okul türleri farklı alanlara yönlendirir. Önceden tanımak, öğrencinin kendi potansiyeline uygun yolu seçmesini sağlar.",
   },
   {
-    title: "Yanlis Tercih Riskini Azaltma",
-    desc: "Liseleri tanimadan yapilan tercihler motivasyon kaybina yol acabilir. Proje, hayal kirikliklarini minimuma indirir.",
+    title: "Yanlış Tercih Riskini Azaltma",
+    desc: "Liseleri tanımadan yapılan tercihler motivasyon kaybına yol açabilir. Proje, hayal kırıklıklarını minimuma indirir.",
   },
   {
-    title: "Okul Kulturunu Ogrenme",
-    desc: "Her okulun sosyal ortami, kulupleri, laboratuvarlari ve universiteye hazirlik destegi farklidir.",
+    title: "Okul Kültürünü Öğrenme",
+    desc: "Her okulun sosyal ortamı, kulüpleri, laboratuvarları ve üniversiteye hazırlık desteği farklıdır.",
   },
   {
     title: "Aile ile Ortak Karar Verme",
-    desc: "Sureci seffaflastirarak aile ve ogrenci arasinda saglikli bir iletisimle ortak bir tercih yapilmasina yardimci olur.",
+    desc: "Süreci şeffaflaştırarak aile ve öğrenci arasında sağlıklı bir iletişimle ortak bir tercih yapılmasına yardımcı olur.",
   },
 ];
 
@@ -49,13 +49,13 @@ export function AboutProject() {
             Hedefim Lise,
             <br />
             <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-              Yolum Bilincli Tercih
+              Yolum Bilinçli Tercih
             </span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl">
-            Mersin il genelindeki ortaokul ogrencilerinin, kendi ilgi ve
-            yeteneklerine en uygun liseyi secerek egitim hayatlarina guclu bir
-            yon vermelerini hedefleyen rehberlik platformu.
+            Mersin il genelindeki ortaokul öğrencilerinin, kendi ilgi ve
+            yeteneklerine en uygun liseyi seçerek eğitim hayatlarına güçlü bir
+            yön vermelerini hedefleyen rehberlik platformu.
           </p>
         </div>
       </div>
@@ -68,21 +68,21 @@ export function AboutProject() {
                 <div className="rounded-xl bg-blue-50 p-2">
                   <Target className="h-6 w-6 text-blue-600" />
                 </div>
-                Projenin Amaci
+                Projenin Amacı
               </h2>
               <p className="mb-6 text-lg leading-relaxed text-slate-600">
-                Bu projenin amaci, LGS oncesinde ogrencilerin farkli lise
-                turlerini ve ozelliklerini taniyarak bilincli tercihler
-                yapmalarini, hedeflerini netlestirmelerini ve egitim hayatlarini
-                kendi ilgi ve yeteneklerine uygun sekilde yonlendirmelerini
-                saglamaktir.
+                Bu projenin amacı, LGS öncesinde öğrencilerin farklı lise
+                türlerini ve özelliklerini tanıyarak bilinçli tercihler
+                yapmalarını, hedeflerini netleştirmelerini ve eğitim hayatlarını
+                kendi ilgi ve yeteneklerine uygun şekilde yönlendirmelerini
+                sağlamaktır.
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
-                  "Hedeflerin netlestirilerek dogru lise tercihinin yapilmasi.",
-                  "Lise turlerinin tanitilarak ilgiye uygun secimlere rehberlik edilmesi.",
-                  "Ogrencilerin bilgiye dayali karar verme becerilerinin gelistirilmesi.",
-                  "Bilincli tercihlerle uzun vadeli akademik motivasyonun artirilmasi.",
+                  "Hedeflerin netleştirilerek doğru lise tercihinin yapılması.",
+                  "Lise türlerinin tanıtılarak ilgiye uygun seçimlere rehberlik edilmesi.",
+                  "Öğrencilerin bilgiye dayalı karar verme becerilerinin geliştirilmesi.",
+                  "Bilinçli tercihlerle uzun vadeli akademik motivasyonun artırılması.",
                 ].map((item) => (
                   <div
                     key={item}
@@ -102,14 +102,14 @@ export function AboutProject() {
                 <div className="rounded-xl bg-orange-50 p-2">
                   <Lightbulb className="h-6 w-6 text-orange-600" />
                 </div>
-                Neden Bu Projeye Ihtiyac Duyuldu?
+                Neden Bu Projeye İhtiyaç Duyuldu?
               </h2>
               <p className="mb-8 leading-relaxed text-slate-600">
-                Lise tercih sureci, ogrencilerin gelecekteki egitim ve kariyer
-                yolculugunu dogrudan etkileyen kritik bir asamadir. Sinav
-                oncesinde liseleri tanimak, sadece sinav motivasyonu acisindan
-                degil, ayni zamanda dogru tercih yapabilmek icin de buyuk onem
-                tasir.
+                Lise tercih süreci, öğrencilerin gelecekteki eğitim ve kariyer
+                yolculuğunu doğrudan etkileyen kritik bir aşamadır. Sınav
+                öncesinde liseleri tanımak, sadece sınav motivasyonu açısından
+                değil, aynı zamanda doğru tercih yapabilmek için de büyük önem
+                taşır.
               </p>
 
               <div className="space-y-4">
@@ -149,10 +149,10 @@ export function AboutProject() {
               <div className="space-y-6">
                 <div>
                   <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Dogrudan Hedef Kitle
+                    Doğrudan Hedef Kitle
                   </h4>
                   <div className="space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
-                    {["7. ve 8. Sinif Ogrencileri", "Ogrenci Velileri"].map(
+                    {["7. ve 8. Sınıf Öğrencileri", "Öğrenci Velileri"].map(
                       (item) => (
                         <div
                           key={item}
@@ -168,13 +168,13 @@ export function AboutProject() {
 
                 <div>
                   <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Dolayli Hedef Kitle
+                    Dolaylı Hedef Kitle
                   </h4>
                   <div className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
                     {[
-                      "Okul Psikolojik Danismanlari",
-                      "Sinif Rehber Ogretmenleri",
-                      "Okul Yoneticileri",
+                      "Okul Psikolojik Danışmanları",
+                      "Sınıf Rehber Öğretmenleri",
+                      "Okul Yöneticileri",
                     ].map((item) => (
                       <div
                         key={item}
@@ -194,11 +194,11 @@ export function AboutProject() {
                 <div className="rounded-xl bg-indigo-50 p-2">
                   <Network className="h-5 w-5 text-indigo-600" />
                 </div>
-                Proje Paydaslari
+                Proje Paydaşları
               </h3>
               <p className="mb-6 text-sm text-slate-500">
-                Bu platform, kurumlar arasi guclu bir is birligi ile hayata
-                gecirilmistir.
+                Bu platform, kurumlar arası güçlü bir iş birliği ile hayata
+                geçirilmiştir.
               </p>
 
               <div className="space-y-4">
@@ -206,10 +206,10 @@ export function AboutProject() {
                   <Handshake className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
                   <div>
                     <div className="text-sm font-bold text-slate-900">
-                      Il ve Ilce Milli Egitim Mudurlukleri
+                      İl ve İlçe Millî Eğitim Müdürlükleri
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      Resmiyet, erisim ve koordinasyon destegi.
+                      Resmiyet, erişim ve koordinasyön desteği.
                     </div>
                   </div>
                 </div>
@@ -217,10 +217,10 @@ export function AboutProject() {
                   <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
                   <div>
                     <div className="text-sm font-bold text-slate-900">
-                      Rehberlik ve Arastirma Merkezleri
+                      Rehberlik ve Araştırma Merkezleri
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      Icerik uretimi, denetim ve musavirlik.
+                      İçerik uretimi, denetim ve müşavirlik.
                     </div>
                   </div>
                 </div>

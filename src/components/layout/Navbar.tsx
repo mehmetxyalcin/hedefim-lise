@@ -4,8 +4,8 @@ import { BookOpen, Menu } from "lucide-react";
 const navItems = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/okullar", label: "Tercih Robotu" },
-  { href: "/alanlar", label: "Meslek Atlasi" },
-  { href: "/hakkinda", label: "Proje Hakkinda" },
+  { href: "/alanlar", label: "Meslek Atlası" },
+  { href: "/hakkinda", label: "Proje Hakkında" },
 ];
 
 export function Navbar() {
@@ -22,7 +22,7 @@ export function Navbar() {
                 Hedefim Lise
               </h1>
               <p className="text-[11px] font-medium uppercase tracking-wider text-blue-300/80">
-                Yolum Bilincli Tercih
+                Yolum Bilinçli Tercih
               </p>
             </div>
           </Link>
@@ -42,7 +42,7 @@ export function Navbar() {
               href="/admin"
               className="rounded-lg border border-white/5 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-white/15"
             >
-              Giris Yap
+              Giriş Yap
             </Link>
           </div>
 

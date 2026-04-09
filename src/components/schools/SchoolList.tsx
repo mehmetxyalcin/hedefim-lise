@@ -87,15 +87,15 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
         <div className="mb-10 max-w-3xl">
           <div className="mb-4 flex items-center gap-2">
             <span className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-100/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-700 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" /> Akilli Tercih Sistemi
+              <Sparkles className="h-3.5 w-3.5" /> Akıllı Tercih Sistemi
             </span>
           </div>
           <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-            Sana Uygun Liseleri Kesfet
+            Sana Uygun Liseleri Keşfet
           </h1>
           <p className="text-lg leading-relaxed text-slate-500">
-            Ilce, okul turu ve aradigin fiziksel imkanlara gore veritabanini
-            filtrele, en uygun eslesmeleri hizla analiz et.
+            İlçe, okul türü ve aradığın fiziksel imkanlara göre veritabanını
+            filtrele, en uygun eşleşmeleri hızla analiz et.
           </p>
         </div>
 
@@ -103,7 +103,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
           <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
             <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
               {filteredSchools.length}
-              <span className="ml-1 font-medium text-slate-500">Sonuc</span>
+              <span className="ml-1 font-medium text-slate-500">Sonuç</span>
             </span>
 
             {filters.district && (
@@ -150,7 +150,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                 className="group flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
                 onClick={() => removeFilter("hasLibrary")}
               >
-                Z-Kutuphane
+                Z-Kütüphane
                 <XCircle className="ml-1 h-3.5 w-3.5 text-slate-300 transition-colors group-hover:text-red-500" />
               </div>
             )}
@@ -160,7 +160,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                 onClick={() => setFilters(initialFilters)}
                 className="ml-2 text-xs font-semibold text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-800"
               >
-                Sifirla
+                Sıfırla
               </button>
             )}
           </div>
@@ -169,11 +169,11 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
             <div className="group relative flex-1 md:w-56">
               <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
               <select
-                defaultValue="yuzdelik"
+                defaultValue="yüzdelik"
                 className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none transition-all hover:bg-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
               >
-                <option value="yuzdelik">Yuzdelik: Dusukten Yuksege</option>
-                <option value="isim">Isim: A&apos;dan Z&apos;ye</option>
+                <option value="yüzdelik">Yüzdelik: Düşükten Yükseğe</option>
+                <option value="isim">İsim: A&apos;dan Z&apos;ye</option>
               </select>
               <ChevronRight className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 rotate-90 text-slate-400" />
             </div>
@@ -197,10 +197,10 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                 <div>
                   <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900">
                     <Filter className="h-5 w-5 text-blue-600" />
-                    Detayli Filtre
+                    Detaylı Filtre
                   </h2>
                   <p className="mt-1 text-xs text-slate-500">
-                    Sonuclari daraltarak hedefine ulas.
+                    Sonuçlari daraltarak hedefine ulaş.
                   </p>
                 </div>
                 <button
@@ -214,7 +214,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
               <div className="flex-grow space-y-8">
                 <div>
                   <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Ilce Lokasyonu
+                    İlçe Lokasyonu
                   </label>
                   <div className="group relative">
                     <MapPin className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
@@ -225,7 +225,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                         setFilters({ ...filters, district: e.target.value })
                       }
                     >
-                      <option value="">Tum Ilceler</option>
+                      <option value="">Tüm İlçeler</option>
                       {DISTRICTS.map((district) => (
                         <option key={district} value={district}>
                           {district}
@@ -238,7 +238,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
 
                 <div>
                   <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Okul Turu
+                    Okul Türü
                   </label>
                   <div className="group relative">
                     <GraduationCap className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
@@ -249,7 +249,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                         setFilters({ ...filters, type: e.target.value })
                       }
                     >
-                      <option value="">Tum Turler</option>
+                      <option value="">Tüm Türler</option>
                       {SCHOOL_TYPES.map((type) => (
                         <option key={type} value={type}>
                           {type}
@@ -273,7 +273,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                         setFilters({ ...filters, field: e.target.value })
                       }
                     >
-                      <option value="">Tum Alanlar</option>
+                      <option value="">Tüm Alanlar</option>
                       {vocationalFields.map((field) => (
                         <option key={field.id} value={field.id}>
                           {field.title}
@@ -291,7 +291,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                   <div className="space-y-2.5">
                     {[
                       { key: "hasGym", label: "Kapali Spor Salonu" },
-                      { key: "hasLibrary", label: "Z-Kutuphane" },
+                      { key: "hasLibrary", label: "Z-Kütüphane" },
                     ].map((item) => {
                       const checked = filters[item.key as keyof Filters] as boolean;
                       return (
@@ -347,7 +347,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                   }}
                   className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
                 >
-                  Sifirla
+                  Sıfırla
                 </button>
                 <button
                   onClick={() => setIsMobileFilterOpen(false)}
@@ -419,7 +419,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                         </div>
                       )}
                       <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Yuzdelik Dilim
+                        Yüzdelik Dilim
                       </span>
                       <span className="text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">
                         %{school.percentile}
@@ -443,17 +443,17 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                     <Search className="h-8 w-8 text-slate-300" />
                   </div>
                   <h3 className="mb-3 text-xl font-bold tracking-tight text-slate-900">
-                    Sonuc Bulunamadi
+                    Sonuç Bulunamadi
                   </h3>
                   <p className="mb-8 max-w-md text-slate-500">
-                    Sectiginiz kombinasyona uygun bir okul kaydi bulunamadi.
+                    Seçtiğiniz kombinasyona uygun bir okul kaydı bulunamadı.
                     Lutfen filtrelerinizi esnetmeyi deneyin.
                   </p>
                   <button
                     onClick={() => setFilters(initialFilters)}
                     className="rounded-xl border border-slate-200 bg-white px-6 py-3 font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
                   >
-                    Tum Filtreleri Temizle
+                    Tüm Filtreleri Temizle
                   </button>
                 </div>
               )}

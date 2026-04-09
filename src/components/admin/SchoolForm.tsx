@@ -30,7 +30,7 @@ export function SchoolForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Okul Adi</span>
+          <span className="mb-2 block text-sm font-semibold text-slate-700">Okul Adı</span>
           <input
             name="name"
             defaultValue={school?.name ?? ""}
@@ -57,7 +57,7 @@ export function SchoolForm({
           />
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Ilce</span>
+          <span className="mb-2 block text-sm font-semibold text-slate-700">İlçe</span>
           <input
             name="district"
             defaultValue={school?.district ?? ""}
@@ -66,7 +66,7 @@ export function SchoolForm({
           />
         </label>
         <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Yuzdelik</span>
+          <span className="mb-2 block text-sm font-semibold text-slate-700">Yüzdelik</span>
           <input
             name="percentile"
             defaultValue={school?.percentile ?? ""}
@@ -84,7 +84,7 @@ export function SchoolForm({
           />
         </label>
         <label className="block md:col-span-2">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Renk Sinifi</span>
+          <span className="mb-2 block text-sm font-semibold text-slate-700">Renk Sınıfı</span>
           <input
             name="color"
             defaultValue={school?.color ?? "bg-gradient-to-br from-slate-700 to-slate-900"}
@@ -95,7 +95,7 @@ export function SchoolForm({
       </div>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">Aciklama</span>
+        <span className="mb-2 block text-sm font-semibold text-slate-700">Açıklama</span>
         <textarea
           name="description"
           defaultValue={school?.description ?? ""}
@@ -106,7 +106,7 @@ export function SchoolForm({
       </label>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">Okul Gorseli</span>
+        <span className="mb-2 block text-sm font-semibold text-slate-700">Okul Görseli</span>
         <input
           type="file"
           name="image_file"
@@ -116,7 +116,7 @@ export function SchoolForm({
         {school?.images?.[0] && (
           <div className="mt-3">
             <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Mevcut Gorsel
+              Mevcut Görsel
             </span>
             <Image
               src={school.images[0]}
@@ -158,7 +158,7 @@ export function SchoolForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Ozellikler</span>
+          <span className="mb-2 block text-sm font-semibold text-slate-700">Özellikler</span>
           <textarea
             name="features"
             defaultValue={joinLines(school?.features)}
@@ -166,7 +166,7 @@ export function SchoolForm({
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
           />
           <span className="mt-2 block text-xs text-slate-500">
-            Her satira bir madde yazabilir veya virgul ile ayirabilirsiniz.
+            Her satıra bir madde yazabilir veya virgül ile ayırabilirsiniz.
           </span>
         </label>
         <label className="block">
@@ -178,7 +178,7 @@ export function SchoolForm({
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
           />
           <span className="mt-2 block text-xs text-slate-500">
-            Her satira bir proje yazabilir veya virgul ile ayirabilirsiniz.
+            Her satıra bir proje yazabilir veya virgül ile ayırabilirsiniz.
           </span>
         </label>
         <label className="block">
@@ -190,17 +190,17 @@ export function SchoolForm({
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
           />
           <span className="mt-2 block text-xs text-slate-500">
-            Her satira bir dil yazabilir veya virgul ile ayirabilirsiniz.
+            Her satıra bir dil yazabilir veya virgül ile ayırabilirsiniz.
           </span>
         </label>
       </div>
 
       <fieldset className="rounded-2xl border border-slate-200 p-5">
         <legend className="px-2 text-sm font-semibold text-slate-700">
-          Meslek Alanlari
+          Meslek Alanları
         </legend>
         {vocationalFields.length === 0 ? (
-          <p className="text-sm text-slate-500">Henuz meslek alani bulunmuyor.</p>
+          <p className="text-sm text-slate-500">Henüz meslek alani bulunmuyor.</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {vocationalFields.map((field) => (
@@ -229,7 +229,7 @@ export function SchoolForm({
           defaultChecked={school ? school.isActive !== false : true}
           className="h-4 w-4"
         />
-        <span className="text-sm font-semibold text-slate-700">Yayinda / aktif</span>
+        <span className="text-sm font-semibold text-slate-700">Yayında / aktif</span>
       </label>
 
       <button

@@ -28,12 +28,14 @@ export function LoginForm() {
     });
 
     if (error) {
-      setStatus("Giris baglantisi gonderilemedi. E-posta adresinizi ve Supabase redirect ayarlarinizi kontrol edin.");
+      setStatus(
+        `Giriş bağlantısı gönderilemedi: ${error.message}`,
+      );
       setIsSubmitting(false);
       return;
     }
 
-    setStatus("Giris baglantisi e-posta adresinize gonderildi.");
+    setStatus("Giriş bağlantısı e-posta adresinize gönderildi.");
     setIsSubmitting(false);
   }
 
@@ -62,7 +64,7 @@ export function LoginForm() {
         disabled={isSubmitting}
         className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {isSubmitting ? "Gonderiliyor..." : "E-posta ile Giris Yap"}
+        {isSubmitting ? "Gönderiliyor..." : "E-posta ile Giriş Yap"}
       </button>
 
       {status && (

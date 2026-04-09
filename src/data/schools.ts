@@ -19,7 +19,7 @@ export const SCHOOLS: School[] = [
     projects: ["TUBITAK 4006", "Erasmus+", "TEKNOFEST Finalisti"],
     languages: ["Ingilizce", "Almanca"],
     description:
-      "Akademik basarisi yuksek, proje odakli yapisiyla one cikan ve bilim insani yetistiren bolgesel guc.",
+      "Akademik başarısı yüksek, proje odaklı yapısıyla öne çıkan ve bilim insanı yetiştiren bölgesel güç.",
     images: [
       "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1000",
       "https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&q=80&w=1000",
@@ -42,7 +42,7 @@ export const SCHOOLS: School[] = [
     ],
     languages: ["Ingilizce", "Fransizca"],
     description:
-      "Sosyal, kulturel ve akademik denge sunan, cok yonlu gelisimi destekleyen koklu bir egitim yuvasi.",
+      "Sosyal, kültürel ve akademik denge sunan, çok yönlü gelişimi destekleyen köklü bir eğitim yuvasi.",
     images: [
       "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1000",
     ],
@@ -56,7 +56,7 @@ export const SCHOOLS: School[] = [
     percentile: "12.50",
     logo: "MTAL",
     color: "bg-gradient-to-br from-orange-500 to-orange-700",
-    features: ["Teknoloji Atolyeleri", "Doner Sermaye", "Staj Imkani"],
+    features: ["Teknoloji Atölyeleri", "Döner Sermaye", "Staj İmkânı"],
     projects: [
       "Meslek Lisesi Memleket Meselesi",
       "Patent/Faydali Model Yarismalari",
@@ -82,7 +82,7 @@ export const SCHOOLS: School[] = [
     projects: ["Beyaz Bayrak", "Beslenme Dostu Okul"],
     languages: ["Ingilizce", "Almanca"],
     description:
-      "Merkezi konumu ve ogrenci odakli modern egitim anlayisiyla one cikan guvenilir tercih.",
+      "Merkezi konumu ve öğrenci odakli modern eğitim anlayisiyla öne çıkan guvenilir tercih.",
     images: [
       "https://images.unsplash.com/photo-1590012314607-6da64f93413b?auto=format&fit=crop&q=80&w=1000",
     ],
@@ -97,10 +97,10 @@ export const SCHOOLS: School[] = [
     logo: "ISM",
     color: "bg-gradient-to-br from-indigo-500 to-indigo-700",
     features: ["Uygulama Laboratuvari", "Revir Simulasyonu"],
-    projects: ["Saglikli Nesiller", "Ilk Yardim Egitimi"],
+    projects: ["Sağlıkli Nesiller", "Ilk Yardim Egitimi"],
     languages: ["Ingilizce"],
     description:
-      "Saglik sektorunde uzmanlasmak isteyenler icin simulasyon ve pratik egitim veren tematik lise.",
+      "Sağlık sektöründe uzmanlaşmak isteyenler için simülasyon ve pratik eğitim veren tematik lise.",
     images: [
       "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1000",
     ],

@@ -11,25 +11,25 @@ const cards = [
   {
     href: "/alanlar",
     icon: Briefcase,
-    title: "Meslek Alanlarini Kesfet",
+    title: "Meslek Alanlarını Keşfet",
     description:
-      "Hangi meslek lisesinde hangi bolumler var? Ilgi ve yeteneklerinize en uygun mesleki alanlari detaylica inceleyin.",
+      "Hangi meslek lisesinde hangi bölümler var? İlgi ve yeteneklerinize en uygun mesleki alanları detaylıca inceleyin.",
     tone: "orange",
   },
   {
     href: "/okullar",
     icon: Search,
-    title: "Akilli Tercih Robotu",
+    title: "Akıllı Tercih Robotu",
     description:
-      "Yuzdelik diliminize, ikamet ettiginiz ilceye ve aradiginiz fiziksel imkanlara en uygun liseyi saniyeler icinde bulun.",
+      "Yüzdelik diliminize, ikamet ettiğiniz ilçeye ve aradığınız fiziksel imkanlara en uygun liseyi saniyeler içinde bulun.",
     tone: "blue",
   },
   {
     href: "/okullar",
     icon: Landmark,
-    title: "Proje Okullarini Tani",
+    title: "Proje Okullarını Tanı",
     description:
-      "Akademik basarisi yuksek, ozel egitim programlari uygulayan ve proje yuru ten okullari yakindan taniyin.",
+      "Akademik başarısı yüksek, özel eğitim programları uygulayan ve proje yürüten okulları yakından tanıyın.",
     tone: "emerald",
   },
 ];
@@ -61,14 +61,14 @@ export function FeatureSection() {
       <div className="container mx-auto max-w-7xl px-6">
         <div className="mx-auto mb-16 max-w-2xl text-center">
           <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-blue-600">
-            Platform Ozellikleri
+            Platform Özellikleri
           </span>
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-            Tercih surecinizi kolaylastiran araclar
+            Tercih sürecinizi kolaylaştıran araclar
           </h2>
           <p className="text-lg leading-relaxed text-slate-500">
-            Hedeflerinize en uygun liseyi bulmaniz icin ihtiyaciniz olan tum
-            veriler ve rehberlik araclari tek bir platformda toplandi.
+            Hedeflerinize en uygun liseyi bulmanız için ihtiyacınız olan tüm
+            veriler ve rehberlik araçları tek bir platformda toplandı.
           </p>
         </div>
 

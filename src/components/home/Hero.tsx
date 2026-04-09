@@ -27,18 +27,18 @@ export function Hero() {
         </div>
 
         <h1 className="mb-6 text-4xl leading-[1.15] font-extrabold tracking-tight text-white md:text-6xl lg:text-7xl">
-          Gelecegini Sansa Birakma,
+          Geleceğini Şansa Birakma,
           <br className="hidden md:block" />
           Liseni{" "}
           <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-            Bilincli
+            Bilinçli
           </span>{" "}
-          Sec.
+          Seç.
         </h1>
 
         <p className="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl">
-          Ilgi alanlarina ve yeteneklerine en uygun liseyi kesfet. Guvenilir
-          verilerle hedefini belirle, kariyer yolculuguna guclu bir baslangic
+          İlgi alanlarına ve yeteneklerine en uygun liseyi keşfet. Güvenilir
+          verilerle hedefini belirle, kariyer yolculuğuna güçlü bir başlangıç
           yap.
         </p>
 
@@ -50,7 +50,7 @@ export function Hero() {
               className="w-full cursor-pointer appearance-none bg-transparent py-4 pr-10 pl-12 font-medium text-slate-700 outline-none"
             >
               <option value="" disabled hidden>
-                Ilce Seciniz
+                İlçe Seçiniz
               </option>
               {DISTRICTS.map((district) => (
                 <option key={district}>{district}</option>
@@ -66,7 +66,7 @@ export function Hero() {
               className="w-full cursor-pointer appearance-none bg-transparent py-4 pr-10 pl-12 font-medium text-slate-700 outline-none"
             >
               <option value="" disabled hidden>
-                Okul Turu Seciniz
+                Okul Türü Seçiniz
               </option>
               {SCHOOL_TYPES.map((type) => (
                 <option key={type}>{type}</option>
@@ -87,11 +87,11 @@ export function Hero() {
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 backdrop-blur-md">
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            <span className="font-medium">RAM Onayli Icerik</span>
+            <span className="font-medium">RAM Onaylı İçerik</span>
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300 backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4 text-blue-400" />
-            <span className="font-medium">Guncel Veriler (2026)</span>
+            <span className="font-medium">Güncel Veriler (2026)</span>
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     if (error) {
       return NextResponse.redirect(
         new URL(
-          `/login?error=${encodeURIComponent("Giris oturumu olusturulamadi. Baglantiyi yeniden deneyin.")}`,
+          `/login?error=${encodeURIComponent("Giriş oturumu olusturulamadi. Baglantiyi yeniden deneyin.")}`,
           getSiteUrlWithPath("/"),
         ),
       );

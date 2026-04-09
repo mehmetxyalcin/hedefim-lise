@@ -8,7 +8,7 @@ export default async function AdminNewSchoolPage() {
   const { supabase, profile } = await requireAdmin();
 
   if (!profile) {
-    return <h1>Yetkisiz erisim.</h1>;
+    return <h1>Yetkisiz erişim.</h1>;
   }
 
   const { data: vocationalFieldsData, error } = await supabase
@@ -17,7 +17,7 @@ export default async function AdminNewSchoolPage() {
     .order("title");
 
   if (error) {
-    return <h1>Meslek alanlari yuklenemedi.</h1>;
+    return <h1>Meslek alanlari yüklenemedi.</h1>;
   }
 
   return (

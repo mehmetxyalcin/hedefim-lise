@@ -16,13 +16,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = searchParams ? await searchParams : undefined;
 
   if (!profile) {
-    return <h1>Yetkisiz erisim.</h1>;
+    return <h1>Yetkisiz erişim.</h1>;
   }
 
   const { data, error } = await supabase.from("schools").select("*").order("name");
 
   if (error) {
-    return <h1>Okullar yuklenemedi.</h1>;
+    return <h1>Okullar yüklenemedi.</h1>;
   }
 
   const schools = (data ?? []).map(mapSchool);
@@ -36,7 +36,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               Admin Paneli
             </h1>
             <p className="text-sm leading-relaxed text-slate-500">
-              Giris yapildi: {profile.email ?? user.email}
+              Giriş yapıldı: {profile.email ?? user.email}
             </p>
           </div>
           <Link

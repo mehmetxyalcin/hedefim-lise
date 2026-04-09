@@ -16,7 +16,7 @@ export function DeleteSchoolButton({
       action={action}
       onSubmit={(event) => {
         const confirmed = window.confirm(
-          `"${schoolName}" okulunu silmek istediginize emin misiniz? Bu islem geri alinmaz.`,
+          `"${schoolName}" okulunu silmek istediğinize emin misiniz? Bu işlem geri alınmaz.`,
         );
 
         if (!confirmed) {

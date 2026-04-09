@@ -11,7 +11,7 @@ export default async function OkullarPage() {
     ]);
 
   if (schoolsError || fieldsError) {
-    return <h1>Veriler yuklenemedi.</h1>;
+    return <h1>Veriler yüklenemedi.</h1>;
   }
 
   return (

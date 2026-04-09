@@ -46,7 +46,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                 className="-ml-2 flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors hover:bg-slate-50 hover:text-blue-600"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Tercih Robotuna Don</span>
+                <span className="hidden sm:inline">Tercih Robotuna Dön</span>
                 <span className="sm:hidden">Geri</span>
               </Link>
               <ChevronRight className="hidden h-3.5 w-3.5 text-slate-300 sm:block" />
@@ -60,7 +60,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 className="rounded-xl border border-transparent p-2 text-slate-400 transition-all hover:border-blue-100 hover:bg-blue-50 hover:text-blue-600"
-                title="Okulu Paylas"
+                title="Okulu Paylaş"
               >
                 <Share2 className="h-4.5 w-4.5" />
               </button>
@@ -123,19 +123,19 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-1.5 transition-colors group-hover:border-blue-200 group-hover:text-blue-600">
                   <MapPin className="h-4 w-4" />
                 </div>
-                <span>{school.address ?? "Adres bilgisi yakinda eklenecek."}</span>
+                <span>{school.address ?? "Adres bilgisi yakında eklenecek."}</span>
               </div>
               <div className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-1.5 transition-colors group-hover:border-blue-200 group-hover:text-blue-600">
                   <Globe className="h-4 w-4" />
                 </div>
-                <span>{school.website ?? "Website bilgisi yakinda eklenecek."}</span>
+                <span>{school.website ?? "Website bilgisi yakında eklenecek."}</span>
               </div>
               <div className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-1.5 transition-colors group-hover:border-blue-200 group-hover:text-blue-600">
                   <Phone className="h-4 w-4" />
                 </div>
-                <span>{school.phone ?? "Telefon bilgisi yakinda eklenecek."}</span>
+                <span>{school.phone ?? "Telefon bilgisi yakında eklenecek."}</span>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
             <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/80 p-6 text-center backdrop-blur-sm transition-all hover:border-blue-200 hover:bg-blue-50/30">
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
               <div className="mt-2 mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                Taban Yuzdelik Dilim
+                Taban Yüzdelik Dilim
               </div>
               <div className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 transition-colors group-hover:text-blue-600 sm:text-5xl">
                 %{school.percentile}
@@ -162,9 +162,9 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
         <div className="container mx-auto max-w-7xl px-6">
           <div className="hide-scrollbar flex space-x-2 overflow-x-auto py-1 sm:space-x-8">
             {[
-              { id: "genel", label: "Genel Bakis", icon: Info },
+              { id: "genel", label: "Genel Bakış", icon: Info },
               { id: "akademik", label: "Akademik", icon: BookOpen },
-              { id: "imkanlar", label: "Imkanlar", icon: Building },
+              { id: "imkanlar", label: "İmkânlar", icon: Building },
               { id: "projeler", label: "Projeler", icon: Trophy },
             ].map((tab) => {
               const TabIcon = tab.icon;
@@ -203,7 +203,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                 <Briefcase
                   className={`h-4 w-4 ${activeTab === "alanlar" ? "text-orange-600" : "text-slate-400"}`}
                 />
-                Meslek Alanlari
+                Meslek Alanları
                 {activeTab === "alanlar" && (
                   <div className="absolute bottom-[-5px] left-0 right-0 h-1 rounded-t-full bg-orange-600" />
                 )}
@@ -223,20 +223,20 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                     <Info className="h-5 w-5" />
                   </div>
                   <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                    Okul Hakkinda
+                    Okul Hakkında
                   </h2>
                 </div>
                 <div className="max-w-none space-y-6 text-lg leading-relaxed text-slate-600">
                   <p>
-                    {school.description} Okulumuz, ogrenci merkezli egitim
-                    anlayisi, donanimli laboratuvarlari ve guclu ogretmen
-                    kadrosu ile bolgesinin en cok tercih edilen egitim
-                    kurumlarindan biridir.
+                    {school.description} Okulumuz, öğrenci merkezli eğitim
+                    anlayışı, donanımlı laboratuvarları ve güçlü öğretmen
+                    kadrosu ile bölgesinin en çok tercih edilen eğitim
+                    kurumlarından biridir.
                   </p>
                   <p>
-                    Amacimiz; ogrencilerimizi sadece ulusal sinavlara
-                    hazirlamak degil, ayni zamanda 21. yuzyil becerileriyle
-                    donatilmis bireyler olarak hayata katmaktir.
+                    Amacımız; öğrencilerimizi sadece ulusal sınavlara
+                    hazırlamak değil, aynı zamanda 21. yüzyıl becerileriyle
+                    donatılmış bireyler olarak hayata katmaktır.
                   </p>
                 </div>
               </div>
@@ -254,7 +254,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                     <div className="mb-3 flex items-center gap-2">
                       <Languages className="h-4.5 w-4.5 text-slate-400" />
                       <h4 className="text-sm font-bold text-slate-900">
-                        Yabanci Diller
+                        Yabancı Diller
                       </h4>
                     </div>
                     <div className="flex flex-wrap gap-2 pl-6">
@@ -297,10 +297,10 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
           <div className="mx-auto max-w-5xl space-y-8">
             <div className="mb-10 text-center">
               <h2 className="mb-3 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                Mesleki Uzmanlik Alanlari
+                Mesleki Uzmanlık Alanları
               </h2>
               <p className="text-lg text-slate-500">
-                Bu okulda yer alan alanlari ve alt dallarini detaylica
+                Bu okulda yer alan alanlari ve alt dallarini detaylıca
                 inceleyin.
               </p>
             </div>
@@ -359,7 +359,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                 <Building className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                Tesis ve Fiziksel Imkanlar
+                Tesis ve Fiziksel İmkânlar
               </h2>
             </div>
 
@@ -388,7 +388,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                 <Trophy className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                Projeler ve Basarilar
+                Projeler ve Başarılar
               </h2>
             </div>
 
@@ -406,7 +406,7 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                   </h4>
                   <p className="flex-grow text-sm leading-relaxed text-slate-500">
                     Okulumuz bu proje kapsaminda aktif calismalar yurutmekte,
-                    ogrencilerine ulusal ve uluslararasi duzeyde vizyon
+                    öğrencilerine ulusal ve uluslararası düzeyde vizyon
                     kazandirmayi hedeflemektedir.
                   </p>
                   <div className="mt-6 flex items-center gap-1 border-t border-slate-50 pt-5 text-xs font-bold uppercase tracking-wider text-indigo-600">
@@ -473,8 +473,8 @@ export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
                 </h4>
                 <p className="mb-6 text-lg leading-relaxed text-slate-600">
                   Hafta sonu uzman kadromuz esliginde 9, 10, 11 ve 12.
-                  siniflara yonelik ucretsiz DYK kurslarimizla ogrencilerimizin
-                  sinav hazirlik sureclerini okul catisi altinda guvenle
+                  sınıflara yönelik ücretsiz DYK kurslarımızla öğrencilerimizin
+                  sinav hazirlik süreçlerini okul catisi altinda güvenle
                   yurutuyoruz.
                 </p>
                 <div className="flex flex-wrap gap-3">

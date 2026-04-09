@@ -17,7 +17,7 @@ export const VOCATIONAL_FIELDS: VocationalField[] = [
     title: "Elektrik-Elektronik Teknolojisi",
     slug: "elektrik-elektronik-teknolojisi",
     description:
-      "Endustriyel bakim, otomasyon ve elektrik tesisatlari uzerine egitim verir.",
+      "Endustriyel bakım, otomasyon ve elektrik tesisatları üzerine eğitim verir.",
     skills: "El-goz koordinasyonu, teknik cizim, dikkat.",
     branches: [
       "Endustriyel Bakim Onarim",
@@ -29,14 +29,14 @@ export const VOCATIONAL_FIELDS: VocationalField[] = [
   },
   {
     id: 3,
-    title: "Saglik Hizmetleri",
+    title: "Sağlık Hizmetleri",
     slug: "saglik-hizmetleri",
-    description: "Saglik sektorune yardimci personel yetistirir.",
-    skills: "Iletisim becerisi, yardimseverlik, sogukkanlilik.",
+    description: "Sağlık sektorune yardimci personel yetistirir.",
+    skills: "İletişim becerisi, yardımseverlik, soğukkanlılık.",
     branches: [
       "Ebe Yardimciligi",
       "Hemsire Yardimciligi",
-      "Saglik Bakim Teknisyenligi",
+      "Sağlık Bakim Teknisyenligi",
     ],
     career: "Hemsire, Acil Tip Teknisyeni (ATT).",
     schools: [5],

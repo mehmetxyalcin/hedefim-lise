@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
-const geistSans = Geist({
+const inter = Inter({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  subsets: ["latin-ext"],
 });
 
-const geistMono = Geist_Mono({
+const robotoMono = Roboto_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin-ext"],
 });
 
 export const metadata: Metadata = {
@@ -22,12 +22,12 @@ export const metadata: Metadata = {
     template: "%s | Hedefim Lise",
   },
   description:
-    "Lise tercih sureci icin okul ve meslek alani bilgilerinin sunuldugu rehber platform.",
+    "Lise tercih süreci için okul ve meslek alanı bilgilerinin sunulduğu rehber platform.",
   applicationName: "Hedefim Lise",
   openGraph: {
     title: "Hedefim Lise",
     description:
-      "Okullari ve meslek alanlarini kesfedin, tercih surecinizi daha kolay yonetin.",
+      "Okulları ve meslek alanlarını keşfedin, tercih sürecinizi daha kolay yönetin.",
     siteName: "Hedefim Lise",
     type: "website",
   },
@@ -45,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="tr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${robotoMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Navbar />

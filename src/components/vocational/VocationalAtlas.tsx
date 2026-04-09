@@ -12,14 +12,14 @@ export function VocationalAtlas({ vocationalFields }: VocationalAtlasProps) {
     <div className="container mx-auto max-w-7xl px-6 py-16">
       <div className="mx-auto mb-16 max-w-3xl text-center">
         <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-orange-600">
-          Bilincli Tercih, Dogru Kariyer
+          Bilinçli Tercih, Doğru Kariyer
         </span>
         <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
-          Meslek Atlasi
+          Meslek Atlası
         </h2>
         <p className="text-lg leading-relaxed text-slate-500 md:text-xl">
-          Ilgi ve yeteneklerinize uygun alani secin, o alanin ne is yaptigini,
-          hangi okullarda bulundugunu ve kariyer firsatlarini derinlemesine
+          İlgi ve yeteneklerinize uygun alanı secin, o alanın ne iş yaptığını,
+          hangi okullarda bulunduğunu ve kariyer fırsatlarını derinlemesine
           inceleyin.
         </p>
       </div>
@@ -48,7 +48,7 @@ export function VocationalAtlas({ vocationalFields }: VocationalAtlasProps) {
 
                 <div className="mt-auto border-t border-slate-50 pt-6">
                   <div className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Populer Dallar
+                    Popüler Dallar
                   </div>
                   <div className="mb-6 flex flex-wrap gap-2">
                     {field.branches.slice(0, 2).map((branch) => (
@@ -66,7 +66,7 @@ export function VocationalAtlas({ vocationalFields }: VocationalAtlasProps) {
                     )}
                   </div>
                   <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 font-semibold text-slate-700 transition-all group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white">
-                    Alani Incele
+                    Alanı İncele
                     <ArrowRight className="h-4 w-4" />
                   </div>
                 </div>

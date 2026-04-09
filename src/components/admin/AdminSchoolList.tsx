@@ -37,11 +37,11 @@ export function AdminSchoolList({
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Okul, ilce, tur veya slug ile ara"
+          placeholder="Okul, ilce, tür veya slug ile ara"
           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 md:max-w-sm"
         />
         <p className="text-sm text-slate-500">
-          {filteredSchools.length} / {schools.length} okul gosteriliyor
+          {filteredSchools.length} / {schools.length} okul gösteriliyor
         </p>
       </div>
 
@@ -50,17 +50,17 @@ export function AdminSchoolList({
           <thead className="bg-slate-50">
             <tr>
               <th className="px-4 py-3 text-sm font-semibold text-slate-700">Okul</th>
-              <th className="px-4 py-3 text-sm font-semibold text-slate-700">Ilce</th>
+              <th className="px-4 py-3 text-sm font-semibold text-slate-700">İlçe</th>
               <th className="px-4 py-3 text-sm font-semibold text-slate-700">Tur</th>
               <th className="px-4 py-3 text-sm font-semibold text-slate-700">Durum</th>
-              <th className="px-4 py-3 text-sm font-semibold text-slate-700">Islem</th>
+              <th className="px-4 py-3 text-sm font-semibold text-slate-700">işlem</th>
             </tr>
           </thead>
           <tbody>
             {filteredSchools.length === 0 ? (
               <tr className="border-t border-slate-200">
                 <td colSpan={5} className="px-4 py-6 text-sm text-slate-500">
-                  Aramaniza uygun okul bulunamadi.
+                  Aramanıza uygun okul bulunamadı.
                 </td>
               </tr>
             ) : (
@@ -78,7 +78,7 @@ export function AdminSchoolList({
                         href={`/admin/schools/${school.id}/edit`}
                         className="font-semibold text-blue-600 hover:text-blue-800"
                       >
-                        Duzenle
+                        Düzenle
                       </Link>
                       <DeleteSchoolButton
                         action={deleteAction}

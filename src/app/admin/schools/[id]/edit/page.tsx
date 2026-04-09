@@ -20,7 +20,7 @@ export default async function AdminEditSchoolPage({
   const query = searchParams ? await searchParams : undefined;
 
   if (!profile) {
-    return <h1>Yetkisiz erisim.</h1>;
+    return <h1>Yetkisiz erişim.</h1>;
   }
 
   const [{ data, error }, { data: vocationalFieldsData, error: vocationalFieldsError }] =
@@ -34,11 +34,11 @@ export default async function AdminEditSchoolPage({
     ]);
 
   if (error || !data) {
-    return <h1>Okul bulunamadi.</h1>;
+    return <h1>Okul bulunamadı.</h1>;
   }
 
   if (vocationalFieldsError) {
-    return <h1>Meslek alanlari yuklenemedi.</h1>;
+    return <h1>Meslek alanlari yüklenemedi.</h1>;
   }
 
   const school = mapSchool(data);
@@ -51,7 +51,7 @@ export default async function AdminEditSchoolPage({
             Admin&apos;e don
           </Link>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">
-            Okulu Duzenle
+            Okulu Düzenle
           </h1>
         </div>
         {query?.error && (

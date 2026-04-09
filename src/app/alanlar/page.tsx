@@ -10,7 +10,7 @@ export default async function AlanlarPage() {
     .order("title");
 
   if (error) {
-    return <h1>Alanlar yuklenemedi.</h1>;
+    return <h1>Alanlar yüklenemedi.</h1>;
   }
 
   return <VocationalAtlas vocationalFields={(data ?? []).map(mapVocationalField)} />;
