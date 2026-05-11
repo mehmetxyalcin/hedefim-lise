@@ -55,7 +55,7 @@ export function SchoolDetail({ school }: Props) {
   }));
 
   return (
-    <div>
+    <div className="min-h-screen bg-white">
       {/* Hero */}
       <SchoolHero school={school} />
 
