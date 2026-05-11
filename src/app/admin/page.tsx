@@ -55,12 +55,20 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               Giriş yapıldı: {profile.email ?? user.email}
             </p>
           </div>
-          <Link
-            href="/admin/schools/new"
-            className="inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
-          >
-            Yeni Okul Ekle
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/site-settings"
+              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              Site Ayarları
+            </Link>
+            <Link
+              href="/admin/schools/new"
+              className="inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
+            >
+              Yeni Okul Ekle
+            </Link>
+          </div>
         </div>
 
         {params?.success && (
