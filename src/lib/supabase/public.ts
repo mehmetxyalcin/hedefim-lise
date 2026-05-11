@@ -280,6 +280,20 @@ export function mapSchoolWithDetails(row: any): SchoolWithDetails {
     .map(mapSchoolProject)
     .sort((a: SchoolProject, b: SchoolProject) => a.orderIndex - b.orderIndex);
 
+  // school_vocational_branches üst seviyeden gelir; vocational_field_id'ye göre grupla
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const branchesByFieldId = new Map<number, VocationalBranch[]>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (row.school_vocational_branches ?? []).forEach((svb: any) => {
+    const branch = svb.vocational_branches;
+    if (!branch) return;
+    const mapped = mapVocationalBranch(branch);
+    const fid = branch.vocational_field_id as number;
+    const list = branchesByFieldId.get(fid) ?? [];
+    list.push(mapped);
+    branchesByFieldId.set(fid, list);
+  });
+
   const vocationalFieldsWithBranches: VocationalFieldWithBranches[] = (
     row.school_vocational_fields ?? []
   )
@@ -287,22 +301,12 @@ export function mapSchoolWithDetails(row: any): SchoolWithDetails {
     .map((svf: any) => svf.vocational_fields)
     .filter(Boolean)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .map((field: any) => {
-      const selectedBranches: VocationalBranch[] = (
-        field.school_vocational_branches ?? []
-      )
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((svb: any) => svb.vocational_branches)
-        .filter(Boolean)
-        .map(mapVocationalBranch);
-
-      return {
-        id: field.id as number,
-        title: field.title as string,
-        slug: field.slug as string,
-        selectedBranches,
-      };
-    });
+    .map((field: any) => ({
+      id: field.id as number,
+      title: field.title as string,
+      slug: field.slug as string,
+      selectedBranches: branchesByFieldId.get(field.id as number) ?? [],
+    }));
 
   const base = mapSchool(row as SchoolRow);
 

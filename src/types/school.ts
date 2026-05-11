@@ -12,9 +12,9 @@ export type School = {
   languages: string[];
   description: string;
   images: string[];
-  address?: string | null;
-  phone?: string | null;
-  website?: string | null;
+  address: string | null;
+  phone: string | null;
+  website: string | null;
   isActive?: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;

@@ -24,6 +24,9 @@ export const SCHOOLS: School[] = [
       "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1000",
       "https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&q=80&w=1000",
     ],
+    address: null,
+    phone: null,
+    website: null,
   },
   {
     id: 2,
@@ -46,6 +49,9 @@ export const SCHOOLS: School[] = [
     images: [
       "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1000",
     ],
+    address: null,
+    phone: null,
+    website: null,
   },
   {
     id: 3,
@@ -67,6 +73,9 @@ export const SCHOOLS: School[] = [
     images: [
       "https://images.unsplash.com/photo-1581092921461-eab62e97a783?auto=format&fit=crop&q=80&w=1000",
     ],
+    address: null,
+    phone: null,
+    website: null,
     vocationalFields: [1, 2],
   },
   {
@@ -86,6 +95,9 @@ export const SCHOOLS: School[] = [
     images: [
       "https://images.unsplash.com/photo-1590012314607-6da64f93413b?auto=format&fit=crop&q=80&w=1000",
     ],
+    address: null,
+    phone: null,
+    website: null,
   },
   {
     id: 5,
@@ -104,6 +116,9 @@ export const SCHOOLS: School[] = [
     images: [
       "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1000",
     ],
+    address: null,
+    phone: null,
+    website: null,
     vocationalFields: [1, 3],
   },
 ];

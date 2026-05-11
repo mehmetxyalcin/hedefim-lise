@@ -217,28 +217,33 @@ CREATE POLICY "admin_write_school_projects"
 
 
 -- ═══════════════════════════════════════════════════════════════════
--- SEED: Tesis master listesi
+-- SEED: Tesis master listesi (icon = emoji)
 -- ═══════════════════════════════════════════════════════════════════
 
 INSERT INTO public.facilities (name, icon, is_default) VALUES
-  ('Kapalı Spor Salonu',       'Dumbbell',         true),
-  ('Z-Kütüphane',              'BookOpen',         true),
-  ('Fen Laboratuvarı',         'FlaskConical',     true),
-  ('Bilgisayar Laboratuvarı',  'Monitor',          true),
-  ('Konferans Salonu',         'Users',            true),
-  ('Sanat Atölyesi',           'Palette',          true),
-  ('Müzik Odası',              'Music',            true),
-  ('Açık Spor Sahası',         'Trophy',           true),
-  ('Yemekhane',                'UtensilsCrossed',  true),
-  ('Kantin',                   'Coffee',           true),
-  ('Teknoloji Atölyeleri',     'Wrench',           true),
-  ('Uygulama Laboratuvarı',    'Microscope',       true),
-  ('Pansiyon',                 'BedDouble',        true),
-  ('Revir',                    'Stethoscope',      true),
-  ('Döner Sermaye Birimi',     'Briefcase',        true),
-  ('Kütüphane',                'Library',          true),
-  ('Çok Amaçlı Salon',         'Building2',        true),
-  ('Okul Bahçesi',             'TreePine',         true)
+  ('Fizik Laboratuvarı',              '⚛️',  true),
+  ('Kimya Laboratuvarı',              '🧪',  true),
+  ('Biyoloji Laboratuvarı',           '🔬',  true),
+  ('Bilgisayar Laboratuvarı',         '💻',  true),
+  ('Kütüphane',                       '📚',  true),
+  ('Çalışma Odası',                   '📖',  true),
+  ('Konferans Salonu',                '🎤',  true),
+  ('Müzik Atölyesi',                  '🎵',  true),
+  ('Resim Atölyesi',                  '🎨',  true),
+  ('Drama Atölyesi',                  '🎭',  true),
+  ('Kulüp Odaları',                   '👥',  true),
+  ('Açık Spor Alanı',                 '⚽',  true),
+  ('Kapalı Spor Salonu',              '🏋️',  true),
+  ('Soyunma ve Giyinme Odası',        null,   true),
+  ('Yemekhane',                       '🍽️',  true),
+  ('Kantin',                          '☕',  true),
+  ('Dinlenme Alanları',               '🛋️',  true),
+  ('Mescit',                          '🕌',  true),
+  ('Pansiyon',                        '🛏️',  true),
+  ('Revir',                           '🏥',  true),
+  ('Engelli Erişimine Uygun Rampa',   '♿',  true),
+  ('Engelli Erişimine Uygun Asansör', '🛗',  true),
+  ('Engelli WC',                      '♿',  true)
 ON CONFLICT (name) DO NOTHING;
 
 

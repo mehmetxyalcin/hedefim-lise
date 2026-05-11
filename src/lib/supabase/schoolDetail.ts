@@ -2,24 +2,18 @@ import { createClient } from "@/lib/supabase/server";
 import { mapSchoolWithDetails } from "@/lib/supabase/public";
 import type { SchoolWithDetails } from "@/types/schoolDetail";
 
-// Tüm ilişkili veriyi tek nested sorguda çeker
+// Tüm ilişkili veriyi tek nested sorguda çeker.
+// school_vocational_branches, vocational_fields içine DEĞİL schools altına join'lenir
+// (vocational_fields↔school_vocational_branches arasında FK yok).
 const SCHOOL_DETAIL_SELECT = `
   *,
   school_vocational_fields(
     vocational_field_id,
-    vocational_fields(
-      id,
-      slug,
-      title,
-      description,
-      skills,
-      career,
-      branches,
-      school_vocational_branches(
-        branch_id,
-        vocational_branches(id, vocational_field_id, name)
-      )
-    )
+    vocational_fields(id, slug, title, description, skills, career, branches)
+  ),
+  school_vocational_branches(
+    branch_id,
+    vocational_branches(id, vocational_field_id, name)
   ),
   school_facilities(
     facilities(id, name, icon, is_default)
@@ -63,6 +57,7 @@ export async function getSchoolWithDetails(
 
     return mapSchoolWithDetails({
       ...basicData,
+      school_vocational_branches: [],
       school_facilities: [],
       school_scores: [],
       school_quotas: [],
