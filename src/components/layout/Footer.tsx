@@ -53,19 +53,21 @@ export async function Footer() {
           {/* Sütun 1: Logo + hakkında */}
           <div className="md:col-span-5">
             <div className="mb-6 flex items-center space-x-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 shadow-lg shadow-blue-600/20">
-                {siteSettings.logo_url ? (
+              {siteSettings.logo_url ? (
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden">
                   <Image
                     src={siteSettings.logo_url}
                     alt={siteSettings.logo_alt}
-                    width={40}
-                    height={40}
-                    className="h-full w-full object-contain"
+                    fill
+                    sizes="48px"
+                    className="object-contain"
                   />
-                ) : (
+                </div>
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 shadow-lg shadow-blue-600/20">
                   <BookOpen className="h-5 w-5 text-white" />
-                )}
-              </div>
+                </div>
+              )}
               <div>
                 <span className="block text-xl font-bold tracking-tight text-white">
                   {siteSettings.site_title}
