@@ -29,6 +29,7 @@ type ParsedRow = {
   name: string;
   district: string;
   school_type: string;
+  education_type: "normal" | "ikili" | null;
   phone: string | null;
   website: string | null;
   address: string | null;
@@ -40,11 +41,26 @@ function str(v: unknown): string {
   return String(v ?? "").trim();
 }
 
+function parseEducationType(
+  value: string,
+): { value: "normal" | "ikili" | null; error: string | null } {
+  if (!value) return { value: null, error: null };
+  const v = value.toLocaleLowerCase("tr-TR");
+  if (v === "normal öğretim") return { value: "normal", error: null };
+  if (v === "ikili öğretim") return { value: "ikili", error: null };
+  return {
+    value: null,
+    error: "Öğretim Şekli geçersiz. 'Normal Öğretim' veya 'İkili Öğretim' olmalı",
+  };
+}
+
 function validateRow(raw: Record<string, unknown>, index: number): Omit<ParsedRow, "status"> {
   const institution_code = str(raw["Kurum Kodu"]);
   const name = str(raw["Okul Adı"]);
   const district = str(raw["İlçe"]);
   const school_type = str(raw["Okul Türü"]);
+  const eduRaw = str(raw["Öğretim Şekli"]);
+  const edu = parseEducationType(eduRaw);
 
   const errors: string[] = [];
   if (!institution_code) errors.push("Kurum Kodu zorunludur");
@@ -54,6 +70,7 @@ function validateRow(raw: Record<string, unknown>, index: number): Omit<ParsedRo
   if (!school_type) errors.push("Okul Türü zorunludur");
   else if (!SCHOOL_TYPES.includes(school_type))
     errors.push(`Geçersiz tür: "${school_type}"`);
+  if (edu.error) errors.push(edu.error);
 
   return {
     rowIndex: index + 2,
@@ -61,6 +78,7 @@ function validateRow(raw: Record<string, unknown>, index: number): Omit<ParsedRo
     name,
     district,
     school_type,
+    education_type: edu.value,
     phone: str(raw["Telefon"]) || null,
     website: str(raw["Website"]) || null,
     address: str(raw["Adres"]) || null,
@@ -226,6 +244,7 @@ export function BulkUploadWizard() {
         name: r.name,
         district: r.district,
         school_type: r.school_type,
+        education_type: r.education_type,
         phone: r.phone,
         website: r.website,
         address: r.address,
@@ -329,7 +348,7 @@ export function BulkUploadWizard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "İlçe", "Tür", "Telefon", "Website", "Adres"].map(
+                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "İlçe", "Tür", "Öğretim Şekli", "Telefon", "Website", "Adres"].map(
                     (h) => (
                       <th
                         key={h}
@@ -376,6 +395,13 @@ export function BulkUploadWizard() {
                     <td className="px-3 py-2 text-slate-600">{row.district || "—"}</td>
                     <td className="max-w-[160px] truncate px-3 py-2 text-slate-600">
                       {row.school_type || "—"}
+                    </td>
+                    <td className="px-3 py-2 text-slate-600">
+                      {row.education_type === "normal"
+                        ? "Normal Öğretim"
+                        : row.education_type === "ikili"
+                          ? "İkili Öğretim"
+                          : "—"}
                     </td>
                     <td className="px-3 py-2 text-slate-500">{row.phone || "—"}</td>
                     <td className="max-w-[140px] truncate px-3 py-2 text-slate-500">

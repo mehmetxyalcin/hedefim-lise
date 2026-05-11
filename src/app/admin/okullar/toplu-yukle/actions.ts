@@ -7,6 +7,7 @@ export type UploadSchoolRow = {
   name: string;
   district: string;
   school_type: string;
+  education_type?: "normal" | "ikili" | null;
   phone?: string | null;
   website?: string | null;
   address?: string | null;
@@ -93,6 +94,7 @@ export async function bulkUploadSchools(
             phone: row.phone ?? null,
             website: row.website ?? null,
             address: row.address ?? null,
+            ...(row.education_type != null && { education_type: row.education_type }),
           })
           .eq("id", existingId);
 
@@ -110,6 +112,7 @@ export async function bulkUploadSchools(
           phone: row.phone ?? null,
           website: row.website ?? null,
           address: row.address ?? null,
+          education_type: row.education_type ?? "normal",
           percentile: "0",
           logo: row.name.slice(0, 2).toUpperCase(),
           color: "bg-gradient-to-br from-slate-700 to-slate-900",
