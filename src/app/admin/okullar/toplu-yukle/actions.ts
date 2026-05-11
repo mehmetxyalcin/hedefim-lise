@@ -34,7 +34,7 @@ export async function checkInstitutionCodes(codes: string[]): Promise<string[]> 
     .filter((c): c is string => Boolean(c));
 }
 
-function slugify(name: string): string {
+function slugifyBase(name: string): string {
   return name
     .trim()
     .toLocaleLowerCase("tr-TR")
@@ -49,6 +49,12 @@ function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
+}
+
+function generateUniqueSlug(name: string, institutionCode: string): string {
+  const base = slugifyBase(name) || slugifyBase(institutionCode);
+  const code = slugifyBase(institutionCode) || institutionCode.replace(/[^a-z0-9]/gi, "").toLowerCase();
+  return `${base}-${code}`;
 }
 
 export async function bulkUploadSchools(
@@ -73,9 +79,6 @@ export async function bulkUploadSchools(
     (existingData ?? []).map((r) => [r.institution_code as string, r.id as number]),
   );
 
-  const { data: slugData } = await supabase.from("schools").select("slug");
-  const existingSlugs = new Set((slugData ?? []).map((r) => r.slug as string));
-
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const rowNum = i + 2;
@@ -96,15 +99,7 @@ export async function bulkUploadSchools(
         if (error) throw new Error(error.message);
         result.updated++;
       } else {
-        let slug = slugify(row.name) || slugify(row.institution_code);
-
-        if (existingSlugs.has(slug)) {
-          const withCode = `${slug}-${slugify(row.institution_code)}`;
-          slug = existingSlugs.has(withCode)
-            ? `${withCode}-${Date.now()}`
-            : withCode;
-        }
-        existingSlugs.add(slug);
+        const slug = generateUniqueSlug(row.name, row.institution_code);
 
         const { error } = await supabase.from("schools").insert({
           name: row.name,
