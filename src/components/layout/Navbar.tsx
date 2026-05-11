@@ -13,21 +13,23 @@ export async function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1c]/90 text-white backdrop-blur-lg">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="group flex items-center space-x-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 shadow-lg shadow-blue-600/20 transition-all group-hover:shadow-blue-600/40 overflow-hidden">
-              {settings.logo_url ? (
+          <Link href="/" className="group flex items-center space-x-3">
+            {settings.logo_url ? (
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden">
                 <Image
                   src={settings.logo_url}
                   alt={settings.logo_alt}
-                  width={40}
-                  height={40}
-                  className="h-full w-full object-contain"
+                  fill
+                  sizes="56px"
+                  className="object-contain"
                   priority
                 />
-              ) : (
+              </div>
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 shadow-lg shadow-blue-600/20 transition-all group-hover:shadow-blue-600/40">
                 <BookOpen className="h-5 w-5 text-white" />
-              )}
-            </div>
+              </div>
+            )}
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white transition-colors group-hover:text-blue-100">
                 {settings.site_title}
