@@ -4,24 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Bookmark,
-  Briefcase,
-  Building,
+  Building2,
   CheckCircle2,
   ChevronRight,
-  Clock,
   Globe,
-  Info,
-  Languages,
-  Layers,
+  Home,
   MapPin,
   Phone,
-  Share2,
   Star,
-  Trophy,
 } from "lucide-react";
 import { VocationalFieldIcon } from "@/lib/vocational-icons";
 import type { School } from "@/types/school";
@@ -32,463 +22,369 @@ type SchoolDetailProps = {
   vocationalFields: VocationalField[];
 };
 
+function getHeroGradient(type: string): string {
+  const t = type.toLowerCase();
+  if (t.includes("meslek") || t.includes("teknik")) {
+    return "from-blue-700 via-indigo-700 to-purple-800";
+  }
+  if (t.includes("fen")) {
+    return "from-orange-600 via-red-600 to-rose-700";
+  }
+  if (t.includes("anadolu")) {
+    return "from-emerald-600 via-teal-600 to-cyan-700";
+  }
+  return "from-slate-600 via-slate-700 to-slate-800";
+}
+
+function getPercentileColor(value: number): string {
+  if (value <= 20) return "bg-red-500";
+  if (value <= 40) return "bg-orange-500";
+  if (value <= 60) return "bg-yellow-500";
+  if (value <= 80) return "bg-green-500";
+  return "bg-blue-500";
+}
+
+function getPercentileLabel(value: number): string {
+  if (value <= 20) return "Çok yüksek başarı gerektirir";
+  if (value <= 40) return "Yüksek başarı gerektirir";
+  if (value <= 60) return "Orta düzey başarı gerektirir";
+  if (value <= 80) return "Ulaşılabilir hedef";
+  return "Geniş yerleşme imkânı";
+}
+
 export function SchoolDetail({ school, vocationalFields }: SchoolDetailProps) {
-  const [activeTab, setActiveTab] = useState("genel");
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = () => {
+    setAdded(true);
+    setTimeout(() => setAdded(false), 3000);
+  };
+
+  const heroImage = school.images[0] ?? null;
+  const heroGradient = getHeroGradient(school.type);
+  const percentileNum = parseFloat(school.percentile);
+  const hasPercentile = !isNaN(percentileNum) && school.percentile !== "";
+  const hasContact = !!(school.address || school.phone || school.website);
+  const hasDescription = !!school.description?.trim();
+  const hasFeatures = school.features.length > 0;
+  const hasLanguages = school.languages.length > 0;
+  const hasVocationalFields = vocationalFields.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-32">
-      <div className="sticky top-0 z-40 border-b border-slate-200/80 bg-white">
-        <div className="container mx-auto max-w-7xl px-6">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
-              <Link
-                href="/okullar"
-                className="-ml-2 flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors hover:bg-slate-50 hover:text-blue-600"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Tercih Robotuna Dön</span>
-                <span className="sm:hidden">Geri</span>
-              </Link>
-              <ChevronRight className="hidden h-3.5 w-3.5 text-slate-300 sm:block" />
-              <span className="hidden text-slate-400 sm:block">{school.district}</span>
-              <ChevronRight className="hidden h-3.5 w-3.5 text-slate-300 md:block" />
-              <span className="hidden max-w-[200px] truncate text-slate-400 md:block">
-                {school.name}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                className="rounded-xl border border-transparent p-2 text-slate-400 transition-all hover:border-blue-100 hover:bg-blue-50 hover:text-blue-600"
-                title="Okulu Paylaş"
-              >
-                <Share2 className="h-4.5 w-4.5" />
-              </button>
-              <button
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-100 hover:bg-blue-50 hover:text-blue-600"
-                title="Tercih Listeme Kaydet"
-              >
-                <Bookmark className="h-4 w-4" />
-                <span className="hidden sm:inline">Kaydet</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto max-w-7xl px-6 pt-8 pb-10">
-        <div className="relative flex flex-col gap-8 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-10 lg:flex-row lg:gap-12">
-          <div className="pointer-events-none absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full bg-blue-50/50 blur-3xl" />
-
-          <div className="relative z-10 flex shrink-0 justify-center lg:justify-start">
-            <div
-              className={`flex h-24 w-24 items-center justify-center rounded-[2rem] text-3xl font-extrabold text-white ring-4 ring-slate-50 shadow-inner border border-white/20 sm:h-32 sm:w-32 sm:text-5xl ${school.color}`}
-            >
-              {school.logo}
-            </div>
-          </div>
-
-          <div className="relative z-10 flex flex-1 flex-col justify-center text-center lg:text-left">
-            {school.images[0] && (
-              <div className="mb-6 overflow-hidden rounded-3xl border border-slate-200 shadow-sm">
-                <Image
-                  src={school.images[0]}
-                  alt={school.name}
-                  width={1280}
-                  height={512}
-                  className="h-64 w-full object-cover"
-                />
-              </div>
-            )}
-            <div className="mb-4 flex flex-wrap justify-center gap-2 lg:justify-start">
-              <span className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm">
-                {school.type}
-              </span>
-              <span className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 shadow-sm">
-                <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                {school.district}
-              </span>
-            </div>
-
-            <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-              {school.name}
-            </h1>
-
-            <p className="mx-auto mb-6 max-w-2xl text-sm leading-relaxed text-slate-500 sm:text-base lg:mx-0">
-              {school.description}
-            </p>
-
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 border-t border-slate-100 pt-5 lg:justify-start">
-              <div className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-1.5 transition-colors group-hover:border-blue-200 group-hover:text-blue-600">
-                  <MapPin className="h-4 w-4" />
-                </div>
-                <span>{school.address ?? "Adres bilgisi yakında eklenecek."}</span>
-              </div>
-              <div className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-1.5 transition-colors group-hover:border-blue-200 group-hover:text-blue-600">
-                  <Globe className="h-4 w-4" />
-                </div>
-                <span>{school.website ?? "Website bilgisi yakında eklenecek."}</span>
-              </div>
-              <div className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-1.5 transition-colors group-hover:border-blue-200 group-hover:text-blue-600">
-                  <Phone className="h-4 w-4" />
-                </div>
-                <span>{school.phone ?? "Telefon bilgisi yakında eklenecek."}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 mt-6 flex shrink-0 flex-col justify-center border-t border-slate-100 pt-8 lg:mt-0 lg:w-72 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
-            <div className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/80 p-6 text-center backdrop-blur-sm transition-all hover:border-blue-200 hover:bg-blue-50/30">
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
-              <div className="mt-2 mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                Taban Yüzdelik Dilim
-              </div>
-              <div className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 transition-colors group-hover:text-blue-600 sm:text-5xl">
-                %{school.percentile}
-              </div>
-              <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-blue-600/40">
-                <Star className="h-4 w-4" />
-                Tercihe Ekle
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="sticky top-16 z-30 border-b border-slate-200 bg-slate-50/80 backdrop-blur-xl">
-        <div className="container mx-auto max-w-7xl px-6">
-          <div className="hide-scrollbar flex space-x-2 overflow-x-auto py-1 sm:space-x-8">
-            {[
-              { id: "genel", label: "Genel Bakış", icon: Info },
-              { id: "akademik", label: "Akademik", icon: BookOpen },
-              { id: "imkanlar", label: "İmkânlar", icon: Building },
-              { id: "projeler", label: "Projeler", icon: Trophy },
-            ].map((tab) => {
-              const TabIcon = tab.icon;
-              const isActive = activeTab === tab.id;
-
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-4 py-3.5 text-sm font-bold whitespace-nowrap transition-all ${
-                    isActive
-                      ? "text-blue-600"
-                      : "rounded-lg text-slate-500 hover:bg-slate-100/50 hover:text-slate-800"
-                  }`}
-                >
-                  <TabIcon
-                    className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-slate-400"}`}
-                  />
-                  {tab.label}
-                  {isActive && (
-                    <div className="absolute bottom-[-5px] left-0 right-0 h-1 rounded-t-full bg-blue-600" />
-                  )}
-                </button>
-              );
-            })}
-
-            {school.vocationalFields && (
-              <button
-                onClick={() => setActiveTab("alanlar")}
-                className={`relative flex items-center gap-2 px-4 py-3.5 text-sm font-bold whitespace-nowrap transition-all ${
-                  activeTab === "alanlar"
-                    ? "text-orange-600"
-                    : "rounded-lg text-slate-500 hover:bg-slate-100/50 hover:text-slate-800"
-                }`}
-              >
-                <Briefcase
-                  className={`h-4 w-4 ${activeTab === "alanlar" ? "text-orange-600" : "text-slate-400"}`}
-                />
-                Meslek Alanları
-                {activeTab === "alanlar" && (
-                  <div className="absolute bottom-[-5px] left-0 right-0 h-1 rounded-t-full bg-orange-600" />
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto max-w-7xl px-6 pt-10">
-        {activeTab === "genel" && (
-          <div className="grid items-start gap-8 lg:grid-cols-12">
-            <div className="space-y-8 lg:col-span-8">
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm sm:p-10">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="rounded-xl border border-blue-100/50 bg-blue-50 p-2.5 text-blue-600">
-                    <Info className="h-5 w-5" />
-                  </div>
-                  <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                    Okul Hakkında
-                  </h2>
-                </div>
-                <div className="max-w-none space-y-6 text-lg leading-relaxed text-slate-600">
-                  <p>
-                    {school.description} Okulumuz, öğrenci merkezli eğitim
-                    anlayışı, donanımlı laboratuvarları ve güçlü öğretmen
-                    kadrosu ile bölgesinin en çok tercih edilen eğitim
-                    kurumlarından biridir.
-                  </p>
-                  <p>
-                    Amacımız; öğrencilerimizi sadece ulusal sınavlara
-                    hazırlamak değil, aynı zamanda 21. yüzyıl becerileriyle
-                    donatılmış bireyler olarak hayata katmaktır.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 lg:col-span-4">
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm">
-                <h3 className="mb-6 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-400">
-                  <Layers className="h-4 w-4" />
-                  Hizli Bilgiler
-                </h3>
-
-                <div className="space-y-6">
-                  <div>
-                    <div className="mb-3 flex items-center gap-2">
-                      <Languages className="h-4.5 w-4.5 text-slate-400" />
-                      <h4 className="text-sm font-bold text-slate-900">
-                        Yabancı Diller
-                      </h4>
-                    </div>
-                    <div className="flex flex-wrap gap-2 pl-6">
-                      {school.languages.map((language) => (
-                        <span
-                          key={language}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm"
-                        >
-                          {language}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="h-px w-full bg-slate-100" />
-
-                  <div>
-                    <div className="mb-2 flex items-center gap-2">
-                      <Clock className="h-4.5 w-4.5 text-slate-400" />
-                      <h4 className="text-sm font-bold text-slate-900">
-                        Egitim Sekli
-                      </h4>
-                    </div>
-                    <div className="pl-6">
-                      <div className="text-sm font-medium text-slate-600">
-                        Tam Gun Egitim
-                      </div>
-                      <div className="mt-0.5 text-xs text-slate-400">
-                        08:30 - 15:40
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50 pb-24 lg:pb-10">
+      {/* ─── Hero Section ─── */}
+      <section className="relative w-full overflow-hidden aspect-[16/9] md:aspect-[21/9]">
+        {heroImage ? (
+          <>
+            <Image
+              src={heroImage}
+              alt={school.name}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+          </>
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${heroGradient}`} />
         )}
 
-        {activeTab === "alanlar" && school.vocationalFields && (
-          <div className="mx-auto max-w-5xl space-y-8">
-            <div className="mb-10 text-center">
-              <h2 className="mb-3 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                Mesleki Uzmanlık Alanları
-              </h2>
-              <p className="text-lg text-slate-500">
-                Bu okulda yer alan alanlari ve alt dallarini detaylıca
-                inceleyin.
-              </p>
-            </div>
+        {/* Breadcrumb */}
+        <nav
+          aria-label="Gezinti yolu"
+          className="absolute top-0 left-0 right-0 container mx-auto max-w-7xl px-6 pt-5"
+        >
+          <ol className="flex items-center gap-1 text-sm text-white/60">
+            <li className="hidden sm:flex items-center gap-1">
+              <Link
+                href="/"
+                className="flex items-center gap-1 hover:text-white transition-colors"
+              >
+                <Home className="h-3.5 w-3.5" />
+                <span>Ana Sayfa</span>
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </li>
+            <li className="hidden sm:flex items-center gap-1">
+              <Link href="/okullar" className="hover:text-white transition-colors">
+                Okullar
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </li>
+            <li className="flex items-center gap-1 text-white/40">
+              <span className="truncate max-w-[120px] sm:max-w-none">{school.type}</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </li>
+            <li className="truncate max-w-[160px] sm:max-w-xs text-white/80 font-medium">
+              {school.name}
+            </li>
+          </ol>
+        </nav>
 
-            <div className="grid gap-6">
-              {vocationalFields.map((field) => {
-                return (
-                  <Link
-                    key={field.id}
-                    href={`/alanlar/${field.slug}`}
-                    className="group cursor-pointer rounded-3xl border border-slate-200/80 bg-white p-6 transition-all hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/5 sm:p-8"
-                  >
-                    <div className="flex flex-col gap-6 md:flex-row md:items-start sm:gap-8">
-                      <div className="shrink-0 rounded-2xl border border-orange-100/50 bg-orange-50 p-5 text-orange-600 shadow-sm transition-colors group-hover:bg-orange-500 group-hover:text-white">
-                        <VocationalFieldIcon slug={field.slug} className="h-8 w-8" />
+        {/* Hero content */}
+        <div className="absolute bottom-0 left-0 right-0 container mx-auto max-w-7xl px-6 pb-20">
+          <span className="inline-block mb-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/20 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider">
+            {school.type}
+          </span>
+          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2 max-w-2xl">
+            {school.name}
+          </h1>
+          <p className="flex items-center gap-1.5 text-white/80 text-sm">
+            <MapPin className="h-4 w-4 shrink-0" />
+            {school.district}
+          </p>
+        </div>
+      </section>
+
+      {/* ─── Content ─── */}
+      <div className="relative z-10 -mt-12 container mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* ── Left column ── */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* About card */}
+            {hasDescription && (
+              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">Okul Hakkında</h2>
+                <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                  {school.description}
+                </p>
+              </article>
+            )}
+
+            {/* Contact card */}
+            {hasContact && (
+              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">İletişim</h2>
+                <dl className="space-y-3">
+                  {school.address && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                      <dd>
+                        <a
+                          href={`https://maps.google.com/?q=${encodeURIComponent(school.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-slate-600 hover:text-blue-600 hover:underline transition-colors"
+                          aria-label={`${school.name} adresini haritada aç`}
+                        >
+                          {school.address}
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                  {school.phone && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-4 w-4 text-slate-400 shrink-0" />
+                      <dd>
+                        <a
+                          href={`tel:${school.phone}`}
+                          className="text-sm text-slate-600 hover:text-blue-600 transition-colors"
+                        >
+                          {school.phone}
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                  {school.website && (
+                    <div className="flex items-center gap-3">
+                      <Globe className="h-4 w-4 text-slate-400 shrink-0" />
+                      <dd>
+                        <a
+                          href={school.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline break-all"
+                          aria-label={`${school.name} web sitesi (yeni sekmede açılır)`}
+                        >
+                          {school.website.replace(/^https?:\/\//, "")}
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </article>
+            )}
+
+            {/* Vocational fields */}
+            {hasVocationalFields && (
+              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">Meslek Alanları</h2>
+                <div className="space-y-3">
+                  {vocationalFields.map((field) => (
+                    <Link
+                      key={field.id}
+                      href={`/alanlar/${field.slug}`}
+                      className="group flex items-center gap-4 rounded-xl border border-slate-100 p-4 hover:border-orange-200 hover:bg-orange-50/50 transition-all"
+                      aria-label={`${field.title} meslek alanı detayları`}
+                    >
+                      <div className="shrink-0 rounded-xl bg-orange-50 p-3 text-orange-600 border border-orange-100 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                        <VocationalFieldIcon slug={field.slug} className="h-5 w-5" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="mb-3 text-2xl font-bold text-slate-900 transition-colors group-hover:text-orange-600">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 group-hover:text-orange-600 transition-colors">
                           {field.title}
-                        </h4>
-                        <p className="mb-5 text-base leading-relaxed text-slate-500">
-                          {field.description}
                         </p>
-                        <div className="space-y-2">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            Mevcut Dallar
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {field.branches.map((branch) => (
+                        {field.branches.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {field.branches.slice(0, 4).map((branch) => (
                               <span
                                 key={branch}
-                                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm"
+                                className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium"
                               >
                                 {branch}
                               </span>
                             ))}
+                            {field.branches.length > 4 && (
+                              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                                +{field.branches.length - 4}
+                              </span>
+                            )}
                           </div>
-                        </div>
+                        )}
                       </div>
-                      <div className="hidden h-20 self-center border-l border-slate-100 pl-6 text-sm font-bold text-slate-400 transition-colors group-hover:text-orange-500 md:flex md:items-center">
-                        Detaylar
-                        <ChevronRight className="ml-1 h-5 w-5" />
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-orange-400 shrink-0 transition-colors" />
+                    </Link>
+                  ))}
+                </div>
+              </article>
+            )}
 
-        {activeTab === "imkanlar" && (
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-8 flex items-center gap-3">
-              <div className="rounded-xl border border-emerald-100/50 bg-emerald-50 p-2.5 text-emerald-600">
-                <Building className="h-5 w-5" />
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                Tesis ve Fiziksel İmkânlar
-              </h2>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {school.features.map((feature) => (
-                <div
-                  key={feature}
-                  className="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 transition-all hover:border-slate-300 hover:shadow-md"
+            {/* School features */}
+            {hasFeatures && (
+              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">Tesis ve İmkânlar</h2>
+                <ul
+                  role="list"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
                 >
-                  <div className="rounded-xl border border-emerald-100/50 bg-emerald-50 p-2 transition-colors group-hover:bg-emerald-500">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500 group-hover:text-white" />
-                  </div>
-                  <span className="font-bold text-slate-700 transition-colors group-hover:text-slate-900">
-                    {feature}
-                  </span>
-                </div>
-              ))}
-            </div>
+                  {school.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 hover:border-emerald-200 hover:bg-emerald-50/50 transition-colors"
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span className="text-sm font-medium text-slate-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            )}
           </div>
-        )}
 
-        {activeTab === "projeler" && (
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-8 flex items-center gap-3">
-              <div className="rounded-xl border border-indigo-100/50 bg-indigo-50 p-2.5 text-indigo-600">
-                <Trophy className="h-5 w-5" />
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                Projeler ve Başarılar
-              </h2>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              {school.projects.map((project) => (
-                <div
-                  key={project}
-                  className="group flex flex-col rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md"
-                >
-                  <div className="mb-5 w-fit rounded-2xl border border-indigo-100/50 bg-indigo-50 p-3.5 text-indigo-600 transition-transform group-hover:scale-110">
-                    <Trophy className="h-6 w-6" />
-                  </div>
-                  <h4 className="mb-3 text-xl font-bold text-slate-900">
-                    {project}
-                  </h4>
-                  <p className="flex-grow text-sm leading-relaxed text-slate-500">
-                    Okulumuz bu proje kapsaminda aktif calismalar yurutmekte,
-                    öğrencilerine ulusal ve uluslararası düzeyde vizyon
-                    kazandirmayi hedeflemektedir.
+          {/* ── Right column ── */}
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* Percentile card */}
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                Taban Yüzdelik Dilim
+              </p>
+              {hasPercentile ? (
+                <>
+                  <p className="text-4xl font-bold text-slate-900 mb-4 tabular-nums">
+                    %{school.percentile}
                   </p>
-                  <div className="mt-6 flex items-center gap-1 border-t border-slate-50 pt-5 text-xs font-bold uppercase tracking-wider text-indigo-600">
-                    Incele
-                    <ArrowRight className="h-3 w-3" />
+
+                  {/* Progress bar */}
+                  <div className="mb-1 flex justify-between text-xs text-slate-400 font-medium">
+                    <span>Zor</span>
+                    <span>Kolay</span>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "akademik" && (
-          <div className="mx-auto grid max-w-6xl items-start gap-8 lg:grid-cols-2">
-            <div className="relative overflow-hidden rounded-[2rem] bg-[#0a0f1c] p-10 text-white shadow-xl">
-              <div className="pointer-events-none absolute top-[-20%] right-[-10%] h-[60%] w-[60%] rounded-full bg-blue-500/20 blur-3xl" />
-              <div className="pointer-events-none absolute bottom-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-cyan-400/10 blur-2xl" />
-
-              <div className="relative z-10">
-                <div className="mb-8 flex items-center gap-3">
-                  <div className="rounded-xl border border-white/20 bg-white/10 p-2.5 backdrop-blur-sm">
-                    <BookOpen className="h-5 w-5 text-blue-300" />
+                  <div
+                    className="relative h-2.5 rounded-full bg-slate-100 mb-3 overflow-hidden"
+                    role="progressbar"
+                    aria-valuenow={percentileNum}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Taban yüzdelik dilim: %${school.percentile}`}
+                  >
+                    <div
+                      className={`h-full rounded-full transition-all ${getPercentileColor(percentileNum)}`}
+                      style={{ width: `${percentileNum}%` }}
+                    />
                   </div>
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-blue-100">
-                    Akademik Performans
-                  </h4>
-                </div>
-
-                <div className="mb-8">
-                  <h3 className="mb-2 text-3xl font-extrabold text-white">
-                    2025 YKS Basarisi
-                  </h3>
-                  <p className="text-sm leading-relaxed text-slate-400">
-                    Ogrencilerimizin universite yerlestirme oranlari her gecen
-                    yil artarak devam etmektedir.
+                  <p className="text-xs text-slate-500 mb-1">
+                    {getPercentileLabel(percentileNum)}
                   </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-colors hover:bg-white/10">
-                    <div className="mb-2 bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-5xl font-extrabold text-transparent">
-                      %85
-                    </div>
-                    <div className="text-xs font-bold uppercase tracking-wide text-slate-300">
-                      Lisans Yerlesme Orani
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-colors hover:bg-white/10">
-                    <div className="mb-2 text-5xl font-extrabold text-white">
-                      12
-                    </div>
-                    <div className="text-xs font-bold uppercase tracking-wide text-slate-300">
-                      Tip Fakultesi Yerlesen
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex h-full flex-col justify-center rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm">
-                <h4 className="mb-4 text-2xl font-extrabold tracking-tight text-slate-900">
-                  Destekleme ve Yetistirme Kurslari (DYK)
-                </h4>
-                <p className="mb-6 text-lg leading-relaxed text-slate-600">
-                  Hafta sonu uzman kadromuz esliginde 9, 10, 11 ve 12.
-                  sınıflara yönelik ücretsiz DYK kurslarımızla öğrencilerimizin
-                  sinav hazirlik süreçlerini okul catisi altinda güvenle
-                  yurutuyoruz.
+                  <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+                    Bu okula yerleşmek için en az{" "}
+                    <span className="font-semibold text-slate-600">%{school.percentile}</span>{" "}
+                    diliminde olmanız gerekiyor.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-slate-400 mb-5">
+                  Taban puanı henüz belirlenmedi.
                 </p>
-                <div className="flex flex-wrap gap-3">
-                  <span className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700">
-                    Ucretsiz
-                  </span>
-                  <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Hafta Sonu
-                  </span>
-                </div>
+              )}
+
+              {/* Desktop add button */}
+              <button
+                onClick={handleAdd}
+                className={`hidden lg:flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
+                  added
+                    ? "bg-emerald-500 text-white"
+                    : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/25"
+                }`}
+                aria-label={added ? "Tercihe eklendi" : "Okulu tercihe ekle"}
+              >
+                <Star className="h-4 w-4" />
+                {added ? "Eklendi ✓" : "Tercihe Ekle"}
+              </button>
+            </div>
+
+            {/* Quick info card */}
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Building2 className="h-4 w-4 text-slate-400" />
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                  Hızlı Bilgiler
+                </h3>
               </div>
+              <dl className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <dt className="text-xs font-medium text-slate-400 shrink-0">Okul Türü</dt>
+                  <dd className="text-xs font-semibold text-slate-700 text-right">{school.type}</dd>
+                </div>
+                <div className="h-px bg-slate-50" />
+                <div className="flex items-start justify-between gap-4">
+                  <dt className="text-xs font-medium text-slate-400 shrink-0">İlçe</dt>
+                  <dd className="text-xs font-semibold text-slate-700 text-right flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {school.district}
+                  </dd>
+                </div>
+                {hasLanguages && (
+                  <>
+                    <div className="h-px bg-slate-50" />
+                    <div className="flex items-start justify-between gap-4">
+                      <dt className="text-xs font-medium text-slate-400 shrink-0">Yabancı Dil</dt>
+                      <dd className="text-xs font-semibold text-slate-700 text-right">
+                        {school.languages.join(", ")}
+                      </dd>
+                    </div>
+                  </>
+                )}
+              </dl>
             </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* ─── Mobile fixed bottom bar ─── */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white border-t border-gray-100 shadow-lg p-4">
+        <button
+          onClick={handleAdd}
+          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all ${
+            added
+              ? "bg-emerald-500 text-white"
+              : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
+          }`}
+          aria-label={added ? "Tercihe eklendi" : "Okulu tercihe ekle"}
+        >
+          <Star className="h-4 w-4" />
+          {added ? "Eklendi ✓" : "Tercihe Ekle"}
+        </button>
       </div>
     </div>
   );

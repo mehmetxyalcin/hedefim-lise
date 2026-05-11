@@ -108,37 +108,45 @@ export function SchoolForm({
         title="İletişim Bilgileri"
         description="Zorunlu olmayan, okul detay sayfasında yardımcı bilgi olarak kullanılan alanlar."
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="space-y-4">
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-700">
               Adres
             </span>
-            <input
+            <textarea
               name="address"
               defaultValue={school?.address ?? ""}
+              rows={2}
+              placeholder="Örn: Şevket Sümer Mah. 2413 Sok. No:1 Akdeniz/Mersin"
               className={inputClassName}
             />
           </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-slate-700">
-              Telefon
-            </span>
-            <input
-              name="phone"
-              defaultValue={school?.phone ?? ""}
-              className={inputClassName}
-            />
-          </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-slate-700">
-              Website
-            </span>
-            <input
-              name="website"
-              defaultValue={school?.website ?? ""}
-              className={inputClassName}
-            />
-          </label>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">
+                Telefon
+              </span>
+              <input
+                type="tel"
+                name="phone"
+                defaultValue={school?.phone ?? ""}
+                placeholder="0324 xxx xx xx"
+                className={inputClassName}
+              />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">
+                Website
+              </span>
+              <input
+                type="url"
+                name="website"
+                defaultValue={school?.website ?? ""}
+                placeholder="https://okul.meb.gov.tr"
+                className={inputClassName}
+              />
+            </label>
+          </div>
         </div>
       </FormSection>
 

@@ -12,6 +12,7 @@ import {
   Filter,
   GraduationCap,
   MapPin,
+  Phone,
   Search,
   SlidersHorizontal,
   Sparkles,
@@ -379,7 +380,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                   </div>
 
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="mb-3 flex flex-wrap gap-2">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
                       <span className="rounded-md border border-blue-100 bg-blue-50/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700">
                         {school.type}
                       </span>
@@ -387,6 +388,17 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                         <MapPin className="h-3 w-3" />
                         {school.district}
                       </span>
+                      {school.phone && (
+                        <a
+                          href={`tel:${school.phone}`}
+                          className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`${school.name} telefonu: ${school.phone}`}
+                        >
+                          <Phone className="h-3 w-3" />
+                          {school.phone}
+                        </a>
+                      )}
                     </div>
 
                     <h3 className="mb-2 line-clamp-1 text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-600 sm:text-2xl">
