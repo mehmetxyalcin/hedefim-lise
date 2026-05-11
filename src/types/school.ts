@@ -38,4 +38,5 @@ export type School = {
   schoolHoursNote?: string | null;
   otherInfo?: string | null;
   scores?: SchoolScoreRaw[];
+  institutionCode?: string | null;
 };

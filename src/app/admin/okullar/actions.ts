@@ -319,6 +319,7 @@ export async function createSchool(formData: FormData) {
     school_hours_end: toNullableString(formData.get("school_hours_end")),
     school_hours_note: toNullableString(formData.get("school_hours_note")),
     other_info: toNullableString(formData.get("other_info")),
+    institution_code: toNullableString(formData.get("institution_code")),
   };
 
   const { data, error } = await supabase
@@ -426,6 +427,7 @@ export async function updateSchool(formData: FormData) {
     school_hours_end: toNullableString(formData.get("school_hours_end")),
     school_hours_note: toNullableString(formData.get("school_hours_note")),
     other_info: toNullableString(formData.get("other_info")),
+    institution_code: toNullableString(formData.get("institution_code")),
   };
 
   const { error } = await supabase.from("schools").update(payload).eq("id", id);

@@ -71,6 +71,7 @@ export function SchoolForm({
         <SmartSchoolBasicFields
           initialColor={school?.color}
           initialDistrict={school?.district}
+          initialInstitutionCode={school?.institutionCode ?? ""}
           initialLogo={school?.logo}
           initialName={school?.name}
           initialSlug={school?.slug}

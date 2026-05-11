@@ -7,6 +7,7 @@ import { SCHOOL_TYPES } from "@/data/schoolTypes";
 type SmartSchoolBasicFieldsProps = {
   initialColor?: string;
   initialDistrict?: string;
+  initialInstitutionCode?: string;
   initialLogo?: string;
   initialName?: string;
   initialSlug?: string;
@@ -55,6 +56,7 @@ function getSlugError(value: string) {
 export function SmartSchoolBasicFields({
   initialColor = "bg-gradient-to-br from-slate-700 to-slate-900",
   initialDistrict = "",
+  initialInstitutionCode = "",
   initialLogo = "",
   initialName = "",
   initialSlug = "",
@@ -62,6 +64,7 @@ export function SmartSchoolBasicFields({
 }: SmartSchoolBasicFieldsProps) {
   const [name, setName] = useState(initialName);
   const [slug, setSlug] = useState(initialSlug);
+  const [institutionCode, setInstitutionCode] = useState(initialInstitutionCode);
   const [type, setType] = useState(initialType);
   const [district, setDistrict] = useState(initialDistrict);
   const [logo, setLogo] = useState(initialLogo);
@@ -120,6 +123,19 @@ export function SmartSchoolBasicFields({
             {errors.name}
           </span>
         )}
+      </label>
+
+      <label className="block">
+        <span className="mb-2 block text-sm font-semibold text-slate-700">
+          Kurum Kodu
+        </span>
+        <input
+          name="institution_code"
+          value={institutionCode}
+          onChange={(event) => setInstitutionCode(event.target.value)}
+          placeholder="Örn: 733521"
+          className={inputClassName}
+        />
       </label>
 
       <label className="block">

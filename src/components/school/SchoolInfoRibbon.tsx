@@ -1,5 +1,5 @@
 import React from "react";
-import { BookOpen, Building, Clock, GraduationCap, Users } from "lucide-react";
+import { BookOpen, Building, Clock, GraduationCap, Hash, Users } from "lucide-react";
 import type { SchoolWithDetails } from "@/types/schoolDetail";
 
 type Props = { school: SchoolWithDetails };
@@ -64,6 +64,15 @@ export function SchoolInfoRibbon({ school }: Props) {
       label: "Okul Saatleri",
       value: `${school.schoolHoursStart} - ${school.schoolHoursEnd}`,
       note: school.schoolHoursNote ?? undefined,
+    });
+  }
+
+  // 6. Kurum Kodu — yalnızca doluysa
+  if (school.institutionCode) {
+    items.push({
+      icon: <Hash className="h-5 w-5 text-blue-600" />,
+      label: "Kurum Kodu",
+      value: school.institutionCode,
     });
   }
 

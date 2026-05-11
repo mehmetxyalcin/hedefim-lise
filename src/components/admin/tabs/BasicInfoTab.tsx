@@ -18,6 +18,7 @@ export function BasicInfoTab({ school }: Props) {
         <SmartSchoolBasicFields
           initialColor={school?.color}
           initialDistrict={school?.district}
+          initialInstitutionCode={school?.institutionCode ?? ""}
           initialLogo={school?.logo}
           initialName={school?.name}
           initialSlug={school?.slug}

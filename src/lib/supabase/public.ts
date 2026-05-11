@@ -48,6 +48,7 @@ type SchoolRow = {
     vocational_fields?: VocationalFieldRow | null;
   }>;
   school_scores?: SchoolScoreRow[] | null;
+  institution_code?: string | null;
 };
 
 type VocationalFieldRow = {
@@ -175,6 +176,7 @@ export function mapSchool(row: SchoolRow): School {
         percentile: s.percentile,
       }),
     ),
+    institutionCode: row.institution_code ?? null,
   };
 }
 
@@ -352,5 +354,6 @@ export function mapSchoolWithDetails(row: any): SchoolWithDetails {
     scholarships,
     schoolProjects,
     vocationalFieldsWithBranches,
+    institutionCode: (row.institution_code as string | null) ?? null,
   };
 }

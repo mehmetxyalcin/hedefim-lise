@@ -87,4 +87,5 @@ export type SchoolWithDetails = {
   scholarships: SchoolScholarship[];
   schoolProjects: SchoolProject[];
   vocationalFieldsWithBranches: VocationalFieldWithBranches[];
+  institutionCode?: string | null;
 };
