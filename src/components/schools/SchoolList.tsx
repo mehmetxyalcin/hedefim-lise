@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
-import type { School } from "@/types/school";
+import type { School, SchoolScoreRaw } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
 
 type Filters = {
@@ -39,6 +39,24 @@ const initialFilters: Filters = {
   hasGym: false,
   hasLibrary: false,
 };
+
+type DisplayScore = {
+  value: string;
+  label: string;
+  year: number;
+};
+
+function getDisplayScore(scores: SchoolScoreRaw[] | undefined): DisplayScore | null {
+  if (!scores || scores.length === 0) return null;
+  const latest = [...scores].sort((a, b) => b.year - a.year)[0];
+  if (latest.percentile != null) {
+    return { value: `%${latest.percentile.toFixed(2)}`, label: "Yüzdelik Dilim", year: latest.year };
+  }
+  if (latest.obp_score != null) {
+    return { value: latest.obp_score.toFixed(2), label: "OBP Puanı", year: latest.year };
+  }
+  return null;
+}
 
 type SchoolListProps = {
   schools: School[];
@@ -423,20 +441,32 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                   </div>
 
                   <div className="relative flex shrink-0 flex-col justify-between border-t border-slate-100 pt-5 sm:w-48 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
-                    <div className="relative mb-4 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/40">
-                      {(index === 0 || index === 2) && (
-                        <div className="absolute -top-3 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white ring-2 ring-white shadow-sm">
-                          <BadgeCheck className="h-3 w-3" />
-                          Eslesme
+                    {(() => {
+                      const score = getDisplayScore(school.scores);
+                      return (
+                        <div className="relative mb-4 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/40">
+                          {(index === 0 || index === 2) && (
+                            <div className="absolute -top-3 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white ring-2 ring-white shadow-sm">
+                              <BadgeCheck className="h-3 w-3" />
+                              Eslesme
+                            </div>
+                          )}
+                          {score ? (
+                            <>
+                              <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                {score.label}
+                              </span>
+                              <span className="text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">
+                                {score.value}
+                              </span>
+                              <span className="mt-1 text-[10px] text-slate-400">{score.year}</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-slate-400">Veri yok</span>
+                          )}
                         </div>
-                      )}
-                      <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Yüzdelik Dilim
-                      </span>
-                      <span className="text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">
-                        %{school.percentile}
-                      </span>
-                    </div>
+                      );
+                    })()}
 
                     <Link
                       href={`/okullar/${school.slug}`}

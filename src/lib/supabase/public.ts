@@ -1,4 +1,4 @@
-import type { School } from "@/types/school";
+import type { School, SchoolScoreRaw } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
 import type {
   Facility,
@@ -47,6 +47,7 @@ type SchoolRow = {
     vocational_field_id: number;
     vocational_fields?: VocationalFieldRow | null;
   }>;
+  school_scores?: SchoolScoreRow[] | null;
 };
 
 type VocationalFieldRow = {
@@ -164,6 +165,16 @@ export function mapSchool(row: SchoolRow): School {
     schoolHoursEnd: row.school_hours_end ?? null,
     schoolHoursNote: row.school_hours_note ?? null,
     otherInfo: row.other_info ?? null,
+    scores: (row.school_scores ?? []).map(
+      (s): SchoolScoreRaw => ({
+        id: s.id,
+        school_id: s.school_id,
+        year: s.year,
+        obp_score: s.obp_score,
+        lgs_score: s.lgs_score,
+        percentile: s.percentile,
+      }),
+    ),
   };
 }
 

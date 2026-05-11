@@ -1,3 +1,12 @@
+export type SchoolScoreRaw = {
+  id: string;
+  school_id: number;
+  year: number;
+  obp_score: number | null;
+  lgs_score: number | null;
+  percentile: number | null;
+};
+
 export type School = {
   id: number;
   name: string;
@@ -28,4 +37,5 @@ export type School = {
   schoolHoursEnd?: string | null;
   schoolHoursNote?: string | null;
   otherInfo?: string | null;
+  scores?: SchoolScoreRaw[];
 };

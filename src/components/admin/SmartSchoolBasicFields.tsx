@@ -7,7 +7,6 @@ type SmartSchoolBasicFieldsProps = {
   initialDistrict?: string;
   initialLogo?: string;
   initialName?: string;
-  initialPercentile?: string;
   initialSlug?: string;
   initialType?: string;
 };
@@ -29,7 +28,7 @@ function slugify(value: string) {
     .replace(/ö/g, "o")
     .replace(/ç/g, "c")
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
@@ -51,32 +50,11 @@ function getSlugError(value: string) {
   return "";
 }
 
-function getPercentileError(value: string) {
-  const normalized = value.trim().replace(",", ".");
-
-  if (!normalized) {
-    return "Yüzdelik zorunludur.";
-  }
-
-  if (!/^(?:100(?:\.0{1,2})?|\d{1,2}(?:\.\d{1,2})?)$/.test(normalized)) {
-    return "Yüzdelik 0-100 arasında sayı olmalıdır. Örn: 2.15";
-  }
-
-  const numericValue = Number(normalized);
-
-  if (Number.isNaN(numericValue) || numericValue < 0 || numericValue > 100) {
-    return "Yüzdelik 0 ile 100 arasında olmalıdır.";
-  }
-
-  return "";
-}
-
 export function SmartSchoolBasicFields({
   initialColor = "bg-gradient-to-br from-slate-700 to-slate-900",
   initialDistrict = "",
   initialLogo = "",
   initialName = "",
-  initialPercentile = "",
   initialSlug = "",
   initialType = "",
 }: SmartSchoolBasicFieldsProps) {
@@ -84,7 +62,6 @@ export function SmartSchoolBasicFields({
   const [slug, setSlug] = useState(initialSlug);
   const [type, setType] = useState(initialType);
   const [district, setDistrict] = useState(initialDistrict);
-  const [percentile, setPercentile] = useState(initialPercentile);
   const [logo, setLogo] = useState(initialLogo);
   const [color, setColor] = useState(initialColor);
   const [slugTouched, setSlugTouched] = useState(Boolean(initialSlug));
@@ -96,7 +73,6 @@ export function SmartSchoolBasicFields({
     district: getRequiredError(district, "İlçe"),
     logo: getRequiredError(logo, "Logo / kısa kod"),
     name: getRequiredError(name, "Okul adı"),
-    percentile: getPercentileError(percentile),
     slug: getSlugError(slug),
     type: getRequiredError(type, "Tür"),
   };
@@ -211,39 +187,6 @@ export function SmartSchoolBasicFields({
         {shouldShowError("district") && (
           <span className="mt-2 block text-xs font-medium text-rose-600">
             {errors.district}
-          </span>
-        )}
-      </label>
-
-      <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">
-          Yüzdelik
-        </span>
-        <input
-          name="percentile"
-          value={percentile}
-          inputMode="decimal"
-          onBlur={() => {
-            markTouched("percentile");
-            setPercentile((current) => current.trim().replace(",", "."));
-          }}
-          onChange={(event) => setPercentile(event.target.value)}
-          onInvalid={() => markTouched("percentile")}
-          pattern="(?:100([,.]0{1,2})?|\d{1,2}([,.]\d{1,2})?)"
-          placeholder="Örn: 2.15"
-          required
-          title="Yüzdelik 0-100 arasında sayı olmalıdır. Örn: 2.15"
-          className={
-            shouldShowError("percentile") ? errorInputClassName : inputClassName
-          }
-        />
-        {shouldShowError("percentile") ? (
-          <span className="mt-2 block text-xs font-medium text-rose-600">
-            {errors.percentile}
-          </span>
-        ) : (
-          <span className="mt-2 block text-xs text-slate-500">
-            0-100 arasında sayısal değer girin. Virgül otomatik noktaya çevrilir.
           </span>
         )}
       </label>

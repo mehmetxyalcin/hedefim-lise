@@ -73,7 +73,6 @@ export function SchoolForm({
           initialDistrict={school?.district}
           initialLogo={school?.logo}
           initialName={school?.name}
-          initialPercentile={school?.percentile}
           initialSlug={school?.slug}
           initialType={school?.type}
         />

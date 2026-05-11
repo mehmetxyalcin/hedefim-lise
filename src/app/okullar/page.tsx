@@ -22,7 +22,11 @@ export default async function OkullarPage() {
   const supabase = await createClient();
   const [{ data: schoolsData, error: schoolsError }, { data: fieldsData, error: fieldsError }] =
     await Promise.all([
-      supabase.from("schools").select("*").eq("is_active", true).order("name"),
+      supabase
+        .from("schools")
+        .select("*, school_scores(id, school_id, year, obp_score, lgs_score, percentile)")
+        .eq("is_active", true)
+        .order("name"),
       supabase.from("vocational_fields").select("*").order("title"),
     ]);
 

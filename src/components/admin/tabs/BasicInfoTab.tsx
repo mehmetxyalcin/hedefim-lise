@@ -20,7 +20,6 @@ export function BasicInfoTab({ school }: Props) {
           initialDistrict={school?.district}
           initialLogo={school?.logo}
           initialName={school?.name}
-          initialPercentile={school?.percentile}
           initialSlug={school?.slug}
           initialType={school?.type}
         />

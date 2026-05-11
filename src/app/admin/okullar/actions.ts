@@ -265,10 +265,6 @@ export async function createSchool(formData: FormData) {
   const slug = getNormalizedSlug(formData, redirectPath);
   const type = getRequiredString(formData, "type", "Tur", redirectPath);
   const district = getRequiredString(formData, "district", "İlçe", redirectPath);
-  const percentile = normalizePercentile(
-    getRequiredString(formData, "percentile", "Yüzdelik", redirectPath),
-    redirectPath,
-  );
   const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
   const color = getRequiredString(formData, "color", "Renk sinifi", redirectPath);
   const description = getRequiredString(
@@ -303,7 +299,7 @@ export async function createSchool(formData: FormData) {
     slug,
     type,
     district,
-    percentile,
+    percentile: "0",
     logo,
     color,
     description,
@@ -369,10 +365,6 @@ export async function updateSchool(formData: FormData) {
   const slug = getNormalizedSlug(formData, redirectPath);
   const type = getRequiredString(formData, "type", "Tur", redirectPath);
   const district = getRequiredString(formData, "district", "İlçe", redirectPath);
-  const percentile = normalizePercentile(
-    getRequiredString(formData, "percentile", "Yüzdelik", redirectPath),
-    redirectPath,
-  );
   const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
   const color = getRequiredString(formData, "color", "Renk sinifi", redirectPath);
   const description = getRequiredString(
@@ -409,7 +401,6 @@ export async function updateSchool(formData: FormData) {
     slug,
     type,
     district,
-    percentile,
     logo,
     color,
     description,
