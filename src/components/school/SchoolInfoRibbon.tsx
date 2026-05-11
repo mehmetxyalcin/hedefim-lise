@@ -1,3 +1,4 @@
+import React from "react";
 import { BookOpen, Building, Clock, GraduationCap, Users } from "lucide-react";
 import type { SchoolWithDetails } from "@/types/schoolDetail";
 
@@ -73,9 +74,8 @@ export function SchoolInfoRibbon({ school }: Props) {
       <div className="hide-scrollbar overflow-x-auto">
         <div className="flex min-w-max items-stretch gap-4">
           {items.map((item, index) => (
-            <>
+            <React.Fragment key={item.label}>
               <div
-                key={item.label}
                 className="flex min-w-[120px] flex-col items-center gap-1.5 rounded-xl bg-gray-50 px-6 py-3"
               >
                 {item.icon}
@@ -90,7 +90,7 @@ export function SchoolInfoRibbon({ school }: Props) {
               {index < items.length - 1 && (
                 <div className="h-12 w-px self-center bg-gray-200" />
               )}
-            </>
+            </React.Fragment>
           ))}
         </div>
       </div>
