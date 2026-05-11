@@ -405,9 +405,6 @@ export async function updateSchool(formData: FormData) {
     logo,
     color,
     description,
-    address: toNullableString(formData.get("address")),
-    phone: toNullableString(formData.get("phone")),
-    website: toNullableString(formData.get("website")),
     images: uploadedImage
       ? [uploadedImage]
       : removeImage
@@ -416,17 +413,14 @@ export async function updateSchool(formData: FormData) {
           ? [currentImage]
           : [],
     features: toArray(formData.get("features")),
-    projects: toArray(formData.get("projects")),
     languages: toArray(formData.get("languages")),
     is_active: toBoolean(formData.get("is_active")),
     placement_type: String(formData.get("placement_type") ?? "yerel"),
     education_type: String(formData.get("education_type") ?? "normal"),
     boarding_type: String(formData.get("boarding_type") ?? "yok"),
-    transportation_info: toNullableString(formData.get("transportation_info")),
     school_hours_start: toNullableString(formData.get("school_hours_start")),
     school_hours_end: toNullableString(formData.get("school_hours_end")),
     school_hours_note: toNullableString(formData.get("school_hours_note")),
-    other_info: toNullableString(formData.get("other_info")),
     institution_code: toNullableString(formData.get("institution_code")),
   };
 

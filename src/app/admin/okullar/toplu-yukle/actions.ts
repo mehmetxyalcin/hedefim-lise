@@ -8,6 +8,10 @@ export type UploadSchoolRow = {
   district: string;
   school_type: string;
   education_type?: "normal" | "ikili" | null;
+  sinavli_2025?: number;
+  sinavsiz_2025?: number;
+  sinavli_2024?: number;
+  sinavsiz_2024?: number;
   phone?: string | null;
   website?: string | null;
   address?: string | null;
@@ -87,6 +91,8 @@ export async function bulkUploadSchools(
     try {
       const existingId = existingMap.get(row.institution_code);
 
+      let schoolId: number = existingId ?? 0;
+
       if (existingId) {
         const { error } = await supabase
           .from("schools")
@@ -110,29 +116,60 @@ export async function bulkUploadSchools(
 
         const slug = generateUniqueSlug(row.name, row.institution_code);
 
-        const { error } = await supabase.from("schools").insert({
-          name: row.name,
-          slug,
-          type: row.school_type,
-          district: row.district,
-          institution_code: row.institution_code,
-          phone: row.phone ?? null,
-          website: row.website ?? null,
-          address: row.address ?? null,
-          education_type: row.education_type ?? "normal",
-          percentile: "0",
-          logo: row.name.slice(0, 2).toUpperCase(),
-          color: "bg-gradient-to-br from-slate-700 to-slate-900",
-          description: "",
-          features: [],
-          projects: [],
-          languages: [],
-          images: [],
-          is_active: false,
-        });
+        const { data: inserted, error } = await supabase
+          .from("schools")
+          .insert({
+            name: row.name,
+            slug,
+            type: row.school_type,
+            district: row.district,
+            institution_code: row.institution_code,
+            phone: row.phone ?? null,
+            website: row.website ?? null,
+            address: row.address ?? null,
+            education_type: row.education_type ?? "normal",
+            percentile: "0",
+            logo: row.name.slice(0, 2).toUpperCase(),
+            color: "bg-gradient-to-br from-slate-700 to-slate-900",
+            description: "",
+            features: [],
+            projects: [],
+            languages: [],
+            images: [],
+            is_active: false,
+          })
+          .select("id")
+          .single();
 
         if (error) throw new Error(error.message);
+        schoolId = (inserted as { id: number }).id;
         result.added++;
+      }
+
+      if (row.sinavli_2025 !== undefined || row.sinavsiz_2025 !== undefined) {
+        const { error: q25err } = await supabase.from("school_quotas").upsert(
+          {
+            school_id: schoolId,
+            year: 2025,
+            ...(row.sinavli_2025 !== undefined && { sinavli_count: row.sinavli_2025 }),
+            ...(row.sinavsiz_2025 !== undefined && { sinavsiz_count: row.sinavsiz_2025 }),
+          },
+          { onConflict: "school_id,year" },
+        );
+        if (q25err) throw new Error(q25err.message);
+      }
+
+      if (row.sinavli_2024 !== undefined || row.sinavsiz_2024 !== undefined) {
+        const { error: q24err } = await supabase.from("school_quotas").upsert(
+          {
+            school_id: schoolId,
+            year: 2024,
+            ...(row.sinavli_2024 !== undefined && { sinavli_count: row.sinavli_2024 }),
+            ...(row.sinavsiz_2024 !== undefined && { sinavsiz_count: row.sinavsiz_2024 }),
+          },
+          { onConflict: "school_id,year" },
+        );
+        if (q24err) throw new Error(q24err.message);
       }
     } catch (err) {
       result.errors.push({

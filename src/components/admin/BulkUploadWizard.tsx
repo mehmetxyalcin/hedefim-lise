@@ -30,6 +30,10 @@ type ParsedRow = {
   district: string;
   school_type: string;
   education_type: "normal" | "ikili" | null;
+  sinavli_2025: number | null | undefined;
+  sinavsiz_2025: number | null | undefined;
+  sinavli_2024: number | null | undefined;
+  sinavsiz_2024: number | null | undefined;
   phone: string | null;
   website: string | null;
   address: string | null;
@@ -39,6 +43,14 @@ type ParsedRow = {
 
 function str(v: unknown): string {
   return String(v ?? "").trim();
+}
+
+function parseQuota(value: unknown): number | null | undefined {
+  const s = String(value ?? "").trim();
+  if (!s) return undefined;
+  const num = parseInt(s, 10);
+  if (isNaN(num) || num < 0 || !Number.isInteger(num)) return null;
+  return num;
 }
 
 function parseEducationType(value: string): "normal" | "ikili" | null {
@@ -58,6 +70,10 @@ type ExtractedRow = {
   school_type: string;
   education_type: "normal" | "ikili" | null;
   edu_raw: string;
+  sinavli_2025: number | null | undefined;
+  sinavsiz_2025: number | null | undefined;
+  sinavli_2024: number | null | undefined;
+  sinavsiz_2024: number | null | undefined;
   phone: string | null;
   website: string | null;
   address: string | null;
@@ -73,6 +89,10 @@ function extractRow(raw: Record<string, unknown>, index: number): ExtractedRow {
     school_type: str(raw["Okul Türü"]),
     education_type: parseEducationType(eduRaw),
     edu_raw: eduRaw,
+    sinavli_2025: parseQuota(raw["Sınavlı 2025"]),
+    sinavsiz_2025: parseQuota(raw["Sınavsız 2025"]),
+    sinavli_2024: parseQuota(raw["Sınavlı 2024"]),
+    sinavsiz_2024: parseQuota(raw["Sınavsız 2024"]),
     phone: str(raw["Telefon"]) || null,
     website: str(raw["Website"]) || null,
     address: str(raw["Adres"]) || null,
@@ -100,6 +120,10 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
   if (row.edu_raw && row.education_type === null) {
     errors.push("Öğretim Şekli geçersiz. 'Normal Öğretim' veya 'İkili Öğretim' olmalı");
   }
+  if (row.sinavli_2025 === null) errors.push("Sınavlı 2025 geçersiz (negatif olmayan tam sayı olmalı)");
+  if (row.sinavsiz_2025 === null) errors.push("Sınavsız 2025 geçersiz (negatif olmayan tam sayı olmalı)");
+  if (row.sinavli_2024 === null) errors.push("Sınavlı 2024 geçersiz (negatif olmayan tam sayı olmalı)");
+  if (row.sinavsiz_2024 === null) errors.push("Sınavsız 2024 geçersiz (negatif olmayan tam sayı olmalı)");
 
   return {
     rowIndex: row.rowIndex,
@@ -108,6 +132,10 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
     district: row.district,
     school_type: row.school_type,
     education_type: row.education_type,
+    sinavli_2025: row.sinavli_2025,
+    sinavsiz_2025: row.sinavsiz_2025,
+    sinavli_2024: row.sinavli_2024,
+    sinavsiz_2024: row.sinavsiz_2024,
     phone: row.phone,
     website: row.website,
     address: row.address,
@@ -272,6 +300,10 @@ export function BulkUploadWizard() {
         district: r.district,
         school_type: r.school_type,
         education_type: r.education_type,
+        ...(r.sinavli_2025 !== undefined && r.sinavli_2025 !== null && { sinavli_2025: r.sinavli_2025 }),
+        ...(r.sinavsiz_2025 !== undefined && r.sinavsiz_2025 !== null && { sinavsiz_2025: r.sinavsiz_2025 }),
+        ...(r.sinavli_2024 !== undefined && r.sinavli_2024 !== null && { sinavli_2024: r.sinavli_2024 }),
+        ...(r.sinavsiz_2024 !== undefined && r.sinavsiz_2024 !== null && { sinavsiz_2024: r.sinavsiz_2024 }),
         phone: r.phone,
         website: r.website,
         address: r.address,
@@ -380,7 +412,7 @@ export function BulkUploadWizard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "İlçe", "Tür", "Öğretim Şekli", "Telefon", "Website", "Adres"].map(
+                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "Öğretim Şekli", "Sınavlı 2025", "Sınavsız 2025", "Sınavlı 2024", "Sınavsız 2024", "Telefon", "Website", "Adres"].map(
                     (h) => (
                       <th
                         key={h}
@@ -424,16 +456,24 @@ export function BulkUploadWizard() {
                     <td className="max-w-[200px] truncate px-3 py-2 text-slate-700">
                       {row.name || "—"}
                     </td>
-                    <td className="px-3 py-2 text-slate-600">{row.district || "—"}</td>
-                    <td className="max-w-[160px] truncate px-3 py-2 text-slate-600">
-                      {row.school_type || "—"}
-                    </td>
                     <td className="px-3 py-2 text-slate-600">
                       {row.education_type === "normal"
-                        ? "Normal Öğretim"
+                        ? "Normal"
                         : row.education_type === "ikili"
-                          ? "İkili Öğretim"
+                          ? "İkili"
                           : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center text-slate-600">
+                      {row.sinavli_2025 !== undefined && row.sinavli_2025 !== null ? row.sinavli_2025 : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center text-slate-600">
+                      {row.sinavsiz_2025 !== undefined && row.sinavsiz_2025 !== null ? row.sinavsiz_2025 : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center text-slate-600">
+                      {row.sinavli_2024 !== undefined && row.sinavli_2024 !== null ? row.sinavli_2024 : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center text-slate-600">
+                      {row.sinavsiz_2024 !== undefined && row.sinavsiz_2024 !== null ? row.sinavsiz_2024 : "—"}
                     </td>
                     <td className="px-3 py-2 text-slate-500">{row.phone || "—"}</td>
                     <td className="max-w-[140px] truncate px-3 py-2 text-slate-500">
