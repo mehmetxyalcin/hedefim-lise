@@ -61,10 +61,16 @@ function getDisplayScore(scores: SchoolScoreRaw[] | undefined): DisplayScore | n
 type SchoolListProps = {
   schools: School[];
   vocationalFields: VocationalField[];
+  initialDistrict?: string;
+  initialType?: string;
 };
 
-export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
-  const [filters, setFilters] = useState<Filters>(initialFilters);
+export function SchoolList({ schools, vocationalFields, initialDistrict = "", initialType = "" }: SchoolListProps) {
+  const [filters, setFilters] = useState<Filters>({
+    ...initialFilters,
+    district: initialDistrict,
+    type: initialType,
+  });
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const activeFiltersCount =

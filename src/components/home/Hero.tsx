@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   ChevronRight,
@@ -12,6 +15,18 @@ import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 
 export function Hero() {
+  const [ilce, setIlce] = useState("");
+  const [tur, setTur] = useState("");
+  const router = useRouter();
+
+  function handleSearch() {
+    const params = new URLSearchParams();
+    if (ilce) params.set("ilce", ilce);
+    if (tur) params.set("tur", tur);
+    const qs = params.toString();
+    router.push(qs ? `/okullar?${qs}` : "/okullar");
+  }
+
   return (
     <div className="relative flex flex-col items-center overflow-hidden bg-[#071426] pt-24 pb-32 lg:pt-32 lg:pb-40">
       <div className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden">
@@ -50,14 +65,15 @@ export function Hero() {
           <div className="group relative flex flex-1 items-center rounded-xl border border-transparent bg-slate-50 transition-colors hover:bg-sky-50 focus-within:border-cyan-200 focus-within:bg-white focus-within:ring-4 focus-within:ring-cyan-500/15">
             <MapPin className="absolute left-4 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-cyan-600" />
             <select
-              defaultValue=""
+              value={ilce}
+              onChange={(e) => setIlce(e.target.value)}
               className="w-full cursor-pointer appearance-none bg-transparent py-4 pr-10 pl-12 font-medium text-slate-700 outline-none"
             >
               <option value="" disabled hidden>
                 İlçe Seçiniz
               </option>
               {DISTRICTS.map((district) => (
-                <option key={district}>{district}</option>
+                <option key={district} value={district}>{district}</option>
               ))}
             </select>
             <ChevronRight className="pointer-events-none absolute right-4 h-5 w-5 rotate-90 text-slate-400" />
@@ -66,26 +82,28 @@ export function Hero() {
           <div className="group relative flex flex-1 items-center rounded-xl border border-transparent bg-slate-50 transition-colors hover:bg-sky-50 focus-within:border-cyan-200 focus-within:bg-white focus-within:ring-4 focus-within:ring-cyan-500/15">
             <GraduationCap className="absolute left-4 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-cyan-600" />
             <select
-              defaultValue=""
+              value={tur}
+              onChange={(e) => setTur(e.target.value)}
               className="w-full cursor-pointer appearance-none bg-transparent py-4 pr-10 pl-12 font-medium text-slate-700 outline-none"
             >
               <option value="" disabled hidden>
                 Okul Türü Seçiniz
               </option>
               {SCHOOL_TYPES.map((type) => (
-                <option key={type}>{type}</option>
+                <option key={type} value={type}>{type}</option>
               ))}
             </select>
             <ChevronRight className="pointer-events-none absolute right-4 h-5 w-5 rotate-90 text-slate-400" />
           </div>
 
-          <Link
-            href="/okullar"
+          <button
+            type="button"
+            onClick={handleSearch}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:from-amber-400 hover:via-orange-500 hover:to-rose-500 hover:shadow-orange-500/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-200 md:w-auto"
           >
             <Search className="h-5 w-5" />
             Okul Ara
-          </Link>
+          </button>
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">

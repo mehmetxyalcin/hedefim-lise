@@ -18,7 +18,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function OkullarPage() {
+type Props = {
+  searchParams?: Promise<{ ilce?: string; tur?: string }>;
+};
+
+export default async function OkullarPage({ searchParams }: Props) {
+  const { ilce, tur } = searchParams ? await searchParams : {};
   const supabase = await createClient();
   const [{ data: schoolsData, error: schoolsError }, { data: fieldsData, error: fieldsError }] =
     await Promise.all([
@@ -38,6 +43,8 @@ export default async function OkullarPage() {
     <SchoolList
       schools={(schoolsData ?? []).map(mapSchool)}
       vocationalFields={(fieldsData ?? []).map(mapVocationalField)}
+      initialDistrict={ilce ?? ""}
+      initialType={tur ?? ""}
     />
   );
 }
