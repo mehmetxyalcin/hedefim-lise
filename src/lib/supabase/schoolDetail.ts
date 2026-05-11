@@ -30,6 +30,14 @@ const SCHOOL_DETAIL_SELECT = `
   school_projects(id, school_id, title, description, image_url, link_url, order_index)
 ` as const;
 
+const SCHOOL_BASIC_SELECT = `
+  *,
+  school_vocational_fields(
+    vocational_field_id,
+    vocational_fields(id, slug, title, description, skills, career, branches)
+  )
+` as const;
+
 export async function getSchoolWithDetails(
   slug: string,
 ): Promise<SchoolWithDetails | null> {
@@ -42,9 +50,28 @@ export async function getSchoolWithDetails(
     .eq("is_active", true)
     .maybeSingle();
 
-  if (error || !data) {
-    return null;
+  // Tablolar henüz oluşturulmamışsa (migration çalıştırılmamış) temel sorguyla dön
+  if (error) {
+    const { data: basicData, error: basicError } = await supabase
+      .from("schools")
+      .select(SCHOOL_BASIC_SELECT)
+      .eq("slug", slug)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (basicError || !basicData) return null;
+
+    return mapSchoolWithDetails({
+      ...basicData,
+      school_facilities: [],
+      school_scores: [],
+      school_quotas: [],
+      school_scholarships: [],
+      school_projects: [],
+    });
   }
+
+  if (!data) return null;
 
   return mapSchoolWithDetails(data);
 }
