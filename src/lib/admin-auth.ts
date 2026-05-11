@@ -10,7 +10,7 @@ async function getLoginRedirect() {
     ? pathname
     : fallbackPath;
 
-  return `/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+  return `/admin/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
     "Oturumunuzun süresi dolmuş olabilir. Lütfen yeniden giriş yapın.",
   )}`;
 }
