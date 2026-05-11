@@ -170,6 +170,7 @@ function mapRawToSchoolWithDetails(row: any): SchoolWithDetails {
     scholarships,
     schoolProjects,
     vocationalFieldsWithBranches,
+    institutionCode: (row.institution_code as string | null) ?? null,
   };
 }
 

@@ -11,6 +11,7 @@ import { SchoolProjects } from "./SchoolProjects";
 import { SchoolContact } from "./SchoolContact";
 import { SchoolTransportation } from "./SchoolTransportation";
 import { SchoolOtherInfo } from "./SchoolOtherInfo";
+import { SchoolLanguages } from "./SchoolLanguages";
 
 type Props = { school: SchoolWithDetails };
 
@@ -70,6 +71,7 @@ export function SchoolDetail({ school }: Props) {
           {/* Sol Sütun */}
           <div className="space-y-6 lg:col-span-2">
             <SchoolAbout description={school.description} />
+            <SchoolLanguages languages={school.languages} />
             <SchoolFacilities facilities={school.facilities} />
             <VocationalAccordion fields={vocationalFields} />
             <SchoolScholarships scholarships={scholarships} />
