@@ -63,7 +63,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               Site Ayarları
             </Link>
             <Link
-              href="/admin/schools/new"
+              href="/admin/okullar/yeni"
               className="inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
             >
               Yeni Okul Ekle

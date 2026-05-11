@@ -672,7 +672,7 @@ export function AdminSchoolList({
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap items-center justify-end gap-2">
                           <Link
-                            href={`/admin/schools/${school.id}/edit`}
+                            href={`/admin/okullar/${school.slug}/duzenle`}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 transition-colors hover:bg-blue-100"
                           >
                             <Pencil className="h-3.5 w-3.5" />
