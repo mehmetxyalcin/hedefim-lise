@@ -6,8 +6,9 @@ async function getLoginRedirect() {
   const fallbackPath = "/admin";
   const requestHeaders = await headers();
   const pathname = requestHeaders.get("x-pathname") ?? fallbackPath;
-  const next = pathname.startsWith("/") && !pathname.startsWith("//")
-    ? pathname
+  const search = requestHeaders.get("x-search") ?? "";
+  const next = pathname.startsWith("/admin") && pathname !== "/admin/login"
+    ? `${pathname}${search}`
     : fallbackPath;
 
   return `/admin/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(

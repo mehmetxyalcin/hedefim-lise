@@ -138,7 +138,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
             Site Ayarları
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            Footer'ın metinlerini, linklerini ve sosyal medya hesaplarını yönetin.
+            Footer&apos;ın metinlerini, linklerini ve sosyal medya hesaplarını yönetin.
           </p>
         </div>
 

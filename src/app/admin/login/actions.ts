@@ -38,7 +38,12 @@ function getAuthErrorMessage(message: string): string {
 }
 
 function getSafeNext(value: string | null): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+  if (
+    !value ||
+    !value.startsWith("/admin") ||
+    value.startsWith("//") ||
+    value.startsWith("/admin/login")
+  ) {
     return "/admin";
   }
   return value;

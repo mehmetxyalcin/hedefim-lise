@@ -312,7 +312,7 @@ export default async function NavigationPage({ searchParams }: PageProps) {
             Site Ayarları
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            Navbar'da görünen menü öğelerini sıralayın ve düzenleyin.
+            Navbar&apos;da görünen menü öğelerini sıralayın ve düzenleyin.
           </p>
         </div>
 

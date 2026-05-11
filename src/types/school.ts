@@ -19,4 +19,13 @@ export type School = {
   createdAt?: string | null;
   updatedAt?: string | null;
   vocationalFields?: number[];
+  // Aşama 1'de eklenen yeni kolonlar
+  placementType?: string;
+  educationType?: string;
+  boardingType?: string;
+  transportationInfo?: string | null;
+  schoolHoursStart?: string | null;
+  schoolHoursEnd?: string | null;
+  schoolHoursNote?: string | null;
+  otherInfo?: string | null;
 };

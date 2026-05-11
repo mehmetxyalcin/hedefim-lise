@@ -82,7 +82,7 @@ export function LogoUploadField({
         <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
           <p className="text-sm font-semibold text-slate-700">Henüz logo yok</p>
           <p className="mt-1 text-xs text-slate-500">
-            Logo yoksa navbar'da varsayılan ikon gösterilir.
+            Logo yoksa navbar&apos;da varsayılan ikon gösterilir.
           </p>
         </div>
       )}

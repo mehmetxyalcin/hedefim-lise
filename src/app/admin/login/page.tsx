@@ -16,7 +16,23 @@ type PageProps = {
   }>;
 };
 
+function getSafeNext(value?: string) {
+  if (
+    !value ||
+    !value.startsWith("/admin") ||
+    value.startsWith("//") ||
+    value.startsWith("/admin/login")
+  ) {
+    return "/admin";
+  }
+
+  return value;
+}
+
 export default async function AdminLoginPage({ searchParams }: PageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const nextPath = getSafeNext(params?.next);
+
   // Zaten giriş yapmış admin'i direkt panele yönlendir
   const supabase = await createClient();
   const {
@@ -31,15 +47,9 @@ export default async function AdminLoginPage({ searchParams }: PageProps) {
       .maybeSingle();
 
     if (profile?.role === "admin") {
-      redirect("/admin");
+      redirect(nextPath);
     }
   }
-
-  const params = searchParams ? await searchParams : undefined;
-  const nextPath =
-    params?.next?.startsWith("/") && !params.next.startsWith("//")
-      ? params.next
-      : "/admin";
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-slate-50 px-6 py-16">

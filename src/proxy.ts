@@ -2,12 +2,21 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+function getSafeAdminNext(pathname: string, search = "") {
+  if (!pathname.startsWith("/admin") || pathname === "/admin/login") {
+    return "/admin";
+  }
+
+  return `${pathname}${search}`;
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
 
   // x-pathname'i request headers'a ekle — admin-auth.ts bunu okur
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
+  requestHeaders.set("x-search", search);
 
   // Supabase cookie refresh için response'u değiştirilebilir tut
   let response = NextResponse.next({
@@ -53,7 +62,7 @@ export async function middleware(request: NextRequest) {
 
   if (!user) {
     const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
+    loginUrl.searchParams.set("next", getSafeAdminNext(pathname, search));
     loginUrl.searchParams.set(
       "error",
       "Bu sayfaya erişmek için giriş yapmanız gerekiyor.",

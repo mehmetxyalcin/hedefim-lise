@@ -8,7 +8,12 @@ type LoginFormProps = {
 };
 
 function getSafeNextPath(nextPath?: string) {
-  if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
+  if (
+    !nextPath ||
+    !nextPath.startsWith("/admin") ||
+    nextPath.startsWith("//") ||
+    nextPath.startsWith("/admin/login")
+  ) {
     return "/admin";
   }
 

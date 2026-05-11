@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 function getSafeNextPath(next: string | null) {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+  if (
+    !next ||
+    !next.startsWith("/admin") ||
+    next.startsWith("//") ||
+    next.startsWith("/admin/login")
+  ) {
     return "/admin";
   }
 
