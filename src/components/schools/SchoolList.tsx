@@ -478,7 +478,7 @@ export function SchoolList({ schools, vocationalFields, initialDistrict = "", in
                       href={`/okullar/${school.slug}`}
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-blue-600/40"
                     >
-                      Detayli Incele
+                      Detaylı İncele
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
