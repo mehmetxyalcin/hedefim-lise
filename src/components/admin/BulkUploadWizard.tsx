@@ -41,48 +41,78 @@ function str(v: unknown): string {
   return String(v ?? "").trim();
 }
 
-function parseEducationType(
-  value: string,
-): { value: "normal" | "ikili" | null; error: string | null } {
-  if (!value) return { value: null, error: null };
+function parseEducationType(value: string): "normal" | "ikili" | null {
+  if (!value) return null;
   const v = value.toLocaleLowerCase("tr-TR");
-  if (v === "normal öğretim") return { value: "normal", error: null };
-  if (v === "ikili öğretim") return { value: "ikili", error: null };
-  return {
-    value: null,
-    error: "Öğretim Şekli geçersiz. 'Normal Öğretim' veya 'İkili Öğretim' olmalı",
-  };
+  if (v === "normal öğretim") return "normal";
+  if (v === "ikili öğretim") return "ikili";
+  return null; // parsed as null AND invalid (detected via edu_raw check)
 }
 
-function validateRow(raw: Record<string, unknown>, index: number): Omit<ParsedRow, "status"> {
-  const institution_code = str(raw["Kurum Kodu"]);
-  const name = str(raw["Okul Adı"]);
-  const district = str(raw["İlçe"]);
-  const school_type = str(raw["Okul Türü"]);
+// ── Adım 1: ham satırdan veri çek, doğrulama yok ────────────────
+type ExtractedRow = {
+  rowIndex: number;
+  institution_code: string;
+  name: string;
+  district: string;
+  school_type: string;
+  education_type: "normal" | "ikili" | null;
+  edu_raw: string;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+};
+
+function extractRow(raw: Record<string, unknown>, index: number): ExtractedRow {
   const eduRaw = str(raw["Öğretim Şekli"]);
-  const edu = parseEducationType(eduRaw);
-
-  const errors: string[] = [];
-  if (!institution_code) errors.push("Kurum Kodu zorunludur");
-  if (!name) errors.push("Okul Adı zorunludur");
-  if (!district) errors.push("İlçe zorunludur");
-  else if (!DISTRICTS.includes(district)) errors.push(`Geçersiz ilçe: "${district}"`);
-  if (!school_type) errors.push("Okul Türü zorunludur");
-  else if (!SCHOOL_TYPES.includes(school_type))
-    errors.push(`Geçersiz tür: "${school_type}"`);
-  if (edu.error) errors.push(edu.error);
-
   return {
     rowIndex: index + 2,
-    institution_code,
-    name,
-    district,
-    school_type,
-    education_type: edu.value,
+    institution_code: str(raw["Kurum Kodu"]),
+    name: str(raw["Okul Adı"]),
+    district: str(raw["İlçe"]),
+    school_type: str(raw["Okul Türü"]),
+    education_type: parseEducationType(eduRaw),
+    edu_raw: eduRaw,
     phone: str(raw["Telefon"]) || null,
     website: str(raw["Website"]) || null,
     address: str(raw["Adres"]) || null,
+  };
+}
+
+// ── Adım 2: DB bilgisiyle doğrula, durum ata ────────────────────
+function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
+  const errors: string[] = [];
+
+  if (!row.institution_code) {
+    errors.push("Kurum Kodu zorunludur");
+  } else if (!isExisting) {
+    if (!row.name) errors.push("Yeni okul için Okul Adı zorunludur");
+    if (!row.district) errors.push("Yeni okul için İlçe zorunludur");
+    if (!row.school_type) errors.push("Yeni okul için Okul Türü zorunludur");
+  }
+
+  if (row.district && !DISTRICTS.includes(row.district)) {
+    errors.push(`Geçersiz ilçe: "${row.district}"`);
+  }
+  if (row.school_type && !SCHOOL_TYPES.includes(row.school_type)) {
+    errors.push(`Geçersiz tür: "${row.school_type}"`);
+  }
+  if (row.edu_raw && row.education_type === null) {
+    errors.push("Öğretim Şekli geçersiz. 'Normal Öğretim' veya 'İkili Öğretim' olmalı");
+  }
+
+  return {
+    rowIndex: row.rowIndex,
+    institution_code: row.institution_code,
+    name: row.name,
+    district: row.district,
+    school_type: row.school_type,
+    education_type: row.education_type,
+    phone: row.phone,
+    website: row.website,
+    address: row.address,
     errors,
+    status: errors.length > 0 ? "error" : isExisting ? "update" : "new",
   };
 }
 
@@ -198,29 +228,26 @@ export function BulkUploadWizard() {
         return;
       }
 
-      const validated = rawRows.map((row, i) => validateRow(row, i));
+      // 1. Veri çek (doğrulamasız)
+      const extracted = rawRows.map((row, i) => extractRow(row, i));
 
-      const validCodes = validated
-        .filter((r) => r.institution_code)
-        .map((r) => r.institution_code);
+      // 2. Kurum kodlarını tek sorguda DB'de kontrol et
+      const allCodes = extracted
+        .map((r) => r.institution_code)
+        .filter(Boolean);
 
       let existingSet = new Set<string>();
       try {
-        const existing = await checkInstitutionCodes(validCodes);
+        const existing = await checkInstitutionCodes(allCodes);
         existingSet = new Set(existing);
       } catch {
-        // institution_code column might not exist yet; treat all as new
+        // institution_code kolonu yoksa hepsini yeni say
       }
 
-      const withStatus: ParsedRow[] = validated.map((r) => ({
-        ...r,
-        status:
-          r.errors.length > 0
-            ? "error"
-            : existingSet.has(r.institution_code)
-              ? "update"
-              : "new",
-      }));
+      // 3. DB bilgisiyle doğrula; durum validateRow içinde atanır
+      const withStatus: ParsedRow[] = extracted.map((r) =>
+        validateRow(r, existingSet.has(r.institution_code)),
+      );
 
       setParsedRows(withStatus);
       setStep(2);
@@ -337,12 +364,17 @@ export function BulkUploadWizard() {
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-bold text-slate-900">Önizleme ve Doğrulama</h2>
 
-          <div className="mb-4 flex flex-wrap gap-2">
+          <div className="mb-2 flex flex-wrap gap-2">
             <Pill label="Toplam" count={stats.total} color="slate" />
             <Pill label="Yeni eklenecek" count={stats.new} color="green" />
             <Pill label="Güncellenecek" count={stats.update} color="yellow" />
             {stats.error > 0 && <Pill label="Hatalı" count={stats.error} color="red" />}
           </div>
+          {stats.update > 0 && (
+            <p className="mb-4 text-xs text-amber-700">
+              Güncellenecek okullarda yalnızca dolu alanlar mevcut değerlerin üzerine yazılır; boş bırakılan alanlar korunur.
+            </p>
+          )}
 
           <div className="mb-4 overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-sm">

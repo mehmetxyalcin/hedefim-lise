@@ -91,9 +91,12 @@ export async function bulkUploadSchools(
         const { error } = await supabase
           .from("schools")
           .update({
-            phone: row.phone ?? null,
-            website: row.website ?? null,
-            address: row.address ?? null,
+            ...(row.name?.trim() && { name: row.name.trim() }),
+            ...(row.district?.trim() && { district: row.district.trim() }),
+            ...(row.school_type?.trim() && { type: row.school_type.trim() }),
+            ...(row.phone?.trim() && { phone: row.phone.trim() }),
+            ...(row.website?.trim() && { website: row.website.trim() }),
+            ...(row.address?.trim() && { address: row.address.trim() }),
             ...(row.education_type != null && { education_type: row.education_type }),
           })
           .eq("id", existingId);
@@ -101,6 +104,10 @@ export async function bulkUploadSchools(
         if (error) throw new Error(error.message);
         result.updated++;
       } else {
+        if (!row.name?.trim() || !row.district?.trim() || !row.school_type?.trim()) {
+          throw new Error("Yeni okul için Okul Adı, İlçe ve Okul Türü zorunludur.");
+        }
+
         const slug = generateUniqueSlug(row.name, row.institution_code);
 
         const { error } = await supabase.from("schools").insert({
