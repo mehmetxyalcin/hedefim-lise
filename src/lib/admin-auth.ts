@@ -1,5 +1,19 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+
+async function getLoginRedirect() {
+  const fallbackPath = "/admin";
+  const requestHeaders = await headers();
+  const pathname = requestHeaders.get("x-pathname") ?? fallbackPath;
+  const next = pathname.startsWith("/") && !pathname.startsWith("//")
+    ? pathname
+    : fallbackPath;
+
+  return `/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+    "Oturumunuzun süresi dolmuş olabilir. Lütfen yeniden giriş yapın.",
+  )}`;
+}
 
 export async function requireAdmin() {
   const supabase = await createClient();
@@ -9,7 +23,7 @@ export async function requireAdmin() {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/login");
+    redirect(await getLoginRedirect());
   }
 
   const { data: profile, error: profileError } = await supabase

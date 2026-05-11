@@ -19,6 +19,8 @@ type SchoolRow = {
   projects: string[] | null;
   languages: string[] | null;
   is_active?: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
   school_vocational_fields?: Array<{
     vocational_field_id: number;
     vocational_fields?: VocationalFieldRow | null;
@@ -73,6 +75,8 @@ export function mapSchool(row: SchoolRow): School {
     phone: row.phone ?? null,
     website: row.website ?? null,
     isActive: row.is_active ?? true,
+    createdAt: row.created_at ?? null,
+    updatedAt: row.updated_at ?? null,
     vocationalFields:
       row.school_vocational_fields
         ?.map((item) => item.vocational_field_id)

@@ -28,7 +28,7 @@ export function DeleteSchoolButton({
       <input type="hidden" name="id" value={schoolId} />
       <button
         type="submit"
-        className="font-semibold text-rose-600 hover:text-rose-800"
+        className="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-100"
       >
         Sil
       </button>

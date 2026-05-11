@@ -31,14 +31,17 @@ export default async function AdminNewSchoolPage({
 
   return (
     <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <Link href="/admin" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-            Admin&apos;e don
+            Admin&apos;e dön
           </Link>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">
             Yeni Okul
           </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Okul bilgilerini, görselini ve meslek alanı ilişkilerini ekleyin.
+          </p>
         </div>
         {params?.error && (
           <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
@@ -47,6 +50,7 @@ export default async function AdminNewSchoolPage({
         )}
         <SchoolForm
           action={createSchool}
+          cancelHref="/admin"
           submitLabel="Okulu Kaydet"
           vocationalFields={(vocationalFieldsData ?? []).map(mapVocationalField)}
         />

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getSiteUrlWithPath } from "@/lib/site";
 
 function getSafeNextPath(next: string | null) {
   if (!next || !next.startsWith("/") || next.startsWith("//")) {
@@ -13,21 +12,41 @@ function getSafeNextPath(next: string | null) {
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const authError = requestUrl.searchParams.get("error");
+  const authErrorDescription = requestUrl.searchParams.get("error_description");
   const next = getSafeNextPath(requestUrl.searchParams.get("next"));
+  const origin = requestUrl.origin;
 
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (authError) {
+    const message =
+      authErrorDescription ??
+      "Giriş bağlantısı geçersiz veya süresi dolmuş. Lütfen yeniden giriş bağlantısı isteyin.";
 
-    if (error) {
-      return NextResponse.redirect(
-        new URL(
-          `/login?error=${encodeURIComponent("Giriş oturumu olusturulamadi. Baglantiyi yeniden deneyin.")}`,
-          getSiteUrlWithPath("/"),
-        ),
-      );
-    }
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent(message)}`, origin),
+    );
   }
 
-  return NextResponse.redirect(new URL(next, getSiteUrlWithPath("/")));
+  if (!code) {
+    return NextResponse.redirect(
+      new URL(
+        `/login?error=${encodeURIComponent("Giriş bağlantısı eksik veya geçersiz. Lütfen yeniden deneyin.")}`,
+        origin,
+      ),
+    );
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return NextResponse.redirect(
+      new URL(
+        `/login?error=${encodeURIComponent("Giriş oturumu oluşturulamadı. Bağlantının süresi dolmuş olabilir; lütfen yeniden deneyin.")}`,
+        origin,
+      ),
+    );
+  }
+
+  return NextResponse.redirect(new URL(next, origin));
 }

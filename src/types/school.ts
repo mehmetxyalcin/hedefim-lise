@@ -16,5 +16,7 @@ export type School = {
   phone?: string | null;
   website?: string | null;
   isActive?: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   vocationalFields?: number[];
 };

@@ -3,11 +3,16 @@ import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
   title: "Admin Girişi",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 type LoginPageProps = {
   searchParams?: Promise<{
     error?: string;
+    next?: string;
   }>;
 };
 
@@ -28,7 +33,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             {params.error}
           </div>
         )}
-        <LoginForm />
+        <LoginForm nextPath={params?.next} />
       </div>
     </div>
   );

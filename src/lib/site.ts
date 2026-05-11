@@ -1,11 +1,13 @@
 const localhostUrl = "http://localhost:3000";
 
 function normalizeSiteUrl(value: string) {
-  if (value.startsWith("http://") || value.startsWith("https://")) {
-    return value;
+  const normalized = value.trim().replace(/\/+$/, "");
+
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    return normalized;
   }
 
-  return `https://${value}`;
+  return `https://${normalized}`;
 }
 
 export function getSiteUrl() {

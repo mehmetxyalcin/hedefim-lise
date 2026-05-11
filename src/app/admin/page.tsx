@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminSchoolList } from "@/components/admin/AdminSchoolList";
 import { mapSchool } from "@/lib/supabase/public";
 import { requireAdmin } from "@/lib/admin-auth";
-import { deleteSchool } from "@/app/admin/okullar/actions";
+import {
+  bulkUpdateSchoolStatus,
+  deleteSchool,
+  toggleSchoolStatus,
+} from "@/app/admin/okullar/actions";
+
+export const metadata: Metadata = {
+  title: "Admin Paneli",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 type AdminPageProps = {
   searchParams?: Promise<{
@@ -19,7 +32,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     return <h1>Yetkisiz erişim.</h1>;
   }
 
-  const { data, error } = await supabase.from("schools").select("*").order("name");
+  const { data, error } = await supabase
+    .from("schools")
+    .select("*, school_vocational_fields(vocational_field_id)")
+    .order("name");
 
   if (error) {
     return <h1>Okullar yüklenemedi.</h1>;
@@ -29,7 +45,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
   return (
     <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-7xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900">
@@ -59,7 +75,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </div>
         )}
 
-        <AdminSchoolList deleteAction={deleteSchool} schools={schools} />
+        <AdminSchoolList
+          bulkStatusAction={bulkUpdateSchoolStatus}
+          deleteAction={deleteSchool}
+          schools={schools}
+          toggleStatusAction={toggleSchoolStatus}
+        />
       </div>
     </div>
   );

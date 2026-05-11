@@ -2,9 +2,20 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { getSiteUrlWithPath } from "@/lib/site";
 
-export function LoginForm() {
+type LoginFormProps = {
+  nextPath?: string;
+};
+
+function getSafeNextPath(nextPath?: string) {
+  if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
+    return "/admin";
+  }
+
+  return nextPath;
+}
+
+export function LoginForm({ nextPath }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,11 +26,10 @@ export function LoginForm() {
     setStatus(null);
 
     const supabase = createClient();
-    const callbackPath = "/auth/callback?next=/admin";
-    const redirectTo =
-      process.env.NEXT_PUBLIC_SITE_URL
-        ? getSiteUrlWithPath(callbackPath)
-        : `${window.location.origin}${callbackPath}`;
+    const callbackPath = `/auth/callback?next=${encodeURIComponent(
+      getSafeNextPath(nextPath),
+    )}`;
+    const redirectTo = new URL(callbackPath, window.location.origin).toString();
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {

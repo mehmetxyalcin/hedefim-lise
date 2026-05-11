@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 
+const maxImageSize = 5 * 1024 * 1024;
+
 function toArray(value: FormDataEntryValue | null) {
   return String(value ?? "")
     .split(/[\n,]/)
@@ -32,12 +34,80 @@ function sanitizeFileName(fileName: string) {
   return fileName.replace(/[^a-zA-Z0-9.-]/g, "-").toLowerCase();
 }
 
+function normalizeSlug(value: string) {
+  return value
+    .trim()
+    .toLocaleLowerCase("tr-TR")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+function normalizePercentile(value: string, redirectPath: string) {
+  const normalized = value.trim().replace(",", ".");
+
+  if (!/^(?:100(?:\.0{1,2})?|\d{1,2}(?:\.\d{1,2})?)$/.test(normalized)) {
+    redirect(
+      `${redirectPath}?error=${encodeURIComponent("Yüzdelik 0-100 arasında sayısal bir değer olmalıdır.")}`,
+    );
+  }
+
+  const numericValue = Number(normalized);
+
+  if (Number.isNaN(numericValue) || numericValue < 0 || numericValue > 100) {
+    redirect(
+      `${redirectPath}?error=${encodeURIComponent("Yüzdelik 0 ile 100 arasında olmalıdır.")}`,
+    );
+  }
+
+  return normalized;
+}
+
+function getNormalizedSlug(formData: FormData, redirectPath: string) {
+  const slug = normalizeSlug(getRequiredString(formData, "slug", "Slug", redirectPath));
+
+  if (!slug) {
+    redirect(
+      `${redirectPath}?error=${encodeURIComponent("Slug küçük harf, rakam veya tire içermelidir.")}`,
+    );
+  }
+
+  return slug;
+}
+
+
 function getActionErrorMessage(error: { code?: string; message: string }) {
   if (error.code === "23505" || error.message.toLowerCase().includes("slug")) {
     return "Bu slug zaten baska bir okul tarafindan kullaniliyor.";
   }
 
   return error.message;
+}
+
+function getUploadErrorMessage(error: Error) {
+  const message = error.message.toLowerCase();
+
+  if (message.includes("bucket") || message.includes("not found")) {
+    return "Görsel yükleme alanı bulunamadı. Supabase storage ayarlarını kontrol edin.";
+  }
+
+  if (message.includes("payload") || message.includes("too large")) {
+    return "Görsel dosyası çok büyük. Daha küçük bir dosya yükleyin.";
+  }
+
+  return error.message;
+}
+
+function redirectToAdminWithSuccess(message: string) {
+  redirect(`/admin?success=${encodeURIComponent(message)}`);
 }
 
 function getRequiredString(
@@ -89,6 +159,10 @@ async function uploadSchoolImage(
 
   if (!file.type.startsWith("image/")) {
     throw new Error("Yuklenen dosya bir gorsel olmali.");
+  }
+
+  if (file.size > maxImageSize) {
+    throw new Error("Görsel dosyası en fazla 5 MB olabilir.");
   }
 
   const fileExt = file.name.includes(".")
@@ -188,13 +262,11 @@ export async function createSchool(formData: FormData) {
 
   const redirectPath = "/admin/schools/new";
   const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
-  const slug = getRequiredString(formData, "slug", "Slug", redirectPath);
+  const slug = getNormalizedSlug(formData, redirectPath);
   const type = getRequiredString(formData, "type", "Tur", redirectPath);
   const district = getRequiredString(formData, "district", "İlçe", redirectPath);
-  const percentile = getRequiredString(
-    formData,
-    "percentile",
-    "Yüzdelik",
+  const percentile = normalizePercentile(
+    getRequiredString(formData, "percentile", "Yüzdelik", redirectPath),
     redirectPath,
   );
   const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
@@ -220,7 +292,9 @@ export async function createSchool(formData: FormData) {
     );
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Görsel yükleme başarısız oldu.";
+      error instanceof Error
+        ? getUploadErrorMessage(error)
+        : "Görsel yükleme başarısız oldu.";
     redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
   }
 
@@ -267,7 +341,7 @@ export async function createSchool(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
-  redirect("/admin?success=Okul%20başarıyla%20eklendi.");
+  redirectToAdminWithSuccess("Okul başarıyla eklendi.");
 }
 
 export async function updateSchool(formData: FormData) {
@@ -284,13 +358,11 @@ export async function updateSchool(formData: FormData) {
   }
 
   const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
-  const slug = getRequiredString(formData, "slug", "Slug", redirectPath);
+  const slug = getNormalizedSlug(formData, redirectPath);
   const type = getRequiredString(formData, "type", "Tur", redirectPath);
   const district = getRequiredString(formData, "district", "İlçe", redirectPath);
-  const percentile = getRequiredString(
-    formData,
-    "percentile",
-    "Yüzdelik",
+  const percentile = normalizePercentile(
+    getRequiredString(formData, "percentile", "Yüzdelik", redirectPath),
     redirectPath,
   );
   const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
@@ -302,6 +374,7 @@ export async function updateSchool(formData: FormData) {
     redirectPath,
   );
   const currentImage = String(formData.get("current_image") ?? "").trim();
+  const removeImage = formData.get("remove_image") === "on";
   const vocationalFieldIds = toNumberArray(
     formData.getAll("vocational_field_ids"),
   );
@@ -317,7 +390,9 @@ export async function updateSchool(formData: FormData) {
     );
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Görsel yükleme başarısız oldu.";
+      error instanceof Error
+        ? getUploadErrorMessage(error)
+        : "Görsel yükleme başarısız oldu.";
     redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
   }
 
@@ -333,7 +408,13 @@ export async function updateSchool(formData: FormData) {
     address: toNullableString(formData.get("address")),
     phone: toNullableString(formData.get("phone")),
     website: toNullableString(formData.get("website")),
-    images: uploadedImage ? [uploadedImage] : currentImage ? [currentImage] : [],
+    images: uploadedImage
+      ? [uploadedImage]
+      : removeImage
+        ? []
+        : currentImage
+          ? [currentImage]
+          : [],
     features: toArray(formData.get("features")),
     projects: toArray(formData.get("projects")),
     languages: toArray(formData.get("languages")),
@@ -360,7 +441,7 @@ export async function updateSchool(formData: FormData) {
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${payload.slug}`);
-  redirect("/admin?success=Okul%20başarıyla%20güncellendi.");
+  redirectToAdminWithSuccess("Okul başarıyla güncellendi.");
 }
 
 export async function deleteSchool(formData: FormData) {
@@ -415,5 +496,103 @@ export async function deleteSchool(formData: FormData) {
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${school.slug}`);
-  redirect("/admin?success=Okul%20başarıyla%20silindi.");
+  redirectToAdminWithSuccess("Okul başarıyla silindi.");
+}
+
+export async function toggleSchoolStatus(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+
+  if (!profile) {
+    redirect("/admin");
+  }
+
+  const id = Number(formData.get("id"));
+  const nextStatus = formData.get("is_active") === "true";
+
+  if (!Number.isInteger(id) || id <= 0) {
+    redirect(`/admin?error=${encodeURIComponent("Geçersiz okul kaydi.")}`);
+  }
+
+  const { data: school, error: schoolError } = await supabase
+    .from("schools")
+    .select("id, slug")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (schoolError || !school) {
+    redirect(`/admin?error=${encodeURIComponent("Okul bulunamadı.")}`);
+  }
+
+  const { error } = await supabase
+    .from("schools")
+    .update({ is_active: nextStatus })
+    .eq("id", id);
+
+  if (error) {
+    redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/okullar");
+  revalidatePath("/alanlar");
+  revalidatePath(`/okullar/${school.slug}`);
+  redirectToAdminWithSuccess(
+    nextStatus ? "Okul aktif hale getirildi." : "Okul pasif hale getirildi.",
+  );
+}
+
+export async function bulkUpdateSchoolStatus(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+
+  if (!profile) {
+    redirect("/admin");
+  }
+
+  const ids = toNumberArray(formData.getAll("ids"));
+  const nextStatus = formData.get("is_active") === "true";
+
+  if (ids.length === 0) {
+    redirect(`/admin?error=${encodeURIComponent("İşlem için okul seçin.")}`);
+  }
+
+  const { data: schools, error: schoolsError } = await supabase
+    .from("schools")
+    .select("id, slug")
+    .in("id", ids);
+
+  if (schoolsError) {
+    redirect(`/admin?error=${encodeURIComponent(schoolsError.message)}`);
+  }
+
+  if ((schools ?? []).length === 0) {
+    redirect(`/admin?error=${encodeURIComponent("Seçilen okullar bulunamadı.")}`);
+  }
+
+  const validIds = (schools ?? []).map((school) => school.id);
+
+  if (validIds.length !== ids.length) {
+    redirect(
+      `/admin?error=${encodeURIComponent("Seçilen okullardan bazıları bulunamadı. Listeyi yenileyip tekrar deneyin.")}`,
+    );
+  }
+
+  const { error } = await supabase
+    .from("schools")
+    .update({ is_active: nextStatus })
+    .in("id", validIds);
+
+  if (error) {
+    redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/okullar");
+  revalidatePath("/alanlar");
+  for (const school of schools ?? []) {
+    revalidatePath(`/okullar/${school.slug}`);
+  }
+
+  redirectToAdminWithSuccess(
+    `${validIds.length} okul ${nextStatus ? "aktif" : "pasif"} hale getirildi.`,
+  );
 }

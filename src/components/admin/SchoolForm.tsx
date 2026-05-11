@@ -1,212 +1,209 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
+import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { SmartSchoolBasicFields } from "@/components/admin/SmartSchoolBasicFields";
+import { UnsavedChangesWarning } from "@/components/admin/UnsavedChangesWarning";
 import type { School } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
+import type { ReactNode } from "react";
 
 type SchoolFormProps = {
   action: (formData: FormData) => void | Promise<void>;
+  cancelHref?: string;
+  publicHref?: string;
   school?: School;
   submitLabel: string;
   vocationalFields: Pick<VocationalField, "id" | "title">[];
 };
 
+type FormSectionProps = {
+  children: ReactNode;
+  description?: string;
+  title: string;
+};
+
+const inputClassName =
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+
 function joinLines(values?: string[]) {
   return values?.join("\n") ?? "";
 }
 
+function FormSection({ children, description, title }: FormSectionProps) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-5 border-b border-slate-100 pb-4">
+        <h2 className="text-lg font-bold tracking-tight text-slate-900">{title}</h2>
+        {description && (
+          <p className="mt-1 text-sm leading-relaxed text-slate-500">
+            {description}
+          </p>
+        )}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function SchoolForm({
   action,
+  cancelHref = "/admin",
+  publicHref,
   school,
   submitLabel,
   vocationalFields,
 }: SchoolFormProps) {
+  const actionTitle = school ? "Değişiklikleri kaydet" : "Okulu kaydet";
+  const actionDescription = school
+    ? "Kaydettiğinizde admin listesi ve public okul sayfaları yeniden doğrulanır."
+    : "Kaydettiğinizde yeni okul admin listesine eklenir.";
+
   return (
-    <form action={action} className="space-y-6">
+    <form action={action} className="space-y-6" data-admin-school-form="true">
+      <UnsavedChangesWarning />
       {school && <input type="hidden" name="id" value={school.id} />}
-      <input
-        type="hidden"
-        name="current_image"
-        value={school?.images?.[0] ?? ""}
-      />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Okul Adı</span>
-          <input
-            name="name"
-            defaultValue={school?.name ?? ""}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Slug</span>
-          <input
-            name="slug"
-            defaultValue={school?.slug ?? ""}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Tur</span>
-          <input
-            name="type"
-            defaultValue={school?.type ?? ""}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">İlçe</span>
-          <input
-            name="district"
-            defaultValue={school?.district ?? ""}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Yüzdelik</span>
-          <input
-            name="percentile"
-            defaultValue={school?.percentile ?? ""}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Logo</span>
-          <input
-            name="logo"
-            defaultValue={school?.logo ?? ""}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Renk Sınıfı</span>
-          <input
-            name="color"
-            defaultValue={school?.color ?? "bg-gradient-to-br from-slate-700 to-slate-900"}
-            required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-      </div>
-
-      <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">Açıklama</span>
-        <textarea
-          name="description"
-          defaultValue={school?.description ?? ""}
-          required
-          rows={4}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
+      <FormSection
+        title="Temel Bilgiler"
+        description="Okulun yönetim panelinde ve public sayfalarda kullanılan ana bilgileri."
+      >
+        <SmartSchoolBasicFields
+          initialColor={school?.color}
+          initialDistrict={school?.district}
+          initialLogo={school?.logo}
+          initialName={school?.name}
+          initialPercentile={school?.percentile}
+          initialSlug={school?.slug}
+          initialType={school?.type}
         />
-      </label>
+      </FormSection>
 
-      <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">Okul Görseli</span>
-        <input
-          type="file"
-          name="image_file"
-          accept="image/*"
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 focus:border-blue-500"
-        />
-        {school?.images?.[0] && (
-          <div className="mt-3">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Mevcut Görsel
+      <FormSection
+        title="Tanıtım ve Görsel"
+        description="Okul detay sayfasında görünen açıklama ve kapak görseli."
+      >
+        <div className="space-y-5">
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Açıklama
             </span>
-            <Image
-              src={school.images[0]}
-              alt={school.name}
-              width={800}
-              height={320}
-              className="h-40 w-full rounded-2xl object-cover border border-slate-200"
+            <textarea
+              name="description"
+              defaultValue={school?.description ?? ""}
+              required
+              rows={5}
+              className={inputClassName}
             />
-          </div>
-        )}
-      </label>
+          </label>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Adres</span>
-          <input
-            name="address"
-            defaultValue={school?.address ?? ""}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
+          <ImageUploadField
+            currentImage={school?.images?.[0]}
+            schoolName={school?.name}
           />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Telefon</span>
-          <input
-            name="phone"
-            defaultValue={school?.phone ?? ""}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Website</span>
-          <input
-            name="website"
-            defaultValue={school?.website ?? ""}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-        </label>
-      </div>
+        </div>
+      </FormSection>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Özellikler</span>
-          <textarea
-            name="features"
-            defaultValue={joinLines(school?.features)}
-            rows={5}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-          <span className="mt-2 block text-xs text-slate-500">
-            Her satıra bir madde yazabilir veya virgül ile ayırabilirsiniz.
-          </span>
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Projeler</span>
-          <textarea
-            name="projects"
-            defaultValue={joinLines(school?.projects)}
-            rows={5}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-          <span className="mt-2 block text-xs text-slate-500">
-            Her satıra bir proje yazabilir veya virgül ile ayırabilirsiniz.
-          </span>
-        </label>
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-slate-700">Diller</span>
-          <textarea
-            name="languages"
-            defaultValue={joinLines(school?.languages)}
-            rows={4}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-          />
-          <span className="mt-2 block text-xs text-slate-500">
-            Her satıra bir dil yazabilir veya virgül ile ayırabilirsiniz.
-          </span>
-        </label>
-      </div>
+      <FormSection
+        title="İletişim Bilgileri"
+        description="Zorunlu olmayan, okul detay sayfasında yardımcı bilgi olarak kullanılan alanlar."
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Adres
+            </span>
+            <input
+              name="address"
+              defaultValue={school?.address ?? ""}
+              className={inputClassName}
+            />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Telefon
+            </span>
+            <input
+              name="phone"
+              defaultValue={school?.phone ?? ""}
+              className={inputClassName}
+            />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Website
+            </span>
+            <input
+              name="website"
+              defaultValue={school?.website ?? ""}
+              className={inputClassName}
+            />
+          </label>
+        </div>
+      </FormSection>
 
-      <fieldset className="rounded-2xl border border-slate-200 p-5">
-        <legend className="px-2 text-sm font-semibold text-slate-700">
-          Meslek Alanları
-        </legend>
+      <FormSection
+        title="İçerik Listeleri"
+        description="Özellik, proje ve dil alanlarını satır satır düzenleyebilirsiniz."
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Özellikler
+            </span>
+            <textarea
+              name="features"
+              defaultValue={joinLines(school?.features)}
+              rows={6}
+              className={inputClassName}
+            />
+            <span className="mt-2 block text-xs text-slate-500">
+              Her satıra bir madde yazabilir veya virgül ile ayırabilirsiniz.
+            </span>
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Projeler
+            </span>
+            <textarea
+              name="projects"
+              defaultValue={joinLines(school?.projects)}
+              rows={6}
+              className={inputClassName}
+            />
+            <span className="mt-2 block text-xs text-slate-500">
+              Her satıra bir proje yazabilir veya virgül ile ayırabilirsiniz.
+            </span>
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-slate-700">
+              Diller
+            </span>
+            <textarea
+              name="languages"
+              defaultValue={joinLines(school?.languages)}
+              rows={4}
+              className={inputClassName}
+            />
+            <span className="mt-2 block text-xs text-slate-500">
+              Her satıra bir dil yazabilir veya virgül ile ayırabilirsiniz.
+            </span>
+          </label>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="Meslek Alanları"
+        description="Bu okulla ilişkilendirilecek mesleki alanları seçin."
+      >
         {vocationalFields.length === 0 ? (
-          <p className="text-sm text-slate-500">Henüz meslek alani bulunmuyor.</p>
+          <p className="text-sm text-slate-500">Henüz meslek alanı bulunmuyor.</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {vocationalFields.map((field) => (
               <label
                 key={field.id}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition-colors hover:bg-white"
               >
                 <input
                   type="checkbox"
@@ -215,29 +212,64 @@ export function SchoolForm({
                   defaultChecked={school?.vocationalFields?.includes(field.id)}
                   className="h-4 w-4"
                 />
-                <span className="text-sm font-medium text-slate-700">{field.title}</span>
+                <span className="text-sm font-medium text-slate-700">
+                  {field.title}
+                </span>
               </label>
             ))}
           </div>
         )}
-      </fieldset>
+      </FormSection>
 
-      <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <input
-          type="checkbox"
-          name="is_active"
-          defaultChecked={school ? school.isActive !== false : true}
-          className="h-4 w-4"
-        />
-        <span className="text-sm font-semibold text-slate-700">Yayında / aktif</span>
-      </label>
-
-      <button
-        type="submit"
-        className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
+      <FormSection
+        title="Yayın Durumu"
+        description="Pasif okullar public okul listesinde ve detay sayfasında görünmez."
       >
-        {submitLabel}
-      </button>
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <input
+            type="checkbox"
+            name="is_active"
+            defaultChecked={school ? school.isActive !== false : true}
+            className="h-4 w-4"
+          />
+          <span className="text-sm font-semibold text-slate-700">
+            Yayında / aktif
+          </span>
+        </label>
+      </FormSection>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-bold text-slate-900">
+              {actionTitle}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {actionDescription}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {publicHref && (
+              <Link
+                href={publicHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Public sayfayı aç
+              </Link>
+            )}
+            <Link
+              href={cancelHref}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              İptal
+            </Link>
+            <FormSubmitButton label={submitLabel} />
+          </div>
+        </div>
+      </div>
     </form>
   );
 }
