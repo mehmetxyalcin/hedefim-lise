@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSchoolWithDetails } from "@/lib/supabase/schoolDetail";
 import { createClient } from "@/lib/supabase/server";
-import { SchoolDetail } from "@/components/schools/SchoolDetail";
+import { SchoolDetail } from "@/components/school/SchoolDetail";
 import { getSiteUrlWithPath } from "@/lib/site";
 
 type OkulDetayPageProps = {
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: OkulDetayPageProps): Promise<
   const absoluteImage = image ? getSiteUrlWithPath(image) : undefined;
 
   return {
-    title: data.name,
+    title: `${data.name} | Hedefim Lise`,
     description,
     alternates: { canonical: path },
     openGraph: {
