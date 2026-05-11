@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DISTRICTS } from "@/data/districts";
+import { SCHOOL_TYPES } from "@/data/schoolTypes";
 
 type SmartSchoolBasicFieldsProps = {
   initialColor?: string;
@@ -157,15 +159,19 @@ export function SmartSchoolBasicFields({
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-slate-700">Tür</span>
-        <input
+        <select
           name="type"
           value={type}
           onBlur={() => markTouched("type")}
           onChange={(event) => setType(event.target.value)}
-          onInvalid={() => markTouched("type")}
           required
           className={shouldShowError("type") ? errorInputClassName : inputClassName}
-        />
+        >
+          <option value="">— Seçin —</option>
+          {SCHOOL_TYPES.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
         {shouldShowError("type") && (
           <span className="mt-2 block text-xs font-medium text-rose-600">
             {errors.type}
@@ -175,15 +181,19 @@ export function SmartSchoolBasicFields({
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-slate-700">İlçe</span>
-        <input
+        <select
           name="district"
           value={district}
           onBlur={() => markTouched("district")}
           onChange={(event) => setDistrict(event.target.value)}
-          onInvalid={() => markTouched("district")}
           required
           className={shouldShowError("district") ? errorInputClassName : inputClassName}
-        />
+        >
+          <option value="">— Seçin —</option>
+          {DISTRICTS.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
         {shouldShowError("district") && (
           <span className="mt-2 block text-xs font-medium text-rose-600">
             {errors.district}

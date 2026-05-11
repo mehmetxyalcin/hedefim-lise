@@ -1,7 +1,14 @@
 export const SCHOOL_TYPES = [
-  "Fen Lisesi",
   "Anadolu Lisesi",
-  "Mesleki ve Teknik Anadolu Lisesi",
-  "Sosyal Bilimler Lisesi",
+  "Fen Lisesi",
   "Anadolu İmam Hatip Lisesi",
+  "Anadolu Meslek Programı",
+  "Anadolu Teknik Programı",
+  "Mesleki Eğitim Merkezi",
+  "Spor Lisesi",
+  "Çok Programlı Anadolu Lisesi",
+  "Güzel Sanatlar Lisesi",
+  "Özel Eğitim Uygulama Okulu (III. Kademe)",
+  "Özel Eğitim Meslek Lisesi (İşitme Engelliler)",
+  "Sosyal Bilimler Lisesi",
 ];
