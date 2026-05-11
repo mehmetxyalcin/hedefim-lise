@@ -142,6 +142,15 @@ ALTER TABLE public.school_scholarships        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.school_projects            ENABLE ROW LEVEL SECURITY;
 
 -- Public okuma
+DROP POLICY IF EXISTS "public_read_facilities"                   ON public.facilities;
+DROP POLICY IF EXISTS "public_read_school_facilities"            ON public.school_facilities;
+DROP POLICY IF EXISTS "public_read_vocational_branches"          ON public.vocational_branches;
+DROP POLICY IF EXISTS "public_read_school_vocational_branches"   ON public.school_vocational_branches;
+DROP POLICY IF EXISTS "public_read_school_quotas"                ON public.school_quotas;
+DROP POLICY IF EXISTS "public_read_school_scores"                ON public.school_scores;
+DROP POLICY IF EXISTS "public_read_school_scholarships"          ON public.school_scholarships;
+DROP POLICY IF EXISTS "public_read_school_projects"              ON public.school_projects;
+
 CREATE POLICY "public_read_facilities"
   ON public.facilities FOR SELECT USING (true);
 
@@ -167,6 +176,15 @@ CREATE POLICY "public_read_school_projects"
   ON public.school_projects FOR SELECT USING (true);
 
 -- Sadece admin yazabilir
+DROP POLICY IF EXISTS "admin_write_facilities"                   ON public.facilities;
+DROP POLICY IF EXISTS "admin_write_school_facilities"            ON public.school_facilities;
+DROP POLICY IF EXISTS "admin_write_vocational_branches"          ON public.vocational_branches;
+DROP POLICY IF EXISTS "admin_write_school_vocational_branches"   ON public.school_vocational_branches;
+DROP POLICY IF EXISTS "admin_write_school_quotas"                ON public.school_quotas;
+DROP POLICY IF EXISTS "admin_write_school_scores"                ON public.school_scores;
+DROP POLICY IF EXISTS "admin_write_school_scholarships"          ON public.school_scholarships;
+DROP POLICY IF EXISTS "admin_write_school_projects"              ON public.school_projects;
+
 CREATE POLICY "admin_write_facilities"
   ON public.facilities FOR ALL
   USING (EXISTS (
