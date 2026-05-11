@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Clock,
   ExternalLink,
   Globe,
   GraduationCap,
@@ -18,7 +19,6 @@ import {
   Phone,
   Star,
   Users,
-  Clock,
 } from "lucide-react";
 import { VocationalFieldIcon } from "@/lib/vocational-icons";
 import type {
@@ -31,44 +31,39 @@ type Props = { school: SchoolWithDetails };
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-function getHeroGradient(type: string): string {
+function heroGradient(type: string): string {
   const t = type.toLowerCase();
   if (t.includes("meslek") || t.includes("teknik"))
-    return "from-blue-700 via-indigo-700 to-purple-800";
-  if (t.includes("fen")) return "from-orange-600 via-red-600 to-rose-700";
-  if (t.includes("anadolu")) return "from-emerald-600 via-teal-600 to-cyan-700";
+    return "from-indigo-700 via-blue-700 to-purple-800";
+  if (t.includes("fen"))
+    return "from-orange-600 via-red-600 to-rose-700";
+  if (t.includes("anadolu"))
+    return "from-emerald-600 via-teal-600 to-cyan-700";
   return "from-slate-600 via-slate-700 to-slate-800";
 }
 
-function getPercentileColor(v: number) {
-  if (v <= 20) return "bg-red-500";
-  if (v <= 40) return "bg-orange-500";
-  if (v <= 60) return "bg-yellow-500";
-  if (v <= 80) return "bg-green-500";
-  return "bg-blue-500";
+function percentileBar(v: number) {
+  if (v <= 20) return { bar: "bg-red-500", label: "Çok yüksek başarı gerektirir" };
+  if (v <= 40) return { bar: "bg-orange-500", label: "Yüksek başarı gerektirir" };
+  if (v <= 60) return { bar: "bg-yellow-500", label: "Orta düzey başarı gerektirir" };
+  if (v <= 80) return { bar: "bg-green-500", label: "Ulaşılabilir hedef" };
+  return { bar: "bg-blue-500", label: "Geniş yerleşme imkânı" };
 }
 
-function getPercentileLabel(v: number) {
-  if (v <= 20) return "Çok yüksek başarı gerektirir";
-  if (v <= 40) return "Yüksek başarı gerektirir";
-  if (v <= 60) return "Orta düzey başarı gerektirir";
-  if (v <= 80) return "Ulaşılabilir hedef";
-  return "Geniş yerleşme imkânı";
-}
-
-function labelFor(key: string, value: string): string {
-  const maps: Record<string, Record<string, string>> = {
-    placementType: { yerel: "Yerel Yerleşim", merkezi: "Merkezi Sınav" },
-    educationType: { normal: "Normal Öğretim", ikili: "İkili Öğretim" },
-    boardingType: {
-      yok: "Yatılı Yok",
-      kiz_erkek: "Kız & Erkek Yatılı",
-      kiz: "Kız Yatılı",
-      erkek: "Erkek Yatılı",
-    },
-  };
-  return maps[key]?.[value] ?? value;
-}
+const PLACEMENT_LABELS: Record<string, string> = {
+  yerel: "Yerel Yerleşim",
+  merkezi: "Merkezi Sınav",
+};
+const EDUCATION_LABELS: Record<string, string> = {
+  normal: "Normal Öğretim",
+  ikili: "İkili Öğretim",
+};
+const BOARDING_LABELS: Record<string, string> = {
+  yok: "Yatılı Yok",
+  kiz_erkek: "Kız & Erkek Yatılı",
+  kiz: "Kız Yatılı",
+  erkek: "Erkek Yatılı",
+};
 
 // ─── Meslek Alanları Accordion ─────────────────────────────────────────────────
 
@@ -92,21 +87,16 @@ function VocationalAccordion({
       {fields.map((field) => {
         const isOpen = openIds.has(field.id);
         return (
-          <div
-            key={field.id}
-            className="overflow-hidden rounded-xl border border-slate-100"
-          >
+          <div key={field.id} className="overflow-hidden rounded-xl border border-slate-100">
             <button
               type="button"
               onClick={() => toggle(field.id)}
-              className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-slate-50"
+              className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-slate-50"
             >
-              <div className="shrink-0 rounded-xl border border-orange-100 bg-orange-50 p-2.5 text-orange-600">
-                <VocationalFieldIcon slug={field.slug} className="h-5 w-5" />
+              <div className="shrink-0 rounded-lg border border-orange-100 bg-orange-50 p-2 text-orange-600">
+                <VocationalFieldIcon slug={field.slug} className="h-4 w-4" />
               </div>
-              <span className="flex-1 font-semibold text-slate-900">
-                {field.title}
-              </span>
+              <span className="flex-1 text-sm font-semibold text-slate-900">{field.title}</span>
               <div className="flex shrink-0 items-center gap-3">
                 <Link
                   href={`/alanlar/${field.slug}`}
@@ -116,7 +106,7 @@ function VocationalAccordion({
                   Alan sayfası →
                 </Link>
                 <ChevronDown
-                  className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                 />
               </div>
             </button>
@@ -135,9 +125,7 @@ function VocationalAccordion({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">
-                    Bu alan için dal bilgisi eklenmemiş.
-                  </p>
+                  <p className="text-xs text-slate-400">Bu alan için dal bilgisi eklenmemiş.</p>
                 )}
               </div>
             )}
@@ -148,7 +136,7 @@ function VocationalAccordion({
   );
 }
 
-// ─── Puan Bilgileri kartı (sağ sütun) ─────────────────────────────────────────
+// ─── Puan Bilgileri kartı ──────────────────────────────────────────────────────
 
 function ScoreCard({
   scores,
@@ -157,33 +145,34 @@ function ScoreCard({
   scores: SchoolScore[];
   fallbackPercentile: string;
 }) {
-  const years = scores.map((s) => s.year).sort((a, b) => b - a);
-  const [activeYear, setActiveYear] = useState(years[0] ?? 0);
+  const sortedYears = scores.map((s) => s.year).sort((a, b) => b - a);
+  const [activeYear, setActiveYear] = useState<number>(sortedYears[0] ?? 0);
   const score = scores.find((s) => s.year === activeYear);
 
-  const rawPercentile =
+  // Percentile'ı belirle: yıllık veri varsa ondan, yoksa fallback
+  const rawP =
     score?.percentile != null
       ? String(score.percentile)
       : scores.length === 0
         ? fallbackPercentile
         : null;
-  const pNum = rawPercentile ? parseFloat(rawPercentile) : NaN;
+  const pNum = rawP != null ? parseFloat(rawP) : NaN;
   const hasP = !isNaN(pNum);
-
-  const hasAnyData =
-    hasP || score?.obpScore != null || score?.lgsScore != null;
+  const { bar, label } = hasP ? percentileBar(pNum) : { bar: "", label: "" };
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      {/* Başlık + yıl sekmeleri */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
           Puan Bilgileri
         </p>
-        {years.length > 0 && (
+        {sortedYears.length > 0 && (
           <div className="flex gap-1">
-            {years.map((y) => (
+            {sortedYears.map((y) => (
               <button
                 key={y}
+                type="button"
                 onClick={() => setActiveYear(y)}
                 className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
                   activeYear === y
@@ -198,34 +187,32 @@ function ScoreCard({
         )}
       </div>
 
+      {/* Yüzdelik dilim */}
       {hasP && (
         <>
-          <p className="mb-3 text-4xl font-bold tabular-nums text-slate-900">
-            %{rawPercentile}
+          <p className="mb-3 text-4xl font-extrabold tabular-nums text-slate-900">
+            %{rawP}
           </p>
           <div className="mb-1 flex justify-between text-[10px] font-medium text-slate-400">
             <span>Zor</span>
             <span>Kolay</span>
           </div>
-          <div className="mb-2 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className="mb-1.5 h-2.5 overflow-hidden rounded-full bg-slate-100">
             <div
-              className={`h-full rounded-full ${getPercentileColor(pNum)}`}
-              style={{ width: `${pNum}%` }}
+              className={`h-full rounded-full transition-all ${bar}`}
+              style={{ width: `${Math.min(pNum, 100)}%` }}
             />
           </div>
-          <p className="mb-4 text-xs text-slate-500">
-            {getPercentileLabel(pNum)}
-          </p>
+          <p className="mb-4 text-xs text-slate-500">{label}</p>
         </>
       )}
 
+      {/* OBP + LGS */}
       {(score?.obpScore != null || score?.lgsScore != null) && (
         <div className="grid grid-cols-2 gap-2">
           {score?.obpScore != null && (
             <div className="rounded-lg bg-blue-50 p-3 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
-                OBP
-              </p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-400">OBP</p>
               <p className="mt-1 text-lg font-bold tabular-nums text-blue-700">
                 {score.obpScore}
               </p>
@@ -233,9 +220,7 @@ function ScoreCard({
           )}
           {score?.lgsScore != null && (
             <div className="rounded-lg bg-purple-50 p-3 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
-                LGS
-              </p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-purple-400">LGS</p>
               <p className="mt-1 text-lg font-bold tabular-nums text-purple-700">
                 {score.lgsScore}
               </p>
@@ -243,33 +228,28 @@ function ScoreCard({
           )}
         </div>
       )}
-
-      {!hasAnyData && (
-        <p className="text-sm text-slate-400">Puan bilgisi henüz eklenmedi.</p>
-      )}
     </div>
   );
 }
 
-// ─── Kontenjan kartı (sağ sütun) ──────────────────────────────────────────────
+// ─── Kontenjan kartı ───────────────────────────────────────────────────────────
 
 function QuotaCard({ quotas }: { quotas: SchoolQuota[] }) {
-  const years = quotas.map((q) => q.year).sort((a, b) => b - a);
-  const [activeYear, setActiveYear] = useState(years[0] ?? 0);
+  const sortedYears = quotas.map((q) => q.year).sort((a, b) => b - a);
+  const [activeYear, setActiveYear] = useState<number>(sortedYears[0] ?? 0);
   const quota = quotas.find((q) => q.year === activeYear);
 
   if (quotas.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-          Kontenjan
-        </p>
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Kontenjan</p>
         <div className="flex gap-1">
-          {years.map((y) => (
+          {sortedYears.map((y) => (
             <button
               key={y}
+              type="button"
               onClick={() => setActiveYear(y)}
               className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
                 activeYear === y
@@ -314,152 +294,152 @@ export function SchoolDetail({ school }: Props) {
     setTimeout(() => setAdded(false), 3000);
   };
 
-  const heroImage = school.images[0] ?? null;
-  const heroGradient = getHeroGradient(school.type);
+  const heroImg = school.images[0] ?? null;
+  const gradient = heroGradient(school.type);
 
+  // Veri varlık kontrolleri
   const hasDescription = !!school.description?.trim();
-  const hasContact = !!(school.address || school.phone || school.website);
-  const hasTransportation = !!school.transportationInfo;
-  const hasFeatures = school.features.length > 0;
   const hasFacilities = school.facilities.length > 0;
+  const hasFeatures = school.features.length > 0;
   const hasVocational = school.vocationalFieldsWithBranches.length > 0;
   const hasScholarships = school.scholarships.length > 0;
   const hasProjects = school.schoolProjects.length > 0;
+  const hasTransportation = !!school.transportationInfo?.trim();
+  const hasContact = !!(school.address || school.phone || school.website);
   const hasOtherInfo = !!school.otherInfo?.trim();
   const hasLanguages = school.languages.length > 0;
   const hasHours = !!(school.schoolHoursStart || school.schoolHoursEnd);
 
+  // Şerit için gösterilecek chip'ler
+  const placementLabel = PLACEMENT_LABELS[school.placementType] ?? school.placementType;
+  const educationLabel = EDUCATION_LABELS[school.educationType] ?? school.educationType;
+  const boardingLabel = BOARDING_LABELS[school.boardingType] ?? school.boardingType;
+  const showBoarding = school.boardingType !== "yok";
+
   return (
     <div className="min-h-screen bg-slate-50 pb-24 lg:pb-10">
-      {/* ─── Hero ─── */}
-      <section className="relative w-full overflow-hidden aspect-[16/9] md:aspect-[21/9]">
-        {heroImage ? (
+
+      {/* ────────────────── HERO ────────────────── */}
+      <section className="relative w-full overflow-hidden" style={{ aspectRatio: "21/9", minHeight: "220px", maxHeight: "480px" }}>
+        {heroImg ? (
           <>
             <Image
-              src={heroImage}
+              src={heroImg}
               alt={school.name}
               fill
               sizes="100vw"
               className="object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
           </>
         ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${heroGradient}`} />
+          <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
         )}
 
         {/* Breadcrumb */}
         <nav
           aria-label="Gezinti yolu"
-          className="absolute top-0 left-0 right-0 container mx-auto max-w-7xl px-6 pt-5"
+          className="absolute left-0 right-0 top-0 mx-auto max-w-7xl px-6 pt-5"
         >
-          <ol className="flex items-center gap-1 text-sm text-white/60">
-            <li className="hidden sm:flex items-center gap-1">
-              <Link
-                href="/"
-                className="flex items-center gap-1 transition-colors hover:text-white"
-              >
+          <ol className="flex items-center gap-1 text-sm text-white/70">
+            <li className="hidden items-center gap-1 sm:flex">
+              <Link href="/" className="flex items-center gap-1 hover:text-white">
                 <Home className="h-3.5 w-3.5" />
-                <span>Ana Sayfa</span>
+                Ana Sayfa
               </Link>
               <ChevronRight className="h-3.5 w-3.5" />
             </li>
-            <li className="hidden sm:flex items-center gap-1">
-              <Link href="/okullar" className="transition-colors hover:text-white">
-                Okullar
-              </Link>
+            <li className="hidden items-center gap-1 sm:flex">
+              <Link href="/okullar" className="hover:text-white">Okullar</Link>
               <ChevronRight className="h-3.5 w-3.5" />
             </li>
-            <li className="flex items-center gap-1 text-white/40">
-              <span className="max-w-[120px] truncate sm:max-w-none">
-                {school.type}
-              </span>
+            <li className="flex items-center gap-1 text-white/50">
+              <span className="max-w-[100px] truncate sm:max-w-none">{school.type}</span>
               <ChevronRight className="h-3.5 w-3.5" />
             </li>
-            <li className="max-w-[160px] truncate font-medium text-white/80 sm:max-w-xs">
+            <li className="max-w-[160px] truncate font-medium text-white/90 sm:max-w-xs">
               {school.name}
             </li>
           </ol>
         </nav>
 
-        {/* Hero içeriği */}
-        <div className="absolute bottom-0 left-0 right-0 container mx-auto max-w-7xl px-6 pb-20">
+        {/* Hero içerik */}
+        <div className="absolute bottom-0 left-0 right-0 mx-auto max-w-7xl px-6 pb-16">
           <span className="mb-3 inline-block rounded-full border border-white/20 bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
             {school.type}
           </span>
-          <h1 className="mb-2 max-w-2xl text-3xl font-bold tracking-tight text-white md:text-4xl">
+          <h1 className="mb-2 max-w-2xl text-3xl font-extrabold tracking-tight text-white drop-shadow-sm md:text-4xl lg:text-5xl">
             {school.name}
           </h1>
-          <p className="flex items-center gap-1.5 text-sm text-white/80">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-white/80">
             <MapPin className="h-4 w-4 shrink-0" />
             {school.district}
           </p>
         </div>
       </section>
 
-      {/* ─── Content ─── */}
-      <div className="relative z-10 -mt-12 container mx-auto max-w-7xl px-4 sm:px-6">
+      {/* ────────────────── CONTENT ────────────────── */}
+      <div className="relative z-10 -mt-10 mx-auto max-w-7xl px-4 sm:px-6">
 
-        {/* Info şeridi — yatay scroll mobilde */}
+        {/* ── Hızlı Bilgiler Şeridi ── */}
         <div className="hide-scrollbar mb-6 overflow-x-auto">
-          <div className="flex min-w-max gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              <Building2 className="h-3.5 w-3.5" />
+          <div className="flex min-w-max gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            {/* Okul Türü — her zaman göster */}
+            <Chip icon={<Building2 className="h-3.5 w-3.5" />} color="slate">
               {school.type}
-            </span>
-            {school.placementType !== "yerel" && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                <GraduationCap className="h-3.5 w-3.5" />
-                {labelFor("placementType", school.placementType)}
-              </span>
+            </Chip>
+
+            {/* Yerleştirme */}
+            <Chip icon={<GraduationCap className="h-3.5 w-3.5" />} color="blue">
+              {placementLabel}
+            </Chip>
+
+            {/* Eğitim şekli */}
+            <Chip icon={<BookOpen className="h-3.5 w-3.5" />} color="purple">
+              {educationLabel}
+            </Chip>
+
+            {/* Pansiyon — sadece varsa */}
+            {showBoarding && (
+              <Chip icon={<Users className="h-3.5 w-3.5" />} color="emerald">
+                {boardingLabel}
+              </Chip>
             )}
-            {school.educationType !== "normal" && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
-                <Clock className="h-3.5 w-3.5" />
-                {labelFor("educationType", school.educationType)}
-              </span>
-            )}
-            {school.boardingType !== "yok" && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                <Users className="h-3.5 w-3.5" />
-                {labelFor("boardingType", school.boardingType)}
-              </span>
-            )}
+
+            {/* Okul saatleri — sadece doluysa */}
             {hasHours && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                <Clock className="h-3.5 w-3.5" />
-                {school.schoolHoursStart}
-                {school.schoolHoursEnd && `–${school.schoolHoursEnd}`}
-                {school.schoolHoursNote && ` (${school.schoolHoursNote})`}
-              </span>
+              <Chip icon={<Clock className="h-3.5 w-3.5" />} color="amber">
+                {[
+                  school.schoolHoursStart,
+                  school.schoolHoursEnd ? `– ${school.schoolHoursEnd}` : null,
+                  school.schoolHoursNote ? `(${school.schoolHoursNote})` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              </Chip>
             )}
           </div>
         </div>
 
+        {/* ── 2 Sütun ── */}
         <div className="grid gap-6 lg:grid-cols-3">
 
-          {/* ── Sol sütun ── */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* ──── Sol sütun ──── */}
+          <div className="space-y-6 lg:col-span-2">
 
             {/* Okul Hakkında */}
             {hasDescription && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Okul Hakkında
-                </h2>
+              <Card title="Okul Hakkında">
                 <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
                   {school.description}
                 </p>
-              </article>
+              </Card>
             )}
 
-            {/* Tesisler */}
+            {/* Tesisler (yeni DB tablosu) */}
             {hasFacilities && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Tesis &amp; Altyapı
-                </h2>
+              <Card title="Tesis ve Altyapı">
                 <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {school.facilities.map((f) => (
                     <li
@@ -467,54 +447,44 @@ export function SchoolDetail({ school }: Props) {
                       className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700"
                     >
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                      {f.icon && <span>{f.icon}</span>}
                       {f.name}
                     </li>
                   ))}
                 </ul>
-              </article>
+              </Card>
             )}
 
-            {/* Meslek Alanları — Accordion */}
+            {/* Meslek Alanları */}
             {hasVocational && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Meslek Alanları ve Dallar
-                </h2>
-                <VocationalAccordion
-                  fields={school.vocationalFieldsWithBranches}
-                />
-              </article>
+              <Card title="Meslek Alanları ve Dallar">
+                <VocationalAccordion fields={school.vocationalFieldsWithBranches} />
+              </Card>
             )}
 
             {/* Özellikler (eski text[] alanı) */}
             {hasFeatures && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Özellikler
-                </h2>
-                <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <Card title="Özellikler">
+                <ul className="grid gap-2 sm:grid-cols-2">
                   {school.features.map((feat) => (
                     <li
                       key={feat}
-                      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3"
+                      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3"
                     >
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                      <span className="text-sm font-medium text-slate-700">
-                        {feat}
-                      </span>
+                      <span className="text-sm font-medium text-slate-700">{feat}</span>
                     </li>
                   ))}
                 </ul>
-              </article>
+              </Card>
             )}
 
             {/* Burs İmkânları */}
             {hasScholarships && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">
-                  <GraduationCap className="h-5 w-5 text-emerald-500" />
-                  Burs İmkânları
-                </h2>
+              <Card
+                title="Burs İmkânları"
+                icon={<GraduationCap className="h-5 w-5 text-emerald-500" />}
+              >
                 <div className="space-y-3">
                   {school.scholarships.map((s) => (
                     <div
@@ -530,22 +500,17 @@ export function SchoolDetail({ school }: Props) {
                         )}
                       </div>
                       {s.description && (
-                        <p className="mt-1.5 text-sm text-slate-500">
-                          {s.description}
-                        </p>
+                        <p className="mt-1.5 text-sm text-slate-500">{s.description}</p>
                       )}
                     </div>
                   ))}
                 </div>
-              </article>
+              </Card>
             )}
 
             {/* Projeler */}
             {hasProjects && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Projeler
-                </h2>
+              <Card title="Projeler">
                 <div className="grid gap-4 sm:grid-cols-2">
                   {school.schoolProjects.map((p) => (
                     <div
@@ -585,28 +550,24 @@ export function SchoolDetail({ school }: Props) {
                     </div>
                   ))}
                 </div>
-              </article>
+              </Card>
             )}
 
-            {/* Ulaşım — ayrı kart */}
+            {/* Ulaşım */}
             {hasTransportation && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">
-                  <Bus className="h-5 w-5 text-blue-500" />
-                  Ulaşım
-                </h2>
+              <Card
+                title="Ulaşım"
+                icon={<Bus className="h-5 w-5 text-blue-500" />}
+              >
                 <p className="text-sm leading-relaxed text-slate-600">
                   {school.transportationInfo}
                 </p>
-              </article>
+              </Card>
             )}
 
             {/* İletişim */}
             {hasContact && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  İletişim
-                </h2>
+              <Card title="İletişim">
                 <dl className="space-y-3">
                   {school.address && (
                     <div className="flex items-start gap-3">
@@ -652,101 +613,57 @@ export function SchoolDetail({ school }: Props) {
                     </div>
                   )}
                 </dl>
-              </article>
+              </Card>
             )}
 
             {/* Diğer Bilgiler */}
             {hasOtherInfo && (
-              <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <h2 className="mb-4 text-lg font-bold text-slate-900">
-                  Ek Bilgiler
-                </h2>
+              <Card title="Ek Bilgiler">
                 <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-600">
                   {school.otherInfo}
                 </pre>
-              </article>
+              </Card>
             )}
           </div>
 
-          {/* ── Sağ sütun ── */}
+          {/* ──── Sağ sütun ──── */}
           <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
 
             {/* Puan Bilgileri */}
-            <ScoreCard
-              scores={school.scores}
-              fallbackPercentile={school.percentile}
-            />
+            <ScoreCard scores={school.scores} fallbackPercentile={school.percentile} />
 
             {/* Kontenjan */}
             <QuotaCard quotas={school.quotas} />
 
             {/* Hızlı Bilgiler */}
-            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-slate-400" />
                 <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
                   Hızlı Bilgiler
                 </h3>
               </div>
-              <dl className="space-y-3 text-xs">
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="shrink-0 font-medium text-slate-400">Okul Türü</dt>
-                  <dd className="text-right font-semibold text-slate-700">
-                    {school.type}
-                  </dd>
-                </div>
-                <div className="h-px bg-slate-50" />
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="shrink-0 font-medium text-slate-400">İlçe</dt>
-                  <dd className="flex items-center gap-1 text-right font-semibold text-slate-700">
-                    <MapPin className="h-3 w-3" />
-                    {school.district}
-                  </dd>
-                </div>
+              <dl className="space-y-2.5 text-xs">
+                <InfoRow label="Okul Türü" value={school.type} />
+                <InfoRow label="İlçe" value={school.district} icon={<MapPin className="h-3 w-3" />} />
                 {hasLanguages && (
-                  <>
-                    <div className="h-px bg-slate-50" />
-                    <div className="flex items-start justify-between gap-4">
-                      <dt className="shrink-0 font-medium text-slate-400">
-                        Yabancı Dil
-                      </dt>
-                      <dd className="text-right font-semibold text-slate-700">
-                        {school.languages.join(", ")}
-                      </dd>
-                    </div>
-                  </>
+                  <InfoRow label="Yabancı Dil" value={school.languages.join(", ")} />
                 )}
-                {school.boardingType !== "yok" && (
-                  <>
-                    <div className="h-px bg-slate-50" />
-                    <div className="flex items-start justify-between gap-4">
-                      <dt className="shrink-0 font-medium text-slate-400">
-                        Yatılı
-                      </dt>
-                      <dd className="text-right font-semibold text-slate-700">
-                        {labelFor("boardingType", school.boardingType)}
-                      </dd>
-                    </div>
-                  </>
+                {showBoarding && (
+                  <InfoRow label="Yatılı" value={boardingLabel} />
                 )}
                 {school.educationType !== "normal" && (
-                  <>
-                    <div className="h-px bg-slate-50" />
-                    <div className="flex items-start justify-between gap-4">
-                      <dt className="shrink-0 font-medium text-slate-400">
-                        Öğretim
-                      </dt>
-                      <dd className="text-right font-semibold text-slate-700">
-                        {labelFor("educationType", school.educationType)}
-                      </dd>
-                    </div>
-                  </>
+                  <InfoRow label="Öğretim" value={educationLabel} />
+                )}
+                {school.placementType !== "yerel" && (
+                  <InfoRow label="Yerleşim" value={placementLabel} />
                 )}
               </dl>
             </div>
 
             {/* Tercihe Ekle — desktop */}
             <button
+              type="button"
               onClick={handleAdd}
               className={`hidden w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all lg:flex ${
                 added
@@ -761,9 +678,10 @@ export function SchoolDetail({ school }: Props) {
         </div>
       </div>
 
-      {/* Mobile fixed bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-100 bg-white p-4 shadow-lg lg:hidden">
+      {/* ── Mobile: fixed bottom bar ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white p-4 shadow-lg lg:hidden">
         <button
+          type="button"
           onClick={handleAdd}
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all ${
             added
@@ -776,5 +694,79 @@ export function SchoolDetail({ school }: Props) {
         </button>
       </div>
     </div>
+  );
+}
+
+// ─── Küçük yardımcı bileşenler ─────────────────────────────────────────────────
+
+type ChipColor = "slate" | "blue" | "purple" | "emerald" | "amber";
+
+const chipClasses: Record<ChipColor, string> = {
+  slate: "bg-slate-100 text-slate-700",
+  blue: "bg-blue-50 text-blue-700",
+  purple: "bg-purple-50 text-purple-700",
+  emerald: "bg-emerald-50 text-emerald-700",
+  amber: "bg-amber-50 text-amber-700",
+};
+
+function Chip({
+  icon,
+  color,
+  children,
+}: {
+  icon: React.ReactNode;
+  color: ChipColor;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${chipClasses[color]}`}
+    >
+      {icon}
+      {children}
+    </span>
+  );
+}
+
+function Card({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <article className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">
+        {icon}
+        {title}
+      </h2>
+      {children}
+    </article>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <>
+      <div className="flex items-start justify-between gap-4">
+        <dt className="shrink-0 font-medium text-slate-400">{label}</dt>
+        <dd className="flex items-center gap-1 text-right font-semibold text-slate-700">
+          {icon}
+          {value}
+        </dd>
+      </div>
+      <div className="h-px bg-slate-50" />
+    </>
   );
 }
