@@ -500,7 +500,7 @@ export function BulkUploadWizard() {
                             : row.boarding_type === "erkek"
                               ? "Erkek"
                               : row.boarding_type === "kiz_erkek"
-                                ? "Karma"
+                                ? "Kız/Erkek"
                                 : <span className="text-rose-500">Geçersiz</span>}
                     </td>
                     <td className="max-w-[180px] truncate px-3 py-2 text-slate-500">
