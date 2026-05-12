@@ -7,7 +7,7 @@ type Props = { school: SchoolWithDetails };
 const BOARDING_LABELS: Record<string, string> = {
   kiz: "Kız Pansiyonu",
   erkek: "Erkek Pansiyonu",
-  kiz_erkek: "Karma Pansiyon",
+  kiz_erkek: "Kız/Erkek Pansiyon",
 };
 
 type InfoItem = {

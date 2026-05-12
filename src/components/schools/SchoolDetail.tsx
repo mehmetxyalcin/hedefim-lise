@@ -60,7 +60,7 @@ const EDUCATION_LABELS: Record<string, string> = {
 };
 const BOARDING_LABELS: Record<string, string> = {
   yok: "Yatılı Yok",
-  kiz_erkek: "Kız & Erkek Yatılı",
+  kiz_erkek: "Kız/Erkek Yatılı",
   kiz: "Kız Yatılı",
   erkek: "Erkek Yatılı",
 };
