@@ -5,6 +5,7 @@ import type { SchoolWithDetails } from "@/types/schoolDetail";
 type Props = { school: SchoolWithDetails };
 
 const BOARDING_LABELS: Record<string, string> = {
+  yok: "Pansiyon Yok",
   kiz: "Kız Pansiyonu",
   erkek: "Erkek Pansiyonu",
   kiz_erkek: "Kız/Erkek Pansiyon",
@@ -45,8 +46,8 @@ export function SchoolInfoRibbon({ school }: Props) {
     });
   }
 
-  // 4. Pansiyon — yalnızca "yok" değilse
-  if (school.boardingType && school.boardingType !== "yok") {
+  // 4. Pansiyon — her zaman göster
+  if (school.boardingType) {
     const boardingLabel = BOARDING_LABELS[school.boardingType];
     if (boardingLabel) {
       items.push({
