@@ -30,6 +30,7 @@ type ParsedRow = {
   district: string;
   school_type: string;
   education_type: "normal" | "ikili" | null;
+  description: string | null;
   sinavli_2025: number | null | undefined;
   sinavsiz_2025: number | null | undefined;
   sinavli_2024: number | null | undefined;
@@ -70,6 +71,7 @@ type ExtractedRow = {
   school_type: string;
   education_type: "normal" | "ikili" | null;
   edu_raw: string;
+  description: string | null;
   sinavli_2025: number | null | undefined;
   sinavsiz_2025: number | null | undefined;
   sinavli_2024: number | null | undefined;
@@ -89,6 +91,7 @@ function extractRow(raw: Record<string, unknown>, index: number): ExtractedRow {
     school_type: str(raw["Okul Türü"]),
     education_type: parseEducationType(eduRaw),
     edu_raw: eduRaw,
+    description: str(raw["Açıklama"]) || null,
     sinavli_2025: parseQuota(raw["Sınavlı 2025"]),
     sinavsiz_2025: parseQuota(raw["Sınavsız 2025"]),
     sinavli_2024: parseQuota(raw["Sınavlı 2024"]),
@@ -120,6 +123,9 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
   if (row.edu_raw && row.education_type === null) {
     errors.push("Öğretim Şekli geçersiz. 'Normal Öğretim' veya 'İkili Öğretim' olmalı");
   }
+  if (row.description && row.description.length > 1000) {
+    errors.push("Açıklama en fazla 1000 karakter olabilir");
+  }
   if (row.sinavli_2025 === null) errors.push("Sınavlı 2025 geçersiz (negatif olmayan tam sayı olmalı)");
   if (row.sinavsiz_2025 === null) errors.push("Sınavsız 2025 geçersiz (negatif olmayan tam sayı olmalı)");
   if (row.sinavli_2024 === null) errors.push("Sınavlı 2024 geçersiz (negatif olmayan tam sayı olmalı)");
@@ -132,6 +138,7 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
     district: row.district,
     school_type: row.school_type,
     education_type: row.education_type,
+    description: row.description,
     sinavli_2025: row.sinavli_2025,
     sinavsiz_2025: row.sinavsiz_2025,
     sinavli_2024: row.sinavli_2024,
@@ -300,6 +307,7 @@ export function BulkUploadWizard() {
         district: r.district,
         school_type: r.school_type,
         education_type: r.education_type,
+        description: r.description,
         ...(r.sinavli_2025 !== undefined && r.sinavli_2025 !== null && { sinavli_2025: r.sinavli_2025 }),
         ...(r.sinavsiz_2025 !== undefined && r.sinavsiz_2025 !== null && { sinavsiz_2025: r.sinavsiz_2025 }),
         ...(r.sinavli_2024 !== undefined && r.sinavli_2024 !== null && { sinavli_2024: r.sinavli_2024 }),
@@ -412,7 +420,7 @@ export function BulkUploadWizard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "Öğretim Şekli", "Sınavlı 2025", "Sınavsız 2025", "Sınavlı 2024", "Sınavsız 2024", "Telefon", "Website", "Adres"].map(
+                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "Öğretim Şekli", "Açıklama", "Sınavlı 2025", "Sınavsız 2025", "Sınavlı 2024", "Sınavsız 2024", "Telefon", "Website", "Adres"].map(
                     (h) => (
                       <th
                         key={h}
@@ -462,6 +470,13 @@ export function BulkUploadWizard() {
                         : row.education_type === "ikili"
                           ? "İkili"
                           : "—"}
+                    </td>
+                    <td className="max-w-[180px] truncate px-3 py-2 text-slate-500">
+                      {row.description
+                        ? row.description.length > 50
+                          ? row.description.slice(0, 50) + "..."
+                          : row.description
+                        : "—"}
                     </td>
                     <td className="px-3 py-2 text-center text-slate-600">
                       {row.sinavli_2025 !== undefined && row.sinavli_2025 !== null ? row.sinavli_2025 : "—"}

@@ -8,6 +8,7 @@ export type UploadSchoolRow = {
   district: string;
   school_type: string;
   education_type?: "normal" | "ikili" | null;
+  description?: string | null;
   sinavli_2025?: number;
   sinavsiz_2025?: number;
   sinavli_2024?: number;
@@ -104,6 +105,7 @@ export async function bulkUploadSchools(
             ...(row.website?.trim() && { website: row.website.trim() }),
             ...(row.address?.trim() && { address: row.address.trim() }),
             ...(row.education_type != null && { education_type: row.education_type }),
+            ...(row.description?.trim() && { description: row.description.trim() }),
           })
           .eq("id", existingId);
 
@@ -131,7 +133,7 @@ export async function bulkUploadSchools(
             percentile: "0",
             logo: row.name.slice(0, 2).toUpperCase(),
             color: "bg-gradient-to-br from-slate-700 to-slate-900",
-            description: "",
+            description: row.description?.trim() ?? "",
             features: [],
             projects: [],
             languages: [],
