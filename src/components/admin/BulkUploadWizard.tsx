@@ -30,6 +30,7 @@ type ParsedRow = {
   district: string;
   school_type: string;
   education_type: "normal" | "ikili" | null;
+  boarding_type: "yok" | "kiz" | "erkek" | "kiz_erkek" | null | undefined;
   description: string | null;
   sinavli_2025: number | null | undefined;
   sinavsiz_2025: number | null | undefined;
@@ -54,6 +55,17 @@ function parseQuota(value: unknown): number | null | undefined {
   return num;
 }
 
+function parseBoardingType(value: unknown): "yok" | "kiz" | "erkek" | "kiz_erkek" | null | undefined {
+  const s = String(value ?? "").trim();
+  if (!s) return undefined;
+  const v = s.toLocaleLowerCase("tr-TR");
+  if (v === "yok") return "yok";
+  if (v === "kız" || v === "kiz") return "kiz";
+  if (v === "erkek") return "erkek";
+  if (v === "karma" || v === "kız-erkek" || v === "kiz-erkek") return "kiz_erkek";
+  return null;
+}
+
 function parseEducationType(value: string): "normal" | "ikili" | null {
   if (!value) return null;
   const v = value.toLocaleLowerCase("tr-TR");
@@ -71,6 +83,7 @@ type ExtractedRow = {
   school_type: string;
   education_type: "normal" | "ikili" | null;
   edu_raw: string;
+  boarding_type: "yok" | "kiz" | "erkek" | "kiz_erkek" | null | undefined;
   description: string | null;
   sinavli_2025: number | null | undefined;
   sinavsiz_2025: number | null | undefined;
@@ -91,6 +104,7 @@ function extractRow(raw: Record<string, unknown>, index: number): ExtractedRow {
     school_type: str(raw["Okul Türü"]),
     education_type: parseEducationType(eduRaw),
     edu_raw: eduRaw,
+    boarding_type: parseBoardingType(raw["Pansiyon"]),
     description: str(raw["Açıklama"]) || null,
     sinavli_2025: parseQuota(raw["Sınavlı 2025"]),
     sinavsiz_2025: parseQuota(raw["Sınavsız 2025"]),
@@ -123,6 +137,9 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
   if (row.edu_raw && row.education_type === null) {
     errors.push("Öğretim Şekli geçersiz. 'Normal Öğretim' veya 'İkili Öğretim' olmalı");
   }
+  if (row.boarding_type === null) {
+    errors.push("Pansiyon geçersiz. 'Yok', 'Kız', 'Erkek' veya 'Karma' olmalı");
+  }
   if (row.description && row.description.length > 1000) {
     errors.push("Açıklama en fazla 1000 karakter olabilir");
   }
@@ -138,6 +155,7 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
     district: row.district,
     school_type: row.school_type,
     education_type: row.education_type,
+    boarding_type: row.boarding_type,
     description: row.description,
     sinavli_2025: row.sinavli_2025,
     sinavsiz_2025: row.sinavsiz_2025,
@@ -307,6 +325,7 @@ export function BulkUploadWizard() {
         district: r.district,
         school_type: r.school_type,
         education_type: r.education_type,
+        ...(r.boarding_type !== undefined && r.boarding_type !== null && { boarding_type: r.boarding_type }),
         description: r.description,
         ...(r.sinavli_2025 !== undefined && r.sinavli_2025 !== null && { sinavli_2025: r.sinavli_2025 }),
         ...(r.sinavsiz_2025 !== undefined && r.sinavsiz_2025 !== null && { sinavsiz_2025: r.sinavsiz_2025 }),
@@ -420,7 +439,7 @@ export function BulkUploadWizard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "Öğretim Şekli", "Açıklama", "Sınavlı 2025", "Sınavsız 2025", "Sınavlı 2024", "Sınavsız 2024", "Telefon", "Website", "Adres"].map(
+                  {["Durum", "#", "Kurum Kodu", "Okul Adı", "Öğretim Şekli", "Pansiyon", "Açıklama", "Sınavlı 2025", "Sınavsız 2025", "Sınavlı 2024", "Sınavsız 2024", "Telefon", "Website", "Adres"].map(
                     (h) => (
                       <th
                         key={h}
@@ -470,6 +489,19 @@ export function BulkUploadWizard() {
                         : row.education_type === "ikili"
                           ? "İkili"
                           : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-slate-600">
+                      {row.boarding_type === undefined
+                        ? "—"
+                        : row.boarding_type === "yok"
+                          ? "Pansiyon Yok"
+                          : row.boarding_type === "kiz"
+                            ? "Kız"
+                            : row.boarding_type === "erkek"
+                              ? "Erkek"
+                              : row.boarding_type === "kiz_erkek"
+                                ? "Karma"
+                                : <span className="text-rose-500">Geçersiz</span>}
                     </td>
                     <td className="max-w-[180px] truncate px-3 py-2 text-slate-500">
                       {row.description
