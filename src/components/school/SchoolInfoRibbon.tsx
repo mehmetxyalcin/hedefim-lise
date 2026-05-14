@@ -60,10 +60,11 @@ export function SchoolInfoRibbon({ school }: Props) {
 
   // 5. Okul Saatleri — ikisi de doluysa
   if (school.schoolHoursStart && school.schoolHoursEnd) {
+    const fmt = (t: string) => t.slice(0, 5);
     items.push({
       icon: <Clock className="h-5 w-5 text-blue-600" />,
       label: "Okul Saatleri",
-      value: `${school.schoolHoursStart} - ${school.schoolHoursEnd}`,
+      value: `${fmt(school.schoolHoursStart)} - ${fmt(school.schoolHoursEnd)}`,
       note: school.schoolHoursNote ?? undefined,
     });
   }
