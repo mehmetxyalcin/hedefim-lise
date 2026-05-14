@@ -63,6 +63,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               Site Ayarları
             </Link>
             <Link
+              href="/admin/meslek-alanlari"
+              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              Meslek Alanları
+            </Link>
+            <Link
               href="/admin/okullar/toplu-yukle"
               className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
