@@ -60,6 +60,23 @@ export async function GET(_req: NextRequest) {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Okullar");
 
+  // ─── Sheet 2: Meslek Alanları ──────────────────────────────────
+  const vocHeaders = ["Kurum Kodu", "Meslek Alanı", "Dal"];
+  const vocExamples = [
+    ["733521", "Bilişim Teknolojileri Alanı", "Yazılım Geliştirme"],
+    ["733521", "Bilişim Teknolojileri Alanı", "Ağ İşletmenliği"],
+    ["733521", "Sağlık Hizmetleri Alanı", "Hemşire Yardımcılığı"],
+    ["745231", "Muhasebe ve Finansman Alanı", ""],
+  ];
+  const vocNotes = [
+    ["NOT: Dal sütunu boş bırakılabilir"],
+    ["NOT: Aynı kurum kodunun mevcut tüm meslek alanları silinip yenileri eklenir"],
+    ["NOT: Büyük/küçük harf fark etmez"],
+  ];
+  const wsVoc = XLSX.utils.aoa_to_sheet([vocHeaders, ...vocExamples, [], ...vocNotes]);
+  wsVoc["!cols"] = [{ wch: 15 }, { wch: 45 }, { wch: 35 }];
+  XLSX.utils.book_append_sheet(wb, wsVoc, "Meslek Alanları");
+
   const buffer: Buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
   return new NextResponse(new Uint8Array(buffer), {

@@ -187,3 +187,140 @@ export async function bulkUploadSchools(
 
   return result;
 }
+
+// ─── Vocational bulk upload ──────────────────────────────────────
+
+export type VocationalRow = {
+  institution_code: string;
+  vocational_field: string;
+  branch?: string;
+};
+
+export type VocationalUploadResult = {
+  updated: number;
+  errors: { institution_code: string; reason: string }[];
+};
+
+export async function fetchSchoolsByInstitutionCodes(
+  codes: string[],
+): Promise<{ institution_code: string; name: string; id: number }[]> {
+  const { supabase } = await requireAdmin();
+  if (codes.length === 0) return [];
+  const { data, error } = await supabase
+    .from("schools")
+    .select("institution_code, name, id")
+    .in("institution_code", codes);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as { institution_code: string; name: string; id: number }[];
+}
+
+export async function fetchVocationalData(): Promise<{
+  fields: { id: number; title: string }[];
+  branches: { id: number; name: string; vocational_field_id: number }[];
+}> {
+  const { supabase } = await requireAdmin();
+  try {
+    const [{ data: fields }, { data: branches }] = await Promise.all([
+      supabase.from("vocational_fields").select("id, title"),
+      supabase.from("vocational_branches").select("id, name, vocational_field_id"),
+    ]);
+    return {
+      fields: (fields ?? []) as { id: number; title: string }[],
+      branches: (branches ?? []) as { id: number; name: string; vocational_field_id: number }[],
+    };
+  } catch {
+    return { fields: [], branches: [] };
+  }
+}
+
+function normalizeVoc(s: string): string {
+  return s.trim().toLocaleLowerCase("tr-TR");
+}
+
+export async function bulkUploadVocational(
+  rows: VocationalRow[],
+): Promise<VocationalUploadResult> {
+  const { supabase } = await requireAdmin();
+
+  if (rows.length > 2000) {
+    throw new Error("Maksimum 2000 satır yüklenebilir.");
+  }
+
+  const [{ data: allFields }, { data: allBranches }] = await Promise.all([
+    supabase.from("vocational_fields").select("id, title"),
+    supabase.from("vocational_branches").select("id, name, vocational_field_id"),
+  ]);
+
+  type VocField = { id: number; title: string };
+  type VocBranch = { id: number; name: string; vocational_field_id: number };
+
+  const fieldMap = new Map<string, VocField>(
+    ((allFields ?? []) as VocField[]).map((f) => [normalizeVoc(f.title), f]),
+  );
+  const branchMap = new Map<string, VocBranch>(
+    ((allBranches ?? []) as VocBranch[]).map((b) => [
+      `${b.vocational_field_id}:${normalizeVoc(b.name)}`,
+      b,
+    ]),
+  );
+
+  const grouped = new Map<string, VocationalRow[]>();
+  for (const row of rows) {
+    const list = grouped.get(row.institution_code) ?? [];
+    list.push(row);
+    grouped.set(row.institution_code, list);
+  }
+
+  const result: VocationalUploadResult = { updated: 0, errors: [] };
+
+  for (const [institutionCode, schoolRows] of grouped) {
+    const { data: school } = await supabase
+      .from("schools")
+      .select("id")
+      .eq("institution_code", institutionCode)
+      .maybeSingle();
+
+    if (!school) {
+      result.errors.push({
+        institution_code: institutionCode,
+        reason: "Bu kurum koduna ait okul bulunamadı",
+      });
+      continue;
+    }
+
+    const schoolId = (school as { id: number }).id;
+
+    // Delete existing (branches first, then fields)
+    await supabase.from("school_vocational_branches").delete().eq("school_id", schoolId);
+    await supabase.from("school_vocational_fields").delete().eq("school_id", schoolId);
+
+    const insertedFieldSet = new Set<number>();
+    const insertedBranchSet = new Set<number>();
+
+    for (const row of schoolRows) {
+      const field = fieldMap.get(normalizeVoc(row.vocational_field));
+      if (!field) continue;
+
+      if (!insertedFieldSet.has(field.id)) {
+        const { error } = await supabase
+          .from("school_vocational_fields")
+          .insert({ school_id: schoolId, vocational_field_id: field.id });
+        if (!error) insertedFieldSet.add(field.id);
+      }
+
+      if (row.branch?.trim()) {
+        const branch = branchMap.get(`${field.id}:${normalizeVoc(row.branch)}`);
+        if (branch && !insertedBranchSet.has(branch.id)) {
+          const { error } = await supabase
+            .from("school_vocational_branches")
+            .insert({ school_id: schoolId, branch_id: branch.id });
+          if (!error) insertedBranchSet.add(branch.id);
+        }
+      }
+    }
+
+    result.updated++;
+  }
+
+  return result;
+}
