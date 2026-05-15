@@ -3,7 +3,6 @@ import { Sparkles } from "lucide-react";
 import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { SchoolList } from "@/components/schools/SchoolList";
-import { SchoolFilters } from "@/components/schools/SchoolFilters";
 import { Pagination } from "@/components/schools/Pagination";
 
 export const metadata: Metadata = {
@@ -107,8 +106,6 @@ export default async function OkullarPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <SchoolFilters initialValues={{ search: ara, ilce, tur, limit }} />
-
         <div className="mb-5 flex items-center justify-between">
           <p className="text-sm text-slate-500">
             {totalCount === 0 ? (
@@ -135,7 +132,15 @@ export default async function OkullarPage({ searchParams }: Props) {
           )}
         </div>
 
-        <SchoolList schools={schools} vocationalFields={vocationalFields} />
+        <SchoolList
+          key={`${ara}-${ilce}-${tur}-${limit}`}
+          schools={schools}
+          vocationalFields={vocationalFields}
+          initialSearch={ara}
+          initialIlce={ilce}
+          initialTur={tur}
+          initialLimit={limit}
+        />
 
         <Pagination
           currentPage={currentPage}

@@ -2,35 +2,34 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowDownWideNarrow,
   ArrowRight,
   BadgeCheck,
-  Briefcase,
   CheckCircle2,
   ChevronRight,
   Filter,
-  GraduationCap,
   MapPin,
   Phone,
   Search,
   SlidersHorizontal,
   X,
-  XCircle,
 } from "lucide-react";
+import { DISTRICTS } from "@/data/districts";
+import { SCHOOL_TYPES } from "@/data/schoolTypes";
 import type { School, SchoolScoreRaw } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
 
-type Filters = {
-  field: string;
-  hasGym: boolean;
-  hasLibrary: boolean;
-};
+const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
 
-const initialFilters: Filters = {
-  field: "",
-  hasGym: false,
-  hasLibrary: false,
+type Props = {
+  schools: School[];
+  vocationalFields: VocationalField[];
+  initialSearch?: string;
+  initialIlce?: string;
+  initialTur?: string;
+  initialLimit?: number;
 };
 
 type DisplayScore = {
@@ -51,98 +50,285 @@ function getDisplayScore(scores: SchoolScoreRaw[] | undefined): DisplayScore | n
   return null;
 }
 
-type SchoolListProps = {
-  schools: School[];
-  vocationalFields: VocationalField[];
-};
+export function SchoolList({
+  schools,
+  vocationalFields,
+  initialSearch = "",
+  initialIlce = "",
+  initialTur = "",
+  initialLimit = 20,
+}: Props) {
+  const router = useRouter();
 
-export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
-  const [filters, setFilters] = useState<Filters>(initialFilters);
+  // URL-based filter form state — applied on "Ara" button click
+  const [search, setSearch] = useState(initialSearch);
+  const [ilce, setIlce] = useState(initialIlce);
+  const [tur, setTur] = useState(initialTur);
+  const [limit, setLimit] = useState<number>(initialLimit);
+
+  // Client-side filters — applied immediately
+  const [alan, setAlan] = useState("");
+  const [hasGym, setHasGym] = useState(false);
+  const [hasLibrary, setHasLibrary] = useState(false);
+
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  const activeFiltersCount =
-    Number(Boolean(filters.field)) +
-    Number(filters.hasGym) +
-    Number(filters.hasLibrary);
+  function buildSearchUrl(): string {
+    const params = new URLSearchParams();
+    const s = search.trim();
+    if (s) params.set("ara", s);
+    if (ilce) params.set("ilce", ilce);
+    if (tur) params.set("tur", tur);
+    if (limit !== 20) params.set("limit", String(limit));
+    const qs = params.toString();
+    return `/okullar${qs ? `?${qs}` : ""}`;
+  }
 
+  function handleSearch() {
+    router.push(buildSearchUrl());
+    setIsMobileFilterOpen(false);
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setIlce("");
+    setTur("");
+    setLimit(20);
+    setAlan("");
+    setHasGym(false);
+    setHasLibrary(false);
+    router.push("/okullar");
+    setIsMobileFilterOpen(false);
+  }
+
+  // Active filter count: URL filters currently applied (from initial values) + client filters
+  const activeFilterCount =
+    Number(Boolean(initialSearch)) +
+    Number(Boolean(initialIlce)) +
+    Number(Boolean(initialTur)) +
+    Number(initialLimit !== 20) +
+    Number(Boolean(alan)) +
+    Number(hasGym) +
+    Number(hasLibrary);
+
+  const hasActiveFilters =
+    Boolean(search.trim() || ilce || tur || limit !== 20 || alan || hasGym || hasLibrary);
+
+  // Client-side filtering on current page's schools
   const filteredSchools = useMemo(
     () =>
       schools.filter((school) => {
+        const alanId = vocationalFields.find((f) => f.title === alan)?.id;
         return (
-          (filters.field === "" ||
-            school.vocationalFields?.includes(Number.parseInt(filters.field, 10))) &&
-          (!filters.hasGym || school.features.includes("Kapalı Spor Salonu")) &&
-          (!filters.hasLibrary || school.features.includes("Z-Kütüphane"))
+          (alan === "" || (alanId !== undefined && school.vocationalFields?.includes(alanId))) &&
+          (!hasGym || school.features.includes("Kapalı Spor Salonu")) &&
+          (!hasLibrary || school.features.includes("Z-Kütüphane"))
         );
       }),
-    [filters, schools],
+    [alan, hasGym, hasLibrary, schools, vocationalFields],
   );
 
-  const selectedField = vocationalFields.find(
-    (field) => field.id === Number.parseInt(filters.field, 10),
-  );
+  const sidebarContent = (
+    <div className="ml-auto flex h-full w-[85%] flex-col overflow-y-auto bg-white p-6 shadow-2xl lg:ml-0 lg:h-auto lg:w-full lg:overflow-visible lg:rounded-3xl lg:border lg:border-slate-200 lg:p-7 lg:shadow-sm">
+      {/* Sidebar header */}
+      <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-5">
+        <div className="flex items-center gap-2">
+          <Filter className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-bold tracking-tight text-slate-900">Detaylı Filtre</h2>
+          {activeFilterCount > 0 && (
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold text-white">
+              {activeFilterCount}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => setIsMobileFilterOpen(false)}
+          className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 lg:hidden"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
 
-  function removeFilter(key: keyof Filters) {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: typeof prev[key] === "boolean" ? false : "",
-    }));
-  }
+      <div className="flex-grow space-y-5">
+        {/* A) Arama kutusu */}
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Okul Ara</label>
+          <div className="relative">
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Okul adı ara..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              className="w-full rounded-lg border border-slate-200 py-2 pr-8 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* B) İlçe */}
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700">İlçe</label>
+          <select
+            value={ilce}
+            onChange={(e) => setIlce(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="">Tüm İlçeler</option>
+            {DISTRICTS.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* C) Okul Türü */}
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Okul Türü</label>
+          <select
+            value={tur}
+            onChange={(e) => setTur(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="">Tüm Türler</option>
+            {SCHOOL_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* D) Meslek Alanı (client-side) */}
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Meslek Alanı</label>
+          <select
+            value={alan}
+            onChange={(e) => setAlan(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="">Tüm Meslek Alanları</option>
+            {vocationalFields.map((f) => (
+              <option key={f.id} value={f.title}>
+                {f.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* E) Sayfa başına */}
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+            Sayfa Başına Okul
+          </label>
+          <select
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            {LIMIT_OPTIONS.map((l) => (
+              <option key={l} value={l}>
+                {l} okul
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Tesis & İmkanlar (client-side) */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Tesis & İmkanlar
+          </label>
+          <div className="space-y-2">
+            {([
+              { key: "hasGym", label: "Kapalı Spor Salonu", checked: hasGym, set: setHasGym },
+              { key: "hasLibrary", label: "Z-Kütüphane", checked: hasLibrary, set: setHasLibrary },
+            ] as const).map((item) => (
+              <label
+                key={item.key}
+                className={`flex cursor-pointer items-center rounded-xl border p-3 transition-all ${
+                  item.checked
+                    ? "border-blue-200 bg-blue-50/50 shadow-sm"
+                    : "border-slate-200 bg-white hover:bg-slate-50"
+                }`}
+              >
+                <div
+                  className={`mr-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors ${
+                    item.checked
+                      ? "border-blue-600 bg-blue-600"
+                      : "border-slate-300 bg-slate-50"
+                  }`}
+                >
+                  {item.checked && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                </div>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={item.checked}
+                  onChange={(e) => item.set(e.target.checked)}
+                />
+                <span
+                  className={`text-sm font-semibold ${
+                    item.checked ? "text-blue-900" : "text-slate-700"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* F) Butonlar */}
+      <div className="mt-6 space-y-2 border-t border-slate-100 pt-6">
+        <button
+          onClick={handleSearch}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          <Search className="h-4 w-4" />
+          Ara
+        </button>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="w-full rounded-lg bg-slate-100 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200"
+          >
+            Filtreleri Temizle
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <div className="relative z-30 mb-8 flex flex-col items-start gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
+      {/* Top bar: result count + sort + mobile filter button */}
+      <div className="relative z-30 mb-6 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
           <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
             {filteredSchools.length}
-            <span className="ml-1 font-medium text-slate-500">Sonuç</span>
+            <span className="ml-1 font-medium text-slate-500">sonuç</span>
           </span>
-
-          {filters.field && (
-            <div
-              className="group flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
-              onClick={() => removeFilter("field")}
-            >
-              <Briefcase className="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-red-500" />
-              {selectedField?.title}
-              <XCircle className="ml-1 h-3.5 w-3.5 text-slate-300 transition-colors group-hover:text-red-500" />
-            </div>
-          )}
-          {filters.hasGym && (
-            <div
-              className="group flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
-              onClick={() => removeFilter("hasGym")}
-            >
-              Spor Salonu
-              <XCircle className="ml-1 h-3.5 w-3.5 text-slate-300 transition-colors group-hover:text-red-500" />
-            </div>
-          )}
-          {filters.hasLibrary && (
-            <div
-              className="group flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
-              onClick={() => removeFilter("hasLibrary")}
-            >
-              Z-Kütüphane
-              <XCircle className="ml-1 h-3.5 w-3.5 text-slate-300 transition-colors group-hover:text-red-500" />
-            </div>
-          )}
-
-          {activeFiltersCount > 0 && (
-            <button
-              onClick={() => setFilters(initialFilters)}
-              className="ml-2 text-xs font-semibold text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-800"
-            >
-              Sıfırla
-            </button>
-          )}
         </div>
 
-        <div className="mt-2 flex w-full items-center gap-3 border-t border-slate-100 pt-4 md:mt-0 md:w-auto md:border-t-0 md:pt-0">
-          <div className="group relative flex-1 md:w-56">
-            <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
+        <div className="flex items-center gap-3">
+          <div className="group relative hidden md:block">
+            <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <select
               defaultValue="yüzdelik"
-              className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none transition-all hover:bg-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             >
               <option value="yüzdelik">Yüzdelik: Düşükten Yükseğe</option>
               <option value="isim">İsim: A&apos;dan Z&apos;ye</option>
@@ -152,146 +338,35 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
 
           <button
             onClick={() => setIsMobileFilterOpen(true)}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 md:hidden"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 lg:hidden"
           >
             <SlidersHorizontal className="h-4 w-4" />
             Filtrele
-            {activeFiltersCount > 0 && (
+            {activeFilterCount > 0 && (
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
-                {activeFiltersCount}
+                {activeFilterCount}
               </span>
             )}
           </button>
         </div>
       </div>
 
+      {/* Main layout: sidebar + cards */}
       <div className="relative flex flex-col items-start gap-8 lg:flex-row">
+        {/* Sidebar */}
         <div
-          className={`${isMobileFilterOpen ? "fixed inset-0 z-50 flex" : "hidden"} w-full shrink-0 flex-col bg-slate-900/40 backdrop-blur-sm lg:sticky lg:top-24 lg:flex lg:w-[280px] lg:bg-transparent lg:backdrop-blur-none`}
+          className={`${
+            isMobileFilterOpen ? "fixed inset-0 z-50 flex" : "hidden"
+          } w-full shrink-0 flex-col bg-slate-900/40 backdrop-blur-sm lg:sticky lg:top-24 lg:flex lg:w-[300px] lg:bg-transparent lg:backdrop-blur-none`}
         >
-          <div className="ml-auto flex h-full w-[85%] flex-col overflow-y-auto border-r border-slate-200 bg-white p-6 shadow-2xl lg:ml-0 lg:h-auto lg:w-full lg:overflow-visible lg:rounded-3xl lg:border lg:p-7 lg:shadow-sm">
-            <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-5">
-              <div>
-                <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900">
-                  <Filter className="h-5 w-5 text-blue-600" />
-                  Detaylı Filtre
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Sonuçları daraltarak hedefine ulaş.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsMobileFilterOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 lg:hidden"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="flex-grow space-y-8">
-              <div>
-                <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Meslek Alanı
-                </label>
-                <div className="group relative">
-                  <Briefcase className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
-                  <select
-                    className="w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3 pr-10 pl-10 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all hover:bg-slate-100 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                    value={filters.field}
-                    onChange={(e) =>
-                      setFilters({ ...filters, field: e.target.value })
-                    }
-                  >
-                    <option value="">Tüm Alanlar</option>
-                    {vocationalFields.map((field) => (
-                      <option key={field.id} value={field.id}>
-                        {field.title}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronRight className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 rotate-90 text-slate-400" />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Tesis & İmkanlar
-                </label>
-                <div className="space-y-2.5">
-                  {[
-                    { key: "hasGym", label: "Kapalı Spor Salonu" },
-                    { key: "hasLibrary", label: "Z-Kütüphane" },
-                  ].map((item) => {
-                    const checked = filters[item.key as keyof Filters] as boolean;
-                    return (
-                      <label
-                        key={item.key}
-                        className={`flex cursor-pointer items-center rounded-xl border p-3.5 transition-all duration-200 ${
-                          checked
-                            ? "border-blue-200 bg-blue-50/50 ring-1 ring-blue-500/5 shadow-sm"
-                            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                        }`}
-                      >
-                        <div
-                          className={`mr-3.5 flex h-5 w-5 items-center justify-center rounded-[6px] border transition-colors ${
-                            checked
-                              ? "border-blue-600 bg-blue-600 text-white"
-                              : "border-slate-300 bg-slate-50"
-                          }`}
-                        >
-                          {checked && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
-                        </div>
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={checked}
-                          onChange={(e) =>
-                            setFilters({
-                              ...filters,
-                              [item.key]: e.target.checked,
-                            } as Filters)
-                          }
-                        />
-                        <span
-                          className={`text-sm font-semibold transition-colors ${
-                            checked ? "text-blue-900" : "text-slate-700"
-                          }`}
-                        >
-                          {item.label}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex gap-3 border-t border-slate-100 pt-6">
-              <button
-                onClick={() => {
-                  setFilters(initialFilters);
-                  if (window.innerWidth < 1024) {
-                    setIsMobileFilterOpen(false);
-                  }
-                }}
-                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
-              >
-                Sıfırla
-              </button>
-              <button
-                onClick={() => setIsMobileFilterOpen(false)}
-                className="flex-[2] rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm lg:hidden"
-              >
-                Uygula
-              </button>
-            </div>
-          </div>
+          {sidebarContent}
           <div
             className="h-full w-[15%] lg:hidden"
             onClick={() => setIsMobileFilterOpen(false)}
           />
         </div>
 
+        {/* Cards */}
         <div className="min-w-0 flex-1">
           <div className="grid gap-5">
             {filteredSchools.map((school, index) => (
@@ -402,7 +477,7 @@ export function SchoolList({ schools, vocationalFields }: SchoolListProps) {
                   Lütfen filtrelerinizi esnetmeyi deneyin.
                 </p>
                 <button
-                  onClick={() => setFilters(initialFilters)}
+                  onClick={clearFilters}
                   className="rounded-xl border border-slate-200 bg-white px-6 py-3 font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
                 >
                   Tüm Filtreleri Temizle
