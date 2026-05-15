@@ -33,6 +33,7 @@ type Props = {
     ara?: string;
     ilce?: string;
     tur?: string;
+    alan?: string;
     limit?: string;
     sayfa?: string;
   }>;
@@ -44,12 +45,26 @@ export default async function OkullarPage({ searchParams }: Props) {
   const ara = (params.ara ?? "").trim();
   const ilce = params.ilce ?? "";
   const tur = params.tur ?? "";
+  const alan = (params.alan ?? "").trim(); // vocational field ID
   const limit = parseLimit(params.limit);
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
 
   const supabase = await createClient();
 
+  // Step 1: When a vocational field is selected, resolve which school IDs have it.
+  // This runs before the main query so count and offset are computed against the
+  // correct subset (a join select would inflate the row count per school).
+  let schoolIdFilter: number[] | null = null;
+  if (alan) {
+    const { data: svfData } = await supabase
+      .from("school_vocational_fields")
+      .select("school_id")
+      .eq("vocational_field_id", Number(alan));
+    schoolIdFilter = (svfData ?? []).map((r) => r.school_id as number);
+  }
+
+  // Step 2: Build and run the main query. Include vocational fields list in parallel.
   let schoolsQuery = supabase
     .from("schools")
     .select(
@@ -62,6 +77,10 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (ara) schoolsQuery = schoolsQuery.ilike("name", `%${ara}%`);
   if (ilce) schoolsQuery = schoolsQuery.eq("district", ilce);
   if (tur) schoolsQuery = schoolsQuery.eq("type", tur);
+  if (schoolIdFilter !== null) {
+    // Empty schoolIdFilter means no schools have this field — use [-1] to guarantee 0 results.
+    schoolsQuery = schoolsQuery.in("id", schoolIdFilter.length > 0 ? schoolIdFilter : [-1]);
+  }
 
   const [schoolsResult, fieldsResult] = await Promise.all([
     schoolsQuery.range(offset, offset + limit - 1),
@@ -83,6 +102,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (ara) paginationSearchParams.ara = ara;
   if (ilce) paginationSearchParams.ilce = ilce;
   if (tur) paginationSearchParams.tur = tur;
+  if (alan) paginationSearchParams.alan = alan;
   if (limit !== 20) paginationSearchParams.limit = String(limit);
 
   const startItem = totalCount === 0 ? 0 : offset + 1;
@@ -133,12 +153,13 @@ export default async function OkullarPage({ searchParams }: Props) {
         </div>
 
         <SchoolList
-          key={`${ara}-${ilce}-${tur}-${limit}`}
+          key={`${ara}-${ilce}-${tur}-${alan}-${limit}`}
           schools={schools}
           vocationalFields={vocationalFields}
           initialSearch={ara}
           initialIlce={ilce}
           initialTur={tur}
+          initialAlan={alan}
           initialLimit={limit}
         />
 

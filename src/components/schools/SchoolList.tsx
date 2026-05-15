@@ -29,6 +29,7 @@ type Props = {
   initialSearch?: string;
   initialIlce?: string;
   initialTur?: string;
+  initialAlan?: string;
   initialLimit?: number;
 };
 
@@ -56,6 +57,7 @@ export function SchoolList({
   initialSearch = "",
   initialIlce = "",
   initialTur = "",
+  initialAlan = "",
   initialLimit = 20,
 }: Props) {
   const router = useRouter();
@@ -64,10 +66,8 @@ export function SchoolList({
   const [search, setSearch] = useState(initialSearch);
   const [ilce, setIlce] = useState(initialIlce);
   const [tur, setTur] = useState(initialTur);
+  const [alan, setAlan] = useState(initialAlan); // vocational field ID as string
   const [limit, setLimit] = useState<number>(initialLimit);
-
-  // Client-side filters — applied immediately
-  const [alan, setAlan] = useState("");
   const [hasGym, setHasGym] = useState(false);
   const [hasLibrary, setHasLibrary] = useState(false);
 
@@ -79,6 +79,7 @@ export function SchoolList({
     if (s) params.set("ara", s);
     if (ilce) params.set("ilce", ilce);
     if (tur) params.set("tur", tur);
+    if (alan) params.set("alan", alan);
     if (limit !== 20) params.set("limit", String(limit));
     const qs = params.toString();
     return `/okullar${qs ? `?${qs}` : ""}`;
@@ -101,31 +102,28 @@ export function SchoolList({
     setIsMobileFilterOpen(false);
   }
 
-  // Active filter count: URL filters currently applied (from initial values) + client filters
+  // Active filter count: shows filters currently applied to server results + client-side filters
   const activeFilterCount =
     Number(Boolean(initialSearch)) +
     Number(Boolean(initialIlce)) +
     Number(Boolean(initialTur)) +
+    Number(Boolean(initialAlan)) +
     Number(initialLimit !== 20) +
-    Number(Boolean(alan)) +
     Number(hasGym) +
     Number(hasLibrary);
 
   const hasActiveFilters =
-    Boolean(search.trim() || ilce || tur || limit !== 20 || alan || hasGym || hasLibrary);
+    Boolean(search.trim() || ilce || tur || alan || limit !== 20 || hasGym || hasLibrary);
 
-  // Client-side filtering on current page's schools
+  // Client-side filtering: only gym/library remain; alan is now server-side via URL
   const filteredSchools = useMemo(
     () =>
-      schools.filter((school) => {
-        const alanId = vocationalFields.find((f) => f.title === alan)?.id;
-        return (
-          (alan === "" || (alanId !== undefined && school.vocationalFields?.includes(alanId))) &&
+      schools.filter(
+        (school) =>
           (!hasGym || school.features.includes("Kapalı Spor Salonu")) &&
-          (!hasLibrary || school.features.includes("Z-Kütüphane"))
-        );
-      }),
-    [alan, hasGym, hasLibrary, schools, vocationalFields],
+          (!hasLibrary || school.features.includes("Z-Kütüphane")),
+      ),
+    [hasGym, hasLibrary, schools],
   );
 
   const sidebarContent = (
@@ -220,7 +218,7 @@ export function SchoolList({
           >
             <option value="">Tüm Meslek Alanları</option>
             {vocationalFields.map((f) => (
-              <option key={f.id} value={f.title}>
+              <option key={f.id} value={String(f.id)}>
                 {f.title}
               </option>
             ))}
