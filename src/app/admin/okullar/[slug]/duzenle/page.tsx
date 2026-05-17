@@ -58,7 +58,6 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
         school_vocational_fields(vocational_field_id),
         school_facilities(facility_id),
         school_vocational_branches(branch_id),
-        school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id),
         school_quotas(id, school_id, year, sinavli_count, sinavsiz_count),
         school_scholarships(id, school_id, title, description, amount_info, order_index),
         school_projects(id, school_id, title, description, image_url, link_url, order_index)
@@ -82,7 +81,27 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
   const selectedBranchIds: string[] = (sd.school_vocational_branches ?? []).map((b: any) => b.branch_id);
   const selectedFieldIds: number[] = (sd.school_vocational_fields ?? []).map((f: any) => f.vocational_field_id);
 
-  const scores = (sd.school_scores ?? []).map(mapSchoolScore);
+  // school_scores'u ayrı sorgula; vocational_field_id kolonu DB'de henüz yoksa
+  // (migration çalıştırılmamış) fallback olarak sütun olmadan çek.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let scoresRaw: any[] = [];
+  {
+    const { data: scoresWithField, error: scoresErr } = await supabase
+      .from("school_scores")
+      .select("id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id")
+      .eq("school_id", sd.id);
+    if (!scoresErr) {
+      scoresRaw = scoresWithField ?? [];
+    } else {
+      const { data: scoresBasic } = await supabase
+        .from("school_scores")
+        .select("id, school_id, year, obp_score, lgs_score, percentile")
+        .eq("school_id", sd.id);
+      scoresRaw = scoresBasic ?? [];
+    }
+  }
+
+  const scores = scoresRaw.map(mapSchoolScore);
   const quotas = (sd.school_quotas ?? []).map(mapSchoolQuota);
   const schoolVocationalFields: { id: number; title: string }[] = (vocationalFieldsData ?? [])
     .filter((vf: any) => selectedFieldIds.includes(vf.id as number))
