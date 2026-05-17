@@ -687,22 +687,31 @@ export async function upsertSchoolScore(formData: FormData) {
   const year = Number(formData.get("year"));
   if (!schoolId || !year) redirect("/admin");
 
+  const id = String(formData.get("id") ?? "").trim() || null;
+  const rawFieldId = String(formData.get("vocational_field_id") ?? "").trim();
+  const vocationalFieldId = rawFieldId ? Number(rawFieldId) : null;
+
   const toOptionalNumeric = (key: string) => {
     const raw = String(formData.get(key) ?? "").trim().replace(",", ".");
     const n = parseFloat(raw);
     return isNaN(n) ? null : n;
   };
 
-  const { error } = await supabase.from("school_scores").upsert(
-    {
-      school_id: schoolId,
-      year,
-      obp_score: toOptionalNumeric("obp_score"),
-      lgs_score: toOptionalNumeric("lgs_score"),
-      percentile: toOptionalNumeric("percentile"),
-    },
-    { onConflict: "school_id,year" },
-  );
+  const payload = {
+    school_id: schoolId,
+    year,
+    vocational_field_id: vocationalFieldId,
+    obp_score: toOptionalNumeric("obp_score"),
+    lgs_score: toOptionalNumeric("lgs_score"),
+    percentile: toOptionalNumeric("percentile"),
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabase.from("school_scores").update(payload).eq("id", id));
+  } else {
+    ({ error } = await supabase.from("school_scores").insert(payload));
+  }
 
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 

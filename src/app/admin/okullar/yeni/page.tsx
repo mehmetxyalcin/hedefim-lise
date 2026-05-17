@@ -97,6 +97,7 @@ export default async function AdminNewSchoolPage({ searchParams }: Props) {
           reorderProject={reorderSchoolProject}
           scores={[]}
           quotas={[]}
+          schoolVocationalFields={[]}
         />
       </div>
     </div>

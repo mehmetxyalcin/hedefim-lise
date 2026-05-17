@@ -237,6 +237,7 @@ export async function fetchVocationalData(): Promise<{
 
 export type ScoreRow = {
   institution_code: string;
+  vocational_field?: string;
   obp_2025?: number;
   lgs_2025?: number;
   percentile_2025?: number;
@@ -253,6 +254,10 @@ export type ScoreUploadResult = {
   errors: { institution_code: string; reason: string }[];
 };
 
+function normalizeScoreField(s: string): string {
+  return s.trim().toLocaleLowerCase("tr-TR");
+}
+
 export async function bulkUploadScores(rows: ScoreRow[]): Promise<ScoreUploadResult> {
   const { supabase } = await requireAdmin();
 
@@ -260,53 +265,101 @@ export async function bulkUploadScores(rows: ScoreRow[]): Promise<ScoreUploadRes
     throw new Error("Maksimum 500 satır yüklenebilir.");
   }
 
+  // Tüm meslek alanlarını çek ve normalize Map oluştur
+  const { data: allVocFields } = await supabase
+    .from("vocational_fields")
+    .select("id, title");
+  const vocFieldMap = new Map(
+    ((allVocFields ?? []) as { id: number; title: string }[]).map((f) => [
+      normalizeScoreField(f.title),
+      f,
+    ]),
+  );
+
   const result: ScoreUploadResult = { updated: 0, errors: [] };
 
   for (const row of rows) {
-    const { data: school } = await supabase
-      .from("schools")
-      .select("id")
-      .eq("institution_code", row.institution_code)
-      .maybeSingle();
-
-    if (!school) {
-      result.errors.push({ institution_code: row.institution_code, reason: "Okul bulunamadı" });
-      continue;
-    }
-
-    const schoolId = (school as { id: number }).id;
-    const years = [2025, 2024, 2023] as const;
-
-    for (const year of years) {
-      const obp = row[`obp_${year}` as keyof ScoreRow] as number | undefined;
-      const lgs = row[`lgs_${year}` as keyof ScoreRow] as number | undefined;
-      const percentile = row[`percentile_${year}` as keyof ScoreRow] as number | undefined;
-
-      if (obp === undefined && lgs === undefined && percentile === undefined) continue;
-
-      // Fetch existing record so we can preserve fields not provided in this upload
-      const { data: existing } = await supabase
-        .from("school_scores")
-        .select("obp_score, lgs_score, percentile")
-        .eq("school_id", schoolId)
-        .eq("year", year)
+    try {
+      const { data: school } = await supabase
+        .from("schools")
+        .select("id")
+        .eq("institution_code", row.institution_code)
         .maybeSingle();
 
-      const rec = existing as { obp_score: number | null; lgs_score: number | null; percentile: number | null } | null;
+      if (!school) {
+        result.errors.push({ institution_code: row.institution_code, reason: "Okul bulunamadı" });
+        continue;
+      }
 
-      await supabase.from("school_scores").upsert(
-        {
+      const schoolId = (school as { id: number }).id;
+
+      // Meslek alanını çöz
+      let vocFieldId: number | null = null;
+      if (row.vocational_field?.trim()) {
+        const found = vocFieldMap.get(normalizeScoreField(row.vocational_field));
+        if (!found) {
+          result.errors.push({
+            institution_code: row.institution_code,
+            reason: `Meslek alanı bulunamadı: "${row.vocational_field}"`,
+          });
+          continue;
+        }
+        vocFieldId = found.id;
+      }
+
+      const years = [2025, 2024, 2023] as const;
+
+      for (const year of years) {
+        const obp = row[`obp_${year}` as keyof ScoreRow] as number | undefined;
+        const lgs = row[`lgs_${year}` as keyof ScoreRow] as number | undefined;
+        const percentile = row[`percentile_${year}` as keyof ScoreRow] as number | undefined;
+
+        if (obp === undefined && lgs === undefined && percentile === undefined) continue;
+
+        // Mevcut kaydı bul (NULL-safe: IS NULL veya = value)
+        let existingQuery = supabase
+          .from("school_scores")
+          .select("id, obp_score, lgs_score, percentile")
+          .eq("school_id", schoolId)
+          .eq("year", year);
+
+        if (vocFieldId !== null) {
+          existingQuery = existingQuery.eq("vocational_field_id", vocFieldId);
+        } else {
+          existingQuery = existingQuery.is("vocational_field_id", null);
+        }
+
+        const { data: existing } = await existingQuery.maybeSingle();
+        const rec = existing as {
+          id: string;
+          obp_score: number | null;
+          lgs_score: number | null;
+          percentile: number | null;
+        } | null;
+
+        const payload = {
           school_id: schoolId,
           year,
+          vocational_field_id: vocFieldId,
           obp_score: obp ?? rec?.obp_score ?? null,
           lgs_score: lgs ?? rec?.lgs_score ?? null,
           percentile: percentile ?? rec?.percentile ?? null,
-        },
-        { onConflict: "school_id,year" },
-      );
-    }
+        };
 
-    result.updated++;
+        if (rec) {
+          await supabase.from("school_scores").update(payload).eq("id", rec.id);
+        } else {
+          await supabase.from("school_scores").insert(payload);
+        }
+      }
+
+      result.updated++;
+    } catch (err) {
+      result.errors.push({
+        institution_code: row.institution_code,
+        reason: err instanceof Error ? err.message : "Bilinmeyen hata",
+      });
+    }
   }
 
   return result;

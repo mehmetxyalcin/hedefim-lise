@@ -94,6 +94,7 @@ type Props = {
   // Puan / kota verileri (okuma için)
   scores: SchoolScore[];
   quotas: SchoolQuota[];
+  schoolVocationalFields: { id: number; title: string }[];
 };
 
 export function SchoolFormTabs({
@@ -130,6 +131,7 @@ export function SchoolFormTabs({
   reorderProject,
   scores,
   quotas,
+  schoolVocationalFields,
 }: Props) {
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId | null) ?? "temel";
@@ -221,6 +223,7 @@ export function SchoolFormTabs({
           schoolId={school.id}
           scores={scores}
           quotas={quotas}
+          schoolVocationalFields={schoolVocationalFields}
           upsertScore={upsertScore}
           upsertQuota={upsertQuota}
           deleteScore={deleteScore}

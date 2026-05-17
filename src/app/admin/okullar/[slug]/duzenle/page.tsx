@@ -58,7 +58,7 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
         school_vocational_fields(vocational_field_id),
         school_facilities(facility_id),
         school_vocational_branches(branch_id),
-        school_scores(id, school_id, year, obp_score, lgs_score, percentile),
+        school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id),
         school_quotas(id, school_id, year, sinavli_count, sinavsiz_count),
         school_scholarships(id, school_id, title, description, amount_info, order_index),
         school_projects(id, school_id, title, description, image_url, link_url, order_index)
@@ -84,6 +84,9 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
 
   const scores = (sd.school_scores ?? []).map(mapSchoolScore);
   const quotas = (sd.school_quotas ?? []).map(mapSchoolQuota);
+  const schoolVocationalFields: { id: number; title: string }[] = (vocationalFieldsData ?? [])
+    .filter((vf: any) => selectedFieldIds.includes(vf.id as number))
+    .map((vf: any) => ({ id: vf.id as number, title: vf.title as string }));
   const scholarships = [...(sd.school_scholarships ?? [])]
     .sort((a: any, b: any) => a.order_index - b.order_index)
     .map(mapSchoolScholarship);
@@ -151,6 +154,7 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
           reorderProject={reorderSchoolProject}
           scores={scores}
           quotas={quotas}
+          schoolVocationalFields={schoolVocationalFields}
         />
       </div>
     </div>

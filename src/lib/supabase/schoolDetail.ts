@@ -24,7 +24,7 @@ const SCHOOL_DETAIL_SELECT = `
   school_vocational_branches (
     branch:vocational_branches ( id, vocational_field_id, name )
   ),
-  school_scores ( id, school_id, year, obp_score, lgs_score, percentile ),
+  school_scores ( id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id, vocational_field:vocational_fields ( id, title ) ),
   school_quotas ( id, school_id, year, sinavli_count, sinavsiz_count ),
   school_scholarships ( id, school_id, title, description, amount_info, order_index ),
   school_projects ( id, school_id, title, description, image_url, link_url, order_index )
@@ -96,6 +96,10 @@ function mapRawToSchoolWithDetails(row: any): SchoolWithDetails {
       obpScore: (s.obp_score as number | null) ?? null,
       lgsScore: (s.lgs_score as number | null) ?? null,
       percentile: (s.percentile as number | null) ?? null,
+      vocationalFieldId: (s.vocational_field_id as number | null) ?? null,
+      vocationalField: s.vocational_field
+        ? { id: s.vocational_field.id as number, name: s.vocational_field.title as string }
+        : null,
     }));
 
   // Kontenjan

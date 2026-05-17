@@ -18,10 +18,13 @@ type Props = { school: SchoolWithDetails };
 export function SchoolDetail({ school }: Props) {
   // SchoolScoreCard snake_case bekliyor; SchoolWithDetails camelCase döndürür
   const scores = school.scores.map((s) => ({
+    id: s.id,
     year: s.year,
     obp_score: s.obpScore,
     lgs_score: s.lgsScore,
     percentile: s.percentile,
+    vocational_field_id: s.vocationalFieldId,
+    vocational_field: s.vocationalField ?? null,
   }));
 
   // SchoolQuotaCard snake_case bekliyor

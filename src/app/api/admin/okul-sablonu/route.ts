@@ -80,25 +80,28 @@ export async function GET(_req: NextRequest) {
   // ─── Sheet 3: Puan Bilgileri ───────────────────────────────────
   const scoreHeaders = [
     "Kurum Kodu",
+    "Meslek Alanı",
     "OBP 2025", "LGS 2025", "Yüzdelik 2025",
     "OBP 2024", "LGS 2024", "Yüzdelik 2024",
     "OBP 2023", "LGS 2023", "Yüzdelik 2023",
   ];
-  const scoreExample = [
-    "733521",
-    450.50, 380.25, 15.00,
-    420.00, 360.00, 18.50,
-    400.00, 340.00, 22.00,
+  const scoreExamples = [
+    ["733521", "",                          350.50, 280.25, 65.00, 320.00, 260.00, 70.00, 300.00, 240.00, 72.00],
+    ["745231", "Tesisat Teknolojisi",       450.50, 380.25, 15.00, 420.00, 360.00, 18.50, 400.00, 340.00, 22.00],
+    ["745231", "Elektrik-Elektronik",       420.00, 360.00, 22.00, 400.00, 340.00, 25.00, 380.00, 320.00, 28.00],
   ];
   const scoreNotes = [
     ["NOT: Kurum Kodu zorunludur, diğer alanlar opsiyoneldir"],
+    ["NOT: Meslek Alanı boşsa okul geneli puanı olarak kaydedilir"],
+    ["NOT: Meslek Alanı doluysa o alana özel puan kaydedilir (aynı okul için birden fazla satır olabilir)"],
     ["NOT: Sadece dolu alanlar güncellenir; boş bırakılanlar mevcut değeri korur"],
     ["NOT: Ondalık sayılar için nokta (.) kullanın"],
     ["NOT: Yüzdelik dilim 0-100 arasında olmalıdır"],
   ];
-  const wsScore = XLSX.utils.aoa_to_sheet([scoreHeaders, scoreExample, [], ...scoreNotes]);
+  const wsScore = XLSX.utils.aoa_to_sheet([scoreHeaders, ...scoreExamples, [], ...scoreNotes]);
   wsScore["!cols"] = [
     { wch: 15 },
+    { wch: 35 },
     { wch: 12 }, { wch: 12 }, { wch: 15 },
     { wch: 12 }, { wch: 12 }, { wch: 15 },
     { wch: 12 }, { wch: 12 }, { wch: 15 },

@@ -26,6 +26,8 @@ export type SchoolScore = {
   obpScore: number | null;
   lgsScore: number | null;
   percentile: number | null;
+  vocationalFieldId: number | null;
+  vocationalField?: { id: number; name: string } | null;
 };
 
 export type SchoolScholarship = {

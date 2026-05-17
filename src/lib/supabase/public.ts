@@ -85,6 +85,7 @@ type SchoolScoreRow = {
   obp_score: number | null;
   lgs_score: number | null;
   percentile: number | null;
+  vocational_field_id?: number | null;
 };
 
 type SchoolQuotaRow = {
@@ -205,6 +206,7 @@ export function mapSchoolScore(row: SchoolScoreRow): SchoolScore {
     obpScore: row.obp_score,
     lgsScore: row.lgs_score,
     percentile: row.percentile,
+    vocationalFieldId: row.vocational_field_id ?? null,
   };
 }
 
