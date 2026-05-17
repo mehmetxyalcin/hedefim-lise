@@ -312,6 +312,85 @@ export async function bulkUploadScores(rows: ScoreRow[]): Promise<ScoreUploadRes
   return result;
 }
 
+// ─── Facility bulk upload ────────────────────────────────────────
+
+export type ParsedFacilityRow = {
+  institution_code: string;
+  facility_names: string[];
+};
+
+export type FacilityUploadResult = {
+  updated: number;
+  notFound: { facility_name: string; institution_code: string; school_name: string }[];
+  errors: { institution_code: string; reason: string }[];
+};
+
+export async function fetchAllFacilities(): Promise<{ id: string; name: string }[]> {
+  const { supabase } = await requireAdmin();
+  const { data, error } = await supabase.from("facilities").select("id, name").order("name");
+  if (error) throw new Error(error.message);
+  return (data ?? []) as { id: string; name: string }[];
+}
+
+function normalizeFac(s: string): string {
+  return s.trim().toLocaleLowerCase("tr-TR");
+}
+
+export async function bulkUploadFacilities(
+  rows: ParsedFacilityRow[],
+): Promise<FacilityUploadResult> {
+  const { supabase } = await requireAdmin();
+
+  if (rows.length > 500) {
+    throw new Error("Maksimum 500 satır yüklenebilir.");
+  }
+
+  const { data: allFacilities } = await supabase.from("facilities").select("id, name");
+  const facilityMap = new Map(
+    ((allFacilities ?? []) as { id: string; name: string }[]).map((f) => [normalizeFac(f.name), f]),
+  );
+
+  const result: FacilityUploadResult = { updated: 0, notFound: [], errors: [] };
+
+  for (const row of rows) {
+    const { data: school } = await supabase
+      .from("schools")
+      .select("id, name")
+      .eq("institution_code", row.institution_code)
+      .maybeSingle();
+
+    if (!school) {
+      result.errors.push({ institution_code: row.institution_code, reason: "Okul bulunamadı" });
+      continue;
+    }
+
+    const schoolId = (school as { id: number; name: string }).id;
+    const schoolName = (school as { id: number; name: string }).name;
+
+    await supabase.from("school_facilities").delete().eq("school_id", schoolId);
+
+    const facilityIds: string[] = [];
+    for (const name of row.facility_names) {
+      const facility = facilityMap.get(normalizeFac(name));
+      if (facility) {
+        facilityIds.push(facility.id);
+      } else {
+        result.notFound.push({ facility_name: name, institution_code: row.institution_code, school_name: schoolName });
+      }
+    }
+
+    if (facilityIds.length > 0) {
+      await supabase
+        .from("school_facilities")
+        .insert(facilityIds.map((facilityId) => ({ school_id: schoolId, facility_id: facilityId })));
+    }
+
+    result.updated++;
+  }
+
+  return result;
+}
+
 function normalizeVoc(s: string): string {
   return s.trim().toLocaleLowerCase("tr-TR");
 }

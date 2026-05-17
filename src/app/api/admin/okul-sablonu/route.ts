@@ -105,6 +105,22 @@ export async function GET(_req: NextRequest) {
   ];
   XLSX.utils.book_append_sheet(wb, wsScore, "Puan Bilgileri");
 
+  // ─── Sheet 4: Tesisler ─────────────────────────────────────────
+  const facilityHeaders = ["Kurum Kodu", "Tesisler"];
+  const facilityExample = [
+    "733521",
+    "Kütüphane, Bilgisayar laboratuvarı, Kapalı spor salonu, Kantin",
+  ];
+  const facilityNotes = [
+    ["NOT: Tesisler virgülle ayrılmış tek satırda yazılır"],
+    ["NOT: Tesis adları sistemdeki adlarla eşleşmelidir"],
+    ["NOT: Mevcut tesisler silinip yenileri eklenir"],
+    ["NOT: Büyük/küçük harf fark etmez"],
+  ];
+  const wsFac = XLSX.utils.aoa_to_sheet([facilityHeaders, facilityExample, [], ...facilityNotes]);
+  wsFac["!cols"] = [{ wch: 15 }, { wch: 70 }];
+  XLSX.utils.book_append_sheet(wb, wsFac, "Tesisler");
+
   const buffer: Buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
   return new NextResponse(new Uint8Array(buffer), {
