@@ -77,6 +77,34 @@ export async function GET(_req: NextRequest) {
   wsVoc["!cols"] = [{ wch: 15 }, { wch: 45 }, { wch: 35 }];
   XLSX.utils.book_append_sheet(wb, wsVoc, "Meslek Alanları");
 
+  // ─── Sheet 3: Puan Bilgileri ───────────────────────────────────
+  const scoreHeaders = [
+    "Kurum Kodu",
+    "OBP 2025", "LGS 2025", "Yüzdelik 2025",
+    "OBP 2024", "LGS 2024", "Yüzdelik 2024",
+    "OBP 2023", "LGS 2023", "Yüzdelik 2023",
+  ];
+  const scoreExample = [
+    "733521",
+    450.50, 380.25, 15.00,
+    420.00, 360.00, 18.50,
+    400.00, 340.00, 22.00,
+  ];
+  const scoreNotes = [
+    ["NOT: Kurum Kodu zorunludur, diğer alanlar opsiyoneldir"],
+    ["NOT: Sadece dolu alanlar güncellenir; boş bırakılanlar mevcut değeri korur"],
+    ["NOT: Ondalık sayılar için nokta (.) kullanın"],
+    ["NOT: Yüzdelik dilim 0-100 arasında olmalıdır"],
+  ];
+  const wsScore = XLSX.utils.aoa_to_sheet([scoreHeaders, scoreExample, [], ...scoreNotes]);
+  wsScore["!cols"] = [
+    { wch: 15 },
+    { wch: 12 }, { wch: 12 }, { wch: 15 },
+    { wch: 12 }, { wch: 12 }, { wch: 15 },
+    { wch: 12 }, { wch: 12 }, { wch: 15 },
+  ];
+  XLSX.utils.book_append_sheet(wb, wsScore, "Puan Bilgileri");
+
   const buffer: Buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
   return new NextResponse(new Uint8Array(buffer), {

@@ -233,6 +233,85 @@ export async function fetchVocationalData(): Promise<{
   }
 }
 
+// ─── Score bulk upload ───────────────────────────────────────────
+
+export type ScoreRow = {
+  institution_code: string;
+  obp_2025?: number;
+  lgs_2025?: number;
+  percentile_2025?: number;
+  obp_2024?: number;
+  lgs_2024?: number;
+  percentile_2024?: number;
+  obp_2023?: number;
+  lgs_2023?: number;
+  percentile_2023?: number;
+};
+
+export type ScoreUploadResult = {
+  updated: number;
+  errors: { institution_code: string; reason: string }[];
+};
+
+export async function bulkUploadScores(rows: ScoreRow[]): Promise<ScoreUploadResult> {
+  const { supabase } = await requireAdmin();
+
+  if (rows.length > 500) {
+    throw new Error("Maksimum 500 satır yüklenebilir.");
+  }
+
+  const result: ScoreUploadResult = { updated: 0, errors: [] };
+
+  for (const row of rows) {
+    const { data: school } = await supabase
+      .from("schools")
+      .select("id")
+      .eq("institution_code", row.institution_code)
+      .maybeSingle();
+
+    if (!school) {
+      result.errors.push({ institution_code: row.institution_code, reason: "Okul bulunamadı" });
+      continue;
+    }
+
+    const schoolId = (school as { id: number }).id;
+    const years = [2025, 2024, 2023] as const;
+
+    for (const year of years) {
+      const obp = row[`obp_${year}` as keyof ScoreRow] as number | undefined;
+      const lgs = row[`lgs_${year}` as keyof ScoreRow] as number | undefined;
+      const percentile = row[`percentile_${year}` as keyof ScoreRow] as number | undefined;
+
+      if (obp === undefined && lgs === undefined && percentile === undefined) continue;
+
+      // Fetch existing record so we can preserve fields not provided in this upload
+      const { data: existing } = await supabase
+        .from("school_scores")
+        .select("obp_score, lgs_score, percentile")
+        .eq("school_id", schoolId)
+        .eq("year", year)
+        .maybeSingle();
+
+      const rec = existing as { obp_score: number | null; lgs_score: number | null; percentile: number | null } | null;
+
+      await supabase.from("school_scores").upsert(
+        {
+          school_id: schoolId,
+          year,
+          obp_score: obp ?? rec?.obp_score ?? null,
+          lgs_score: lgs ?? rec?.lgs_score ?? null,
+          percentile: percentile ?? rec?.percentile ?? null,
+        },
+        { onConflict: "school_id,year" },
+      );
+    }
+
+    result.updated++;
+  }
+
+  return result;
+}
+
 function normalizeVoc(s: string): string {
   return s.trim().toLocaleLowerCase("tr-TR");
 }
