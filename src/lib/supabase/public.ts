@@ -127,7 +127,7 @@ export function mapVocationalField(row: VocationalFieldRow): VocationalField {
     description: row.description ?? "",
     skills: row.skills ?? "",
     career: row.career ?? "",
-    branches: row.branches ?? [],
+    branches: Array.isArray(row.branches) ? row.branches : [],
     schools:
       row.school_vocational_fields?.map((item) => item.school_id).filter(Boolean) ??
       [],
