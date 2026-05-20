@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   ArrowDownWideNarrow,
   ArrowRight,
-  BadgeCheck,
   CheckCircle2,
   ChevronRight,
   Filter,
@@ -343,7 +342,7 @@ export function SchoolList({
         {/* Cards */}
         <div className="min-w-0 flex-1">
           <div className="grid gap-5">
-            {filteredSchools.map((school, index) => (
+            {filteredSchools.map((school) => (
               <div
                 key={school.id}
                 className="group relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 sm:flex-row sm:p-6"
@@ -406,12 +405,6 @@ export function SchoolList({
                     const score = getDisplayScore(school.scores);
                     return (
                       <div className="relative mb-4 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/40">
-                        {(index === 0 || index === 2) && (
-                          <div className="absolute -top-3 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white ring-2 ring-white shadow-sm">
-                            <BadgeCheck className="h-3 w-3" />
-                            Eşleşme
-                          </div>
-                        )}
                         {score ? (
                           <>
                             <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
