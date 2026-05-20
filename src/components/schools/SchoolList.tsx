@@ -402,9 +402,11 @@ export function SchoolList({
                     )}
                   </div>
 
-                  <h3 className="mb-2 line-clamp-1 text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-600 sm:text-2xl">
-                    {school.name}
-                  </h3>
+                  <Link href={`/okullar/${school.slug}`}>
+                    <h3 className="mb-2 line-clamp-1 text-xl font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 group-hover:text-blue-600 sm:text-2xl">
+                      {school.name}
+                    </h3>
+                  </Link>
 
                   <p className="mb-4 max-w-2xl pr-4 text-sm leading-relaxed text-slate-500 line-clamp-2">
                     {school.description}
