@@ -36,6 +36,7 @@ type Props = {
     alan?: string;
     limit?: string;
     sayfa?: string;
+    yerlestirme?: string;
   }>;
 };
 
@@ -46,6 +47,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   const ilce = params.ilce ?? "";
   const tur = params.tur ?? "";
   const alan = (params.alan ?? "").trim(); // vocational field ID
+  const yerlestirme = params.yerlestirme ?? "";
   const limit = parseLimit(params.limit);
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
@@ -77,6 +79,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (ara) schoolsQuery = schoolsQuery.ilike("name", `%${ara}%`);
   if (ilce) schoolsQuery = schoolsQuery.eq("district", ilce);
   if (tur) schoolsQuery = schoolsQuery.eq("type", tur);
+  if (yerlestirme) schoolsQuery = schoolsQuery.eq("placement_type", yerlestirme);
   if (schoolIdFilter !== null) {
     // Empty schoolIdFilter means no schools have this field — use [-1] to guarantee 0 results.
     schoolsQuery = schoolsQuery.in("id", schoolIdFilter.length > 0 ? schoolIdFilter : [-1]);
@@ -103,6 +106,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (ilce) paginationSearchParams.ilce = ilce;
   if (tur) paginationSearchParams.tur = tur;
   if (alan) paginationSearchParams.alan = alan;
+  if (yerlestirme) paginationSearchParams.yerlestirme = yerlestirme;
   if (limit !== 20) paginationSearchParams.limit = String(limit);
 
   const startItem = totalCount === 0 ? 0 : offset + 1;
@@ -153,13 +157,14 @@ export default async function OkullarPage({ searchParams }: Props) {
         </div>
 
         <SchoolList
-          key={`${ara}-${ilce}-${tur}-${alan}-${limit}`}
+          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}`}
           schools={schools}
           vocationalFields={vocationalFields}
           initialSearch={ara}
           initialIlce={ilce}
           initialTur={tur}
           initialAlan={alan}
+          initialPlacement={yerlestirme}
           initialLimit={limit}
         />
 

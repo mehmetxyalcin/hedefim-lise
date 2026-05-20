@@ -31,6 +31,7 @@ type Props = {
   initialTur?: string;
   initialAlan?: string;
   initialLimit?: number;
+  initialPlacement?: string;
 };
 
 type DisplayScore = {
@@ -59,6 +60,7 @@ export function SchoolList({
   initialTur = "",
   initialAlan = "",
   initialLimit = 20,
+  initialPlacement = "",
 }: Props) {
   const router = useRouter();
 
@@ -68,8 +70,7 @@ export function SchoolList({
   const [tur, setTur] = useState(initialTur);
   const [alan, setAlan] = useState(initialAlan); // vocational field ID as string
   const [limit, setLimit] = useState<number>(initialLimit);
-  const [hasGym, setHasGym] = useState(false);
-  const [hasLibrary, setHasLibrary] = useState(false);
+  const [placement, setPlacement] = useState(initialPlacement);
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
@@ -80,6 +81,7 @@ export function SchoolList({
     if (ilce) params.set("ilce", ilce);
     if (tur) params.set("tur", tur);
     if (alan) params.set("alan", alan);
+    if (placement) params.set("yerlestirme", placement);
     if (limit !== 20) params.set("limit", String(limit));
     const qs = params.toString();
     return `/okullar${qs ? `?${qs}` : ""}`;
@@ -96,6 +98,7 @@ export function SchoolList({
     if (initialIlce) params.set("ilce", initialIlce);
     if (initialTur) params.set("tur", initialTur);
     if (initialAlan) params.set("alan", initialAlan);
+    if (initialPlacement) params.set("yerlestirme", initialPlacement);
     if (newLimit !== 20) params.set("limit", String(newLimit));
     const qs = params.toString();
     router.push(`/okullar${qs ? `?${qs}` : ""}`);
@@ -107,34 +110,30 @@ export function SchoolList({
     setTur("");
     setLimit(20);
     setAlan("");
-    setHasGym(false);
-    setHasLibrary(false);
+    setPlacement("");
     router.push("/okullar");
     setIsMobileFilterOpen(false);
   }
 
-  // Active filter count: shows filters currently applied to server results + client-side filters
+  // Active filter count: shows filters currently applied to server results
   const activeFilterCount =
     Number(Boolean(initialSearch)) +
     Number(Boolean(initialIlce)) +
     Number(Boolean(initialTur)) +
     Number(Boolean(initialAlan)) +
-    Number(initialLimit !== 20) +
-    Number(hasGym) +
-    Number(hasLibrary);
+    Number(Boolean(initialPlacement)) +
+    Number(initialLimit !== 20);
 
   const hasActiveFilters =
-    Boolean(search.trim() || ilce || tur || alan || limit !== 20 || hasGym || hasLibrary);
+    Boolean(search.trim() || ilce || tur || alan || placement || limit !== 20);
 
-  // Client-side filtering: only gym/library remain; alan is now server-side via URL
+  // No remaining client-side filters; all filtering is server-side via URL
   const filteredSchools = useMemo(
     () =>
       schools.filter(
-        (school) =>
-          (!hasGym || school.features.includes("Kapalı Spor Salonu")) &&
-          (!hasLibrary || school.features.includes("Z-Kütüphane")),
+        () => true,
       ),
-    [hasGym, hasLibrary, schools],
+    [schools],
   );
 
   const sidebarContent = (
@@ -236,49 +235,21 @@ export function SchoolList({
           </select>
         </div>
 
-        {/* Tesis & İmkanlar (client-side) */}
+        {/* E) Yerleştirme Türü */}
         <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Tesis & İmkanlar
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+            Yerleştirme Türü
           </label>
-          <div className="space-y-2">
-            {([
-              { key: "hasGym", label: "Kapalı Spor Salonu", checked: hasGym, set: setHasGym },
-              { key: "hasLibrary", label: "Z-Kütüphane", checked: hasLibrary, set: setHasLibrary },
-            ] as const).map((item) => (
-              <label
-                key={item.key}
-                className={`flex cursor-pointer items-center rounded-xl border p-3 transition-all ${
-                  item.checked
-                    ? "border-blue-200 bg-blue-50/50 shadow-sm"
-                    : "border-slate-200 bg-white hover:bg-slate-50"
-                }`}
-              >
-                <div
-                  className={`mr-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors ${
-                    item.checked
-                      ? "border-blue-600 bg-blue-600"
-                      : "border-slate-300 bg-slate-50"
-                  }`}
-                >
-                  {item.checked && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
-                </div>
-                <input
-                  type="checkbox"
-                  className="hidden"
-                  checked={item.checked}
-                  onChange={(e) => item.set(e.target.checked)}
-                />
-                <span
-                  className={`text-sm font-semibold ${
-                    item.checked ? "text-blue-900" : "text-slate-700"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </label>
-            ))}
-          </div>
+          <select
+            value={placement}
+            onChange={(e) => setPlacement(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="">Tümü</option>
+            <option value="yerel">Yerel Yerleştirme</option>
+            <option value="merkezi">Merkezi Yerleştirme</option>
+            <option value="yerel_merkezi">Yerel ve Merkezi</option>
+          </select>
         </div>
       </div>
 
