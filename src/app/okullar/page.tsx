@@ -125,8 +125,7 @@ export default async function OkullarPage({ searchParams }: Props) {
             Sana Uygun Liseleri Keşfet
           </h1>
           <p className="text-lg leading-relaxed text-slate-500">
-            İlçe, okul türü ve aradığın fiziksel imkanlara göre veritabanını
-            filtrele, en uygun eşleşmeleri hızla analiz et.
+            İlçe, okul türü ve fiziksel imkanlara göre filtrele, en uygun eşleşmeleri hızla bul.
           </p>
         </div>
 
