@@ -90,6 +90,17 @@ export function SchoolList({
     setIsMobileFilterOpen(false);
   }
 
+  function handleLimitChange(newLimit: number) {
+    const params = new URLSearchParams();
+    if (initialSearch) params.set("ara", initialSearch);
+    if (initialIlce) params.set("ilce", initialIlce);
+    if (initialTur) params.set("tur", initialTur);
+    if (initialAlan) params.set("alan", initialAlan);
+    if (newLimit !== 20) params.set("limit", String(newLimit));
+    const qs = params.toString();
+    router.push(`/okullar${qs ? `?${qs}` : ""}`);
+  }
+
   function clearFilters() {
     setSearch("");
     setIlce("");
@@ -225,24 +236,6 @@ export function SchoolList({
           </select>
         </div>
 
-        {/* E) Sayfa başına */}
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-            Sayfa Başına Okul
-          </label>
-          <select
-            value={limit}
-            onChange={(e) => setLimit(Number(e.target.value))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-          >
-            {LIMIT_OPTIONS.map((l) => (
-              <option key={l} value={l}>
-                {l} okul
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Tesis & İmkanlar (client-side) */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -314,11 +307,23 @@ export function SchoolList({
     <>
       {/* Top bar: result count + sort + mobile filter button */}
       <div className="relative z-30 mb-6 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
             {filteredSchools.length}
             <span className="ml-1 font-medium text-slate-500">sonuç</span>
           </span>
+          <div className="flex items-center gap-1.5">
+            <span className="whitespace-nowrap text-xs text-slate-500">Sayfa başına:</span>
+            <select
+              value={limit}
+              onChange={(e) => handleLimitChange(Number(e.target.value))}
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            >
+              {LIMIT_OPTIONS.map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
