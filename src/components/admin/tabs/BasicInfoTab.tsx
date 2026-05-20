@@ -64,10 +64,11 @@ export function BasicInfoTab({ school }: Props) {
             <legend className="mb-3 block text-sm font-semibold text-slate-700">
               Yerleştirme Türü
             </legend>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {[
-                { value: "yerel", label: "Yerel" },
-                { value: "merkezi", label: "Merkezi" },
+                { value: "yerel", label: "Yerel Yerleştirme" },
+                { value: "merkezi", label: "Merkezi Yerleştirme" },
+                { value: "yerel_merkezi", label: "Yerel ve Merkezi" },
               ].map(({ value, label }) => (
                 <label key={value} className="flex cursor-pointer items-center gap-2">
                   <input

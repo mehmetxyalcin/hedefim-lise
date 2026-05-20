@@ -33,7 +33,7 @@ export function SchoolInfoRibbon({ school }: Props) {
     items.push({
       icon: <BookOpen className="h-5 w-5 text-blue-600" />,
       label: "Yerleştirme",
-      value: school.placementType === "yerel" ? "Yerel Yerleştirme" : "Merkezi Yerleştirme",
+      value: ({ yerel: "Yerel Yerleştirme", merkezi: "Merkezi Yerleştirme", yerel_merkezi: "Yerel ve Merkezi" } as Record<string, string>)[school.placementType] ?? "Yerel Yerleştirme",
     });
   }
 
