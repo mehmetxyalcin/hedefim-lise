@@ -376,9 +376,6 @@ export async function updateSchool(formData: FormData) {
   );
   const currentImage = String(formData.get("current_image") ?? "").trim();
   const removeImage = formData.get("remove_image") === "on";
-  const vocationalFieldIds = toNumberArray(
-    formData.getAll("vocational_field_ids"),
-  );
   let uploadedImage: string | null = null;
 
   await ensureUniqueSlug(supabase, slug, redirectPath, id);
@@ -432,19 +429,11 @@ export async function updateSchool(formData: FormData) {
     );
   }
 
-  try {
-    await syncSchoolVocationalFields(supabase, id, vocationalFieldIds);
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Meslek alanlari kaydedilemedi.";
-    redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
-  }
-
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${payload.slug}`);
-  redirectToAdminWithSuccess("Okul başarıyla güncellendi.");
+  redirectToTab(payload.slug, "temel", "Temel bilgiler kaydedildi.");
 }
 
 export async function deleteSchool(formData: FormData) {
