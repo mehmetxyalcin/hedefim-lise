@@ -5,6 +5,7 @@ export type SchoolScoreRaw = {
   obp_score: number | null;
   lgs_score: number | null;
   percentile: number | null;
+  vocational_field_id?: number | null;
 };
 
 export type School = {

@@ -1,23 +1,20 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Briefcase,
-  CheckCircle2,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, BookOpen, Briefcase, CheckCircle2 } from "lucide-react";
 import { VocationalFieldIcon } from "@/lib/vocational-icons";
+import { VocationalSchoolList } from "@/components/school/VocationalSchoolList";
 import type { School } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
 
 type VocationalDetailProps = {
   field: VocationalField;
   relatedSchools: School[];
+  fieldId: number;
 };
 
 export function VocationalDetail({
   field,
   relatedSchools,
+  fieldId,
 }: VocationalDetailProps) {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
@@ -155,49 +152,12 @@ export function VocationalDetail({
           <div className="lg:col-span-1">
             <div className="sticky top-28 rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
               <h3 className="mb-3 text-xl font-bold tracking-tight text-slate-900">
-                Alanın Bulundugu Okullar
+                Alanın Bulunduğu Okullar
               </h3>
               <p className="mb-6 text-sm text-slate-500">
                 Mersin genelinde bu eğitimi veren kurumlar:
               </p>
-
-              <div className="space-y-4">
-                {relatedSchools.map((school) => (
-                  <Link
-                    key={school.id}
-                    href={`/okullar/${school.slug}`}
-                    className="group block cursor-pointer rounded-2xl border border-slate-100 bg-white p-4 transition-all hover:border-blue-300 hover:shadow-md"
-                  >
-                    <div className="mb-3 flex items-center gap-4">
-                      <div
-                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-inner ${school.color}`}
-                      >
-                        {school.logo}
-                      </div>
-                      <div>
-                        <div className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 transition-colors group-hover:text-blue-600">
-                          {school.name}
-                        </div>
-                        <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                          {school.district}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs">
-                      <span className="font-medium text-slate-500">
-                        Yüzdelik:
-                        <span className="ml-1 font-bold text-slate-900">
-                          %{school.percentile}
-                        </span>
-                      </span>
-                      <span className="flex items-center font-semibold text-blue-600">
-                        İncele
-                        <ChevronRight className="ml-0.5 h-3.5 w-3.5" />
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              <VocationalSchoolList schools={relatedSchools} fieldId={fieldId} />
             </div>
           </div>
         </div>

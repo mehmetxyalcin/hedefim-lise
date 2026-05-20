@@ -84,20 +84,42 @@ export default async function AlanDetayPage({
 }: AlanDetayPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data, error } = await supabase
+
+  // Try with school_scores including vocational_field_id (requires migration).
+  // Falls back to scores without vocational_field_id if the column doesn't exist yet.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any = null;
+
+  const { data: detailed, error: detailedErr } = await supabase
     .from("vocational_fields")
-    .select("*, school_vocational_fields(school_id, schools(*))")
+    .select(
+      "*, school_vocational_fields(school_id, schools(*, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id)))",
+    )
     .eq("slug", slug)
     .maybeSingle();
 
-  if (error || !data) {
-    notFound();
+  if (!detailedErr) {
+    data = detailed;
+  } else {
+    const { data: basic, error: basicErr } = await supabase
+      .from("vocational_fields")
+      .select(
+        "*, school_vocational_fields(school_id, schools(*, school_scores(id, school_id, year, obp_score, lgs_score, percentile)))",
+      )
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (basicErr || !basic) notFound();
+    data = basic;
   }
+
+  if (!data) notFound();
 
   return (
     <VocationalDetail
       field={mapVocationalField(data)}
       relatedSchools={extractSchoolsFromVocationalField(data)}
+      fieldId={data.id as number}
     />
   );
 }

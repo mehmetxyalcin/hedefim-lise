@@ -175,6 +175,7 @@ export function mapSchool(row: SchoolRow): School {
         obp_score: s.obp_score,
         lgs_score: s.lgs_score,
         percentile: s.percentile,
+        vocational_field_id: s.vocational_field_id ?? null,
       }),
     ),
     institutionCode: row.institution_code ?? null,
