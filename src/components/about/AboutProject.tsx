@@ -197,8 +197,8 @@ export function AboutProject() {
                 Proje Paydaşları
               </h3>
               <p className="mb-6 text-sm text-slate-500">
-                Bu platform, kurumlar arası güçlü bir iş birliği ile hayata
-                geçirilmiştir.
+                Bu platform, Akdeniz Rehberlik ve Araştırma Merkezi öncülüğünde
+                kurumlar arası güçlü bir iş birliği ile hayata geçirilmiştir.
               </p>
 
               <div className="space-y-4">
@@ -220,10 +220,42 @@ export function AboutProject() {
                       Rehberlik ve Araştırma Merkezleri
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      İçerik uretimi, denetim ve müşavirlik.
+                      İçerik üretimi, denetim ve müşavirlik.
+                    </div>
+                    <div className="mt-2 text-xs leading-relaxed text-slate-400">
+                      Akdeniz RAM, Toroslar RAM, Yenişehir RAM, Mezitli RAM,
+                      Erdemli RAM, Tarsus RAM, Silifke RAM, Mut RAM, Anamur RAM
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
+              <h3 className="mb-6 flex items-center gap-3 text-xl font-bold tracking-tight text-slate-900">
+                <div className="rounded-xl bg-blue-50 p-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
+                Proje Ekibi
+              </h3>
+              <div className="space-y-3">
+                {[
+                  "Mehmet Yalçın",
+                  "Gülmisal Kurtaran",
+                  "Süheyla Küçük",
+                  "Recep Bağlı",
+                ].map((name) => (
+                  <div key={name} className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 ring-1 ring-blue-100">
+                      <span className="text-xs font-bold text-blue-600">
+                        {name.charAt(0)}
+                      </span>
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">
+                      {name}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
