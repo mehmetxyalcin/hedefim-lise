@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { getSiteUrl } from "@/lib/site";
@@ -51,6 +52,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
