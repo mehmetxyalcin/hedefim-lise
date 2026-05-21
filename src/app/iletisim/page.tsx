@@ -61,7 +61,7 @@ export default function IletisimPage() {
               </div>
               <p className="text-2xl font-extrabold text-blue-700">1-2 iş günü</p>
               <p className="mt-1 text-xs text-blue-600">
-                Mesajınızı aldıktan sonra mümkün olan en kısa sürede yanıt vermeye çalışırız.
+                Mesajınızı aldıktan sonra mümkün olan en kısa sürede yanıt vermeye çalışıyoruz.
               </p>
             </div>
 
