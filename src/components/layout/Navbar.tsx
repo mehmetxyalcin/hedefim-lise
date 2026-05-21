@@ -52,6 +52,12 @@ export async function Navbar() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/iletisim"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
+            >
+              İletişim
+            </Link>
             <div className="mx-4 h-5 w-px bg-white/10" />
             <Link
               href="/admin"

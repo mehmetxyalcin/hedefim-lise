@@ -32,10 +32,19 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     return <h1>Yetkisiz erişim.</h1>;
   }
 
-  const { data, error } = await supabase
-    .from("schools")
-    .select("*, school_vocational_fields(vocational_field_id)")
-    .order("name");
+  const [schoolsResult, unreadResult] = await Promise.all([
+    supabase
+      .from("schools")
+      .select("*, school_vocational_fields(vocational_field_id)")
+      .order("name"),
+    supabase
+      .from("contact_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "unread"),
+  ]);
+
+  const { data, error } = schoolsResult;
+  const unreadCount = unreadResult.count ?? 0;
 
   if (error) {
     return <h1>Okullar yüklenemedi.</h1>;
@@ -56,6 +65,17 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/mesajlar"
+              className="relative inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              Mesajlar
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-bold text-white">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
             <Link
               href="/admin/site-settings"
               className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
