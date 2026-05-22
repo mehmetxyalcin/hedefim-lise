@@ -28,14 +28,14 @@ export async function GET(request: Request) {
       "Giriş bağlantısı geçersiz veya süresi dolmuş. Lütfen yeniden giriş bağlantısı isteyin.";
 
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(message)}`, origin),
+      new URL(`/admin/login?error=${encodeURIComponent(message)}`, origin),
     );
   }
 
   if (!code) {
     return NextResponse.redirect(
       new URL(
-        `/login?error=${encodeURIComponent("Giriş bağlantısı eksik veya geçersiz. Lütfen yeniden deneyin.")}`,
+        `/admin/login?error=${encodeURIComponent("Giriş bağlantısı eksik veya geçersiz. Lütfen yeniden deneyin.")}`,
         origin,
       ),
     );
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   if (error) {
     return NextResponse.redirect(
       new URL(
-        `/login?error=${encodeURIComponent("Giriş oturumu oluşturulamadı. Bağlantının süresi dolmuş olabilir; lütfen yeniden deneyin.")}`,
+        `/admin/login?error=${encodeURIComponent("Giriş oturumu oluşturulamadı. Bağlantının süresi dolmuş olabilir; lütfen yeniden deneyin.")}`,
         origin,
       ),
     );
