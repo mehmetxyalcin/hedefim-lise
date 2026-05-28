@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, Menu } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { getSiteSettings, getNavigationItems } from "@/lib/site-settings";
 import { FavoritesNavIcon } from "./FavoritesNavIcon";
+import { MobileMenu } from "./MobileMenu";
 
 export async function Navbar() {
   const [settings, navItems] = await Promise.all([
@@ -11,7 +12,7 @@ export async function Navbar() {
   ]);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1c]/90 text-white backdrop-blur-lg">
+    <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1c]/90 text-white backdrop-blur-lg relative">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="group flex items-center space-x-3">
@@ -69,12 +70,7 @@ export async function Navbar() {
             </Link>
           </div>
 
-          <button
-            aria-label="Menüyü aç"
-            className="rounded-lg p-2 text-slate-300 transition-all hover:bg-white/5 hover:text-white md:hidden"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+          <MobileMenu navItems={navItems} />
         </div>
       </div>
     </nav>
