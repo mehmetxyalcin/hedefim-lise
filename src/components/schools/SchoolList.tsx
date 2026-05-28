@@ -400,12 +400,6 @@ export function SchoolList({
                 key={school.id}
                 className="group relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 sm:flex-row sm:p-6"
               >
-                <div className="shrink-0">
-                  <div className={`flex h-16 w-16 items-center justify-center rounded-2xl border border-white/20 text-xl font-extrabold text-white shadow-inner sm:h-20 sm:w-20 sm:text-2xl ${school.color}`}>
-                    {school.logo}
-                  </div>
-                </div>
-
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <span className="rounded-md border border-blue-100 bg-blue-50/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700">

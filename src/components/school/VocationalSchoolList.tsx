@@ -67,19 +67,12 @@ export function VocationalSchoolList({ schools, fieldId }: Props) {
             href={`/okullar/${school.slug}`}
             className="group block cursor-pointer rounded-2xl border border-slate-100 bg-white p-4 transition-all hover:border-blue-300 hover:shadow-md"
           >
-            <div className="mb-3 flex items-center gap-4">
-              <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-inner ${school.color}`}
-              >
-                {school.logo}
+            <div className="mb-3">
+              <div className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 transition-colors group-hover:text-blue-600">
+                {school.name}
               </div>
-              <div>
-                <div className="line-clamp-2 text-sm font-bold leading-tight text-slate-900 transition-colors group-hover:text-blue-600">
-                  {school.name}
-                </div>
-                <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                  {school.district}
-                </div>
+              <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                {school.district}
               </div>
             </div>
 
