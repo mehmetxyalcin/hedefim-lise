@@ -31,6 +31,7 @@ type Props = {
   initialAlan?: string;
   initialLimit?: number;
   initialPlacement?: string;
+  initialSiralama?: string;
 };
 
 type DisplayScore = {
@@ -51,6 +52,14 @@ function getDisplayScore(scores: SchoolScoreRaw[] | undefined): DisplayScore | n
   return null;
 }
 
+const SORT_OPTIONS = [
+  { value: "isim_asc", label: "İsme Göre (A-Z)" },
+  { value: "yuzdelik_asc", label: "Yüzdelik: Düşükten Yükseğe" },
+  { value: "yuzdelik_desc", label: "Yüzdelik: Yüksekten Düşüğe" },
+  { value: "obp_desc", label: "OBP: Yüksekten Düşüğe" },
+  { value: "obp_asc", label: "OBP: Düşükten Yükseğe" },
+] as const;
+
 export function SchoolList({
   schools,
   vocationalFields,
@@ -60,6 +69,7 @@ export function SchoolList({
   initialAlan = "",
   initialLimit = 20,
   initialPlacement = "",
+  initialSiralama = "isim_asc",
 }: Props) {
   const router = useRouter();
 
@@ -70,6 +80,7 @@ export function SchoolList({
   const [alan, setAlan] = useState(initialAlan); // vocational field ID as string
   const [limit, setLimit] = useState<number>(initialLimit);
   const [placement, setPlacement] = useState(initialPlacement);
+  const [siralama, setSiralama] = useState(initialSiralama);
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
@@ -82,6 +93,7 @@ export function SchoolList({
     if (alan) params.set("alan", alan);
     if (placement) params.set("yerlestirme", placement);
     if (limit !== 20) params.set("limit", String(limit));
+    if (siralama !== "isim_asc") params.set("siralama", siralama);
     const qs = params.toString();
     return `/okullar${qs ? `?${qs}` : ""}`;
   }
@@ -99,6 +111,22 @@ export function SchoolList({
     if (initialAlan) params.set("alan", initialAlan);
     if (initialPlacement) params.set("yerlestirme", initialPlacement);
     if (newLimit !== 20) params.set("limit", String(newLimit));
+    if (siralama !== "isim_asc") params.set("siralama", siralama);
+    const qs = params.toString();
+    router.push(`/okullar${qs ? `?${qs}` : ""}`);
+  }
+
+  function handleSortChange(value: string) {
+    setSiralama(value);
+    const params = new URLSearchParams();
+    if (initialSearch) params.set("ara", initialSearch);
+    if (initialIlce) params.set("ilce", initialIlce);
+    if (initialTur) params.set("tur", initialTur);
+    if (initialAlan) params.set("alan", initialAlan);
+    if (initialPlacement) params.set("yerlestirme", initialPlacement);
+    if (limit !== 20) params.set("limit", String(limit));
+    if (value !== "isim_asc") params.set("siralama", value);
+    params.set("sayfa", "1");
     const qs = params.toString();
     router.push(`/okullar${qs ? `?${qs}` : ""}`);
   }
@@ -300,11 +328,13 @@ export function SchoolList({
           <div className="group relative hidden md:block">
             <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <select
-              defaultValue="yüzdelik"
+              value={siralama}
+              onChange={(e) => handleSortChange(e.target.value)}
               className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             >
-              <option value="yüzdelik">Yüzdelik: Düşükten Yükseğe</option>
-              <option value="isim">İsim: A&apos;dan Z&apos;ye</option>
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
             </select>
             <ChevronRight className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 rotate-90 text-slate-400" />
           </div>

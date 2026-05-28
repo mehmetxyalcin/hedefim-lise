@@ -28,6 +28,13 @@ function parseLimit(raw: string | undefined): ValidLimit {
   return (VALID_LIMITS as readonly number[]).includes(n) ? (n as ValidLimit) : 20;
 }
 
+const SCORE_SORTS = ["yuzdelik_asc", "yuzdelik_desc", "obp_desc", "obp_asc"] as const;
+type ScoreSort = (typeof SCORE_SORTS)[number];
+
+function isScoreSort(s: string): s is ScoreSort {
+  return (SCORE_SORTS as readonly string[]).includes(s);
+}
+
 type Props = {
   searchParams?: Promise<{
     ara?: string;
@@ -37,6 +44,7 @@ type Props = {
     limit?: string;
     sayfa?: string;
     yerlestirme?: string;
+    siralama?: string;
   }>;
 };
 
@@ -48,6 +56,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   const tur = params.tur ?? "";
   const alan = (params.alan ?? "").trim(); // vocational field ID
   const yerlestirme = params.yerlestirme ?? "";
+  const siralama = params.siralama ?? "isim_asc";
   const limit = parseLimit(params.limit);
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
@@ -66,40 +75,134 @@ export default async function OkullarPage({ searchParams }: Props) {
     schoolIdFilter = (svfData ?? []).map((r) => r.school_id as number);
   }
 
-  // Step 2: Build and run the main query. Include vocational fields list in parallel.
-  let schoolsQuery = supabase
-    .from("schools")
-    .select(
-      "*, school_scores(id, school_id, year, obp_score, lgs_score, percentile), school_vocational_fields(vocational_field_id)",
-      { count: "exact" },
-    )
-    .eq("is_active", true)
-    .order("name");
+  const SCHOOLS_SELECT =
+    "*, school_scores(id, school_id, year, obp_score, lgs_score, percentile), school_vocational_fields(vocational_field_id)";
 
-  if (ara) schoolsQuery = schoolsQuery.ilike("name", `%${ara}%`);
-  if (ilce) schoolsQuery = schoolsQuery.eq("district", ilce);
-  if (tur) schoolsQuery = schoolsQuery.eq("type", tur);
-  if (yerlestirme) schoolsQuery = schoolsQuery.eq("placement_type", yerlestirme);
-  if (schoolIdFilter !== null) {
-    // Empty schoolIdFilter means no schools have this field — use [-1] to guarantee 0 results.
-    schoolsQuery = schoolsQuery.in("id", schoolIdFilter.length > 0 ? schoolIdFilter : [-1]);
+  // Helper: apply shared filters to any supabase query
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function applyFilters<T extends ReturnType<typeof supabase.from>>(q: any): any {
+    if (ara) q = q.ilike("name", `%${ara}%`);
+    if (ilce) q = q.eq("district", ilce);
+    if (tur) q = q.eq("type", tur);
+    if (yerlestirme) q = q.eq("placement_type", yerlestirme);
+    if (schoolIdFilter !== null) {
+      q = q.in("id", schoolIdFilter!.length > 0 ? schoolIdFilter : [-1]);
+    }
+    return q;
   }
 
-  const [schoolsResult, fieldsResult] = await Promise.all([
-    schoolsQuery.range(offset, offset + limit - 1),
-    supabase.from("vocational_fields").select("*").order("title"),
-  ]);
+  const fieldsPromise = supabase.from("vocational_fields").select("*").order("title");
 
-  if (schoolsResult.error || fieldsResult.error) {
-    return <h1>Veriler yüklenemedi.</h1>;
+  let schools: ReturnType<typeof mapSchool>[];
+  let totalCount: number;
+  let fieldsResult: Awaited<typeof fieldsPromise>;
+
+  if (!isScoreSort(siralama)) {
+    // ── İsim sıralaması (default): sunucu tarafında sayfalama ──
+    let schoolsQuery = supabase
+      .from("schools")
+      .select(SCHOOLS_SELECT, { count: "exact" })
+      .eq("is_active", true)
+      .order("name");
+    schoolsQuery = applyFilters(schoolsQuery);
+
+    const [schoolsResult, fr] = await Promise.all([
+      schoolsQuery.range(offset, offset + limit - 1),
+      fieldsPromise,
+    ]);
+    fieldsResult = fr;
+
+    if (schoolsResult.error || fieldsResult.error) {
+      return <h1>Veriler yüklenemedi.</h1>;
+    }
+
+    totalCount = schoolsResult.count ?? 0;
+    schools = (schoolsResult.data ?? []).map(mapSchool);
+  } else {
+    // ── Puan sıralaması: önce tüm ID'leri sırala, sonra sayfayı çek ──
+
+    // Step A: Tüm filtreli okul ID'leri
+    let idQuery = supabase.from("schools").select("id").eq("is_active", true);
+    idQuery = applyFilters(idQuery);
+
+    const [idResult, fr] = await Promise.all([idQuery, fieldsPromise]);
+    fieldsResult = fr;
+
+    if (idResult.error || fieldsResult.error) {
+      return <h1>Veriler yüklenemedi.</h1>;
+    }
+
+    const allIds = (idResult.data ?? []).map((r) => r.id as number);
+
+    // Step B: Puan verileri (en son yıl, okul başına tek skor)
+    const { data: scoreData } = allIds.length > 0
+      ? await supabase
+          .from("school_scores")
+          .select("school_id, percentile, obp_score, year")
+          .in("school_id", allIds)
+      : { data: [] as { school_id: number; percentile: number | null; obp_score: number | null; year: number }[] };
+
+    type ScoreEntry = { percentile: number | null; obp_score: number | null };
+    const scoreMap = new Map<number, ScoreEntry>();
+    for (const s of scoreData ?? []) {
+      const id = s.school_id as number;
+      const existing = scoreMap.get(id);
+      // En son yıla ait skoru tut
+      if (!existing || (s.year as number) > ((scoreMap as Map<number, ScoreEntry & { year: number }>).get(id)?.year ?? 0)) {
+        (scoreMap as Map<number, ScoreEntry & { year: number }>).set(id, {
+          percentile: s.percentile,
+          obp_score: s.obp_score,
+          year: s.year as number,
+        });
+      }
+    }
+
+    // Step C: ID'leri sırala
+    const HIGH = 99999;
+    const sortedIds = [...allIds].sort((a, b) => {
+      const aS = scoreMap.get(a);
+      const bS = scoreMap.get(b);
+      if (siralama === "yuzdelik_asc")
+        return (aS?.percentile ?? HIGH) - (bS?.percentile ?? HIGH);
+      if (siralama === "yuzdelik_desc")
+        return (bS?.percentile ?? -1) - (aS?.percentile ?? -1);
+      if (siralama === "obp_desc")
+        return (bS?.obp_score ?? -1) - (aS?.obp_score ?? -1);
+      // obp_asc
+      return (aS?.obp_score ?? HIGH) - (bS?.obp_score ?? HIGH);
+    });
+
+    totalCount = sortedIds.length;
+    const pageIds = sortedIds.slice(offset, offset + limit);
+
+    // Step D: Sayfanın okul detaylarını çek
+    const { data: schoolsData, error: schoolsErr } =
+      pageIds.length > 0
+        ? await supabase
+            .from("schools")
+            .select(SCHOOLS_SELECT)
+            .eq("is_active", true)
+            .in("id", pageIds)
+        : { data: [], error: null };
+
+    if (schoolsErr) {
+      return <h1>Veriler yüklenemedi.</h1>;
+    }
+
+    // Sıralamayı koru
+    const schoolMap = new Map(
+      (schoolsData ?? []).map((s) => [s.id as number, s]),
+    );
+    const orderedData = pageIds
+      .map((id) => schoolMap.get(id))
+      .filter(Boolean) as typeof schoolsData;
+
+    schools = (orderedData ?? []).map(mapSchool);
   }
 
-  const totalCount = schoolsResult.count ?? 0;
+  const vocationalFields = (fieldsResult.data ?? []).map(mapVocationalField);
   const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
   const currentPage = Math.min(sayfa, totalPages);
-
-  const schools = (schoolsResult.data ?? []).map(mapSchool);
-  const vocationalFields = (fieldsResult.data ?? []).map(mapVocationalField);
 
   const paginationSearchParams: Record<string, string> = {};
   if (ara) paginationSearchParams.ara = ara;
@@ -108,6 +211,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (alan) paginationSearchParams.alan = alan;
   if (yerlestirme) paginationSearchParams.yerlestirme = yerlestirme;
   if (limit !== 20) paginationSearchParams.limit = String(limit);
+  if (siralama !== "isim_asc") paginationSearchParams.siralama = siralama;
 
   const startItem = totalCount === 0 ? 0 : offset + 1;
   const endItem = Math.min(offset + limit, totalCount);
@@ -156,7 +260,7 @@ export default async function OkullarPage({ searchParams }: Props) {
         </div>
 
         <SchoolList
-          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}`}
+          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}`}
           schools={schools}
           vocationalFields={vocationalFields}
           initialSearch={ara}
@@ -165,6 +269,7 @@ export default async function OkullarPage({ searchParams }: Props) {
           initialAlan={alan}
           initialPlacement={yerlestirme}
           initialLimit={limit}
+          initialSiralama={siralama}
         />
 
         <Pagination
