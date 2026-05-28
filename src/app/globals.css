@@ -25,3 +25,39 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@media print {
+  nav,
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-title::before {
+    content: "Tercih Listem — Hedefim Lise";
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+
+  .favorite-card {
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+    margin-bottom: 8px;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .order-number {
+    background: #1d4ed8 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .score-badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

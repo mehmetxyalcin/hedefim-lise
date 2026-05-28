@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookOpen, Menu } from "lucide-react";
 import { getSiteSettings, getNavigationItems } from "@/lib/site-settings";
+import { FavoritesNavIcon } from "./FavoritesNavIcon";
 
 export async function Navbar() {
   const [settings, navItems] = await Promise.all([
@@ -58,6 +59,7 @@ export async function Navbar() {
             >
               İletişim
             </Link>
+            <FavoritesNavIcon />
             <div className="mx-4 h-5 w-px bg-white/10" />
             <Link
               href="/admin"

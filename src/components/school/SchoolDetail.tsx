@@ -12,6 +12,7 @@ import { SchoolContact } from "./SchoolContact";
 import { SchoolTransportation } from "./SchoolTransportation";
 import { SchoolOtherInfo } from "./SchoolOtherInfo";
 import { SchoolLanguages } from "./SchoolLanguages";
+import { FavoriteButton } from "./FavoriteButton";
 
 type Props = { school: SchoolWithDetails };
 
@@ -92,12 +93,7 @@ export function SchoolDetail({ school }: Props) {
           <div className="hidden flex-col gap-4 lg:sticky lg:top-24 lg:flex lg:self-start">
             <SchoolScoreCard scores={scores} />
             <SchoolQuotaCard quotas={quotas} />
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
-            >
-              ☆ Tercihe Ekle
-            </button>
+            <FavoriteButton school={school} />
           </div>
         </div>
       </div>
@@ -110,12 +106,7 @@ export function SchoolDetail({ school }: Props) {
 
       {/* Mobil: Sabit alt buton */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg lg:hidden">
-        <button
-          type="button"
-          className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
-        >
-          ☆ Tercihe Ekle
-        </button>
+        <FavoriteButton school={school} />
       </div>
     </div>
   );
