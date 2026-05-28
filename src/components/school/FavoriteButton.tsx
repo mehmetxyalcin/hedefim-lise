@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, StarOff, Check } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { SchoolWithDetails } from "@/types/schoolDetail";
@@ -9,7 +9,12 @@ type Props = { school: SchoolWithDetails };
 
 export function FavoriteButton({ school }: Props) {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const [mounted, setMounted] = useState(false);
   const [showAdded, setShowAdded] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const id = String(school.id);
   const added = isFavorite(id);
@@ -42,6 +47,18 @@ export function FavoriteButton({ school }: Props) {
       setTimeout(() => setShowAdded(false), 2000);
     }
   };
+
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition-all hover:bg-blue-700"
+      >
+        <Star className="h-5 w-5" />
+        Tercihe Ekle
+      </button>
+    );
+  }
 
   if (showAdded) {
     return (

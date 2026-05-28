@@ -18,29 +18,43 @@ export type FavoriteSchool = {
 };
 
 const STORAGE_KEY = "hedefim_favorites";
+const SYNC_EVENT = "hedefim_favorites_updated";
+
+function readStorage(): FavoriteSchool[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as FavoriteSchool[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteSchool[]>([]);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setFavorites(JSON.parse(stored));
-    } catch {}
+    setFavorites(readStorage());
+
+    // Aynı sekmedeki diğer useFavorites örneklerini senkronize et
+    const onSync = () => setFavorites(readStorage());
+    window.addEventListener(SYNC_EVENT, onSync);
+    return () => window.removeEventListener(SYNC_EVENT, onSync);
   }, []);
 
   const save = (list: FavoriteSchool[]) => {
-    setFavorites(list);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    setFavorites(list);
+    window.dispatchEvent(new Event(SYNC_EVENT));
   };
 
   const addFavorite = (school: FavoriteSchool) => {
-    if (favorites.some((f) => f.id === school.id)) return;
-    save([...favorites, school]);
+    const current = readStorage();
+    if (current.some((f) => f.id === school.id)) return;
+    save([...current, school]);
   };
 
   const removeFavorite = (id: string) => {
-    save(favorites.filter((f) => f.id !== id));
+    save(readStorage().filter((f) => f.id !== id));
   };
 
   const moveUp = (index: number) => {
