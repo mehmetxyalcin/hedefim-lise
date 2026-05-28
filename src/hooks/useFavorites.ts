@@ -2,28 +2,40 @@
 
 import { useState, useEffect } from "react";
 
+export type FavoriteScore = {
+  year: number;
+  percentile: number | null;
+  obp_score: number | null;
+  lgs_score: number | null;
+  vocational_field_name: string | null;
+};
+
 export type FavoriteSchool = {
   id: string;
   name: string;
   district: string;
   school_type: string;
   slug: string;
-  latest_score: {
-    year: number;
-    percentile: number | null;
-    obp_score: number | null;
-    lgs_score: number | null;
-    vocational_field_name: string | null;
-  } | null;
+  scores: FavoriteScore[];
 };
 
 const STORAGE_KEY = "hedefim_favorites";
 const SYNC_EVENT = "hedefim_favorites_updated";
 
+function migrate(raw: unknown[]): FavoriteSchool[] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return raw.map((f: any) => ({
+    ...f,
+    scores: f.scores ?? (f.latest_score ? [f.latest_score] : []),
+  }));
+}
+
 function readStorage(): FavoriteSchool[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as FavoriteSchool[]) : [];
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return migrate(Array.isArray(parsed) ? parsed : []);
   } catch {
     return [];
   }
@@ -35,7 +47,6 @@ export function useFavorites() {
   useEffect(() => {
     setFavorites(readStorage());
 
-    // Aynı sekmedeki diğer useFavorites örneklerini senkronize et
     const onSync = () => setFavorites(readStorage());
     window.addEventListener(SYNC_EVENT, onSync);
     return () => window.removeEventListener(SYNC_EVENT, onSync);

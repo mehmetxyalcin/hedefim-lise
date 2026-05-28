@@ -19,8 +19,22 @@ export function FavoriteButton({ school }: Props) {
   const id = String(school.id);
   const added = isFavorite(id);
 
-  const latestScore =
-    [...school.scores].sort((a, b) => b.year - a.year)[0] ?? null;
+  const latestYear =
+    school.scores.length > 0
+      ? Math.max(...school.scores.map((s) => s.year))
+      : null;
+
+  const latestScores = latestYear
+    ? school.scores
+        .filter((s) => s.year === latestYear)
+        .map((s) => ({
+          year: s.year,
+          percentile: s.percentile,
+          obp_score: s.obpScore,
+          lgs_score: s.lgsScore,
+          vocational_field_name: s.vocationalField?.name ?? null,
+        }))
+    : [];
 
   const handleClick = () => {
     if (added) {
@@ -32,16 +46,7 @@ export function FavoriteButton({ school }: Props) {
         district: school.district,
         school_type: school.type,
         slug: school.slug,
-        latest_score: latestScore
-          ? {
-              year: latestScore.year,
-              percentile: latestScore.percentile,
-              obp_score: latestScore.obpScore,
-              lgs_score: latestScore.lgsScore,
-              vocational_field_name:
-                latestScore.vocationalField?.name ?? null,
-            }
-          : null,
+        scores: latestScores,
       });
       setShowAdded(true);
       setTimeout(() => setShowAdded(false), 2000);

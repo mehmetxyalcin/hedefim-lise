@@ -58,15 +58,14 @@ export default function TercihlerimPage() {
             </Link>
           </div>
         ) : (
-          /* Tercih kartları */
           <div className="print-title space-y-3">
             {favorites.map((school, index) => (
               <div
                 key={school.id}
-                className="favorite-card flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+                className="favorite-card flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
               >
                 {/* Sıra numarası */}
-                <div className="order-number flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
+                <div className="order-number mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
                   {index + 1}
                 </div>
 
@@ -90,41 +89,49 @@ export default function TercihlerimPage() {
                     </span>
                   </div>
 
-                  {school.latest_score && (
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      {school.latest_score.percentile != null &&
-                        school.latest_score.percentile > 0 && (
-                          <span className="score-badge rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
-                            %{school.latest_score.percentile.toFixed(2)}{" "}
-                            Yüzdelik
+                  {school.scores && school.scores.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {school.scores.map((score, i) => (
+                        <div
+                          key={i}
+                          className="flex flex-wrap items-center gap-2"
+                        >
+                          <span className="min-w-[80px] text-xs text-slate-500">
+                            {score.vocational_field_name ?? "Okul Geneli"}:
                           </span>
-                        )}
-                      {school.latest_score.obp_score != null &&
-                        school.latest_score.obp_score > 0 && (
-                          <span className="score-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                            OBP: {school.latest_score.obp_score.toFixed(2)}
+
+                          {score.percentile != null &&
+                            score.percentile > 0 && (
+                              <span className="score-badge rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
+                                %{score.percentile.toFixed(2)} Yüzdelik
+                              </span>
+                            )}
+
+                          {score.obp_score != null &&
+                            score.obp_score > 0 && (
+                              <span className="score-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                                OBP: {score.obp_score.toFixed(2)}
+                              </span>
+                            )}
+
+                          {score.lgs_score != null &&
+                            score.lgs_score > 0 && (
+                              <span className="score-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                                LGS: {score.lgs_score.toFixed(2)}
+                              </span>
+                            )}
+
+                          <span className="text-xs text-slate-400">
+                            ({score.year})
                           </span>
-                        )}
-                      {school.latest_score.lgs_score != null &&
-                        school.latest_score.lgs_score > 0 && (
-                          <span className="score-badge rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                            LGS: {school.latest_score.lgs_score.toFixed(2)}
-                          </span>
-                        )}
-                      {school.latest_score.vocational_field_name && (
-                        <span className="text-xs text-slate-500">
-                          {school.latest_score.vocational_field_name}
-                        </span>
-                      )}
-                      <span className="text-xs text-slate-400">
-                        ({school.latest_score.year})
-                      </span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
 
                 {/* Sıralama butonları */}
-                <div className="no-print flex shrink-0 flex-col gap-1">
+                <div className="no-print flex shrink-0 flex-col gap-1 pt-0.5">
                   <button
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
@@ -146,7 +153,7 @@ export default function TercihlerimPage() {
                 {/* Sil butonu */}
                 <button
                   onClick={() => removeFavorite(school.id)}
-                  className="no-print shrink-0 rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                  className="no-print shrink-0 rounded-lg p-2 pt-2.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
                   title="Listeden çıkar"
                 >
                   <X className="h-4 w-4" />
