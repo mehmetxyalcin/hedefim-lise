@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useActionState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
@@ -137,9 +137,18 @@ export function SchoolFormTabs({
   quotas,
   schoolVocationalFields,
 }: Props) {
+  const router = useRouter();
+
   const [temelState, temelDispatch] = useActionState(saveSchool, null);
   const [iletisimState, iletisimDispatch] = useActionState(saveContact, null);
   const [digerState, digerDispatch] = useActionState(saveOtherInfo, null);
+
+  // Başarılı kayıt sonrası server component verilerini yenile
+  useEffect(() => {
+    if (temelState?.success || iletisimState?.success || digerState?.success) {
+      router.refresh();
+    }
+  }, [temelState, iletisimState, digerState, router]);
 
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId | null) ?? "temel";

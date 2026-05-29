@@ -434,6 +434,7 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${payload.slug}`);
+  revalidatePath(`/admin/okullar/${payload.slug}/duzenle`);
   return { success: true, message: "Temel bilgiler kaydedildi." };
 }
 
@@ -639,6 +640,7 @@ export async function updateSchoolContact(_prevState: unknown, formData: FormDat
 
   const slug = await getSchoolSlug(supabase, id);
   revalidatePath(`/okullar/${slug}`);
+  revalidatePath(`/admin/okullar/${slug}/duzenle`);
   return { success: true, message: "İletişim bilgileri kaydedildi." };
 }
 
@@ -662,6 +664,7 @@ export async function updateSchoolOtherInfo(_prevState: unknown, formData: FormD
 
   const slug = await getSchoolSlug(supabase, id);
   revalidatePath(`/okullar/${slug}`);
+  revalidatePath(`/admin/okullar/${slug}/duzenle`);
   return { success: true, message: "Bilgiler kaydedildi." };
 }
 
