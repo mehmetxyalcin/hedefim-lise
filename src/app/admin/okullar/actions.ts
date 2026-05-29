@@ -429,11 +429,7 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
     .from("schools")
     .update(payload)
     .eq("id", id)
-    .select("id, name, updated_at");
-
-  console.log("[updateSchool] id:", id, "name:", name, "slug:", slug);
-  console.log("[updateSchool] update sonucu:", updatedRows);
-  console.log("[updateSchool] update hatası:", error);
+    .select("id");
 
   if (error) {
     return { success: false, message: getActionErrorMessage(error) };
@@ -441,9 +437,6 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
 
   // RLS / yetki sorunu: update hata vermez ama 0 satır etkiler.
   if (!updatedRows || updatedRows.length === 0) {
-    console.error(
-      "[updateSchool] 0 satır güncellendi — büyük olasılıkla schools tablosunda admin UPDATE için RLS politikası yok.",
-    );
     return {
       success: false,
       message:
