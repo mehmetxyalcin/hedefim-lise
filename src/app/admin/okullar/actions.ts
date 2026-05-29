@@ -425,10 +425,30 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase.from("schools").update(payload).eq("id", id);
+  const { data: updatedRows, error } = await supabase
+    .from("schools")
+    .update(payload)
+    .eq("id", id)
+    .select("id, name, updated_at");
+
+  console.log("[updateSchool] id:", id, "name:", name, "slug:", slug);
+  console.log("[updateSchool] update sonucu:", updatedRows);
+  console.log("[updateSchool] update hatası:", error);
 
   if (error) {
     return { success: false, message: getActionErrorMessage(error) };
+  }
+
+  // RLS / yetki sorunu: update hata vermez ama 0 satır etkiler.
+  if (!updatedRows || updatedRows.length === 0) {
+    console.error(
+      "[updateSchool] 0 satır güncellendi — büyük olasılıkla schools tablosunda admin UPDATE için RLS politikası yok.",
+    );
+    return {
+      success: false,
+      message:
+        "Kayıt güncellenemedi (0 satır etkilendi). Veritabanında 'schools' tablosu için admin yazma (RLS) yetkisi tanımlı olmayabilir.",
+    };
   }
 
   revalidatePath("/admin");
