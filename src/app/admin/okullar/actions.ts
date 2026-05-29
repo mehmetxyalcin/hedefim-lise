@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 
+export type ActionResult = { success: boolean; message: string };
+
 const maxImageSize = 5 * 1024 * 1024;
 
 function toArray(value: FormDataEntryValue | null) {
@@ -253,7 +255,7 @@ async function syncSchoolVocationalFields(
   }
 }
 
-export async function createSchool(formData: FormData) {
+export async function createSchool(_prevState: unknown, formData: FormData): Promise<ActionResult> {
   const { supabase, profile } = await requireAdmin();
 
   if (!profile) {
@@ -347,9 +349,10 @@ export async function createSchool(formData: FormData) {
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   redirectToAdminWithSuccess("Okul başarıyla eklendi.");
+  return { success: true, message: "Okul başarıyla eklendi." };
 }
 
-export async function updateSchool(formData: FormData) {
+export async function updateSchool(_prevState: unknown, formData: FormData): Promise<ActionResult> {
   const { supabase, profile } = await requireAdmin();
 
   if (!profile) {
@@ -391,7 +394,7 @@ export async function updateSchool(formData: FormData) {
       error instanceof Error
         ? getUploadErrorMessage(error)
         : "Görsel yükleme başarısız oldu.";
-    redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
+    return { success: false, message };
   }
 
   const payload = {
@@ -424,16 +427,14 @@ export async function updateSchool(formData: FormData) {
   const { error } = await supabase.from("schools").update(payload).eq("id", id);
 
   if (error) {
-    redirect(
-      `${redirectPath}?error=${encodeURIComponent(getActionErrorMessage(error))}`,
-    );
+    return { success: false, message: getActionErrorMessage(error) };
   }
 
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
   revalidatePath(`/okullar/${payload.slug}`);
-  redirectToTab(payload.slug, "temel", "Temel bilgiler kaydedildi.");
+  return { success: true, message: "Temel bilgiler kaydedildi." };
 }
 
 export async function deleteSchool(formData: FormData) {
@@ -617,12 +618,12 @@ function redirectToTab(slug: string, tab: string, success?: string) {
 // İletişim (Tab 2) — kısmi güncelleme
 // ─────────────────────────────────────────────────────────────────
 
-export async function updateSchoolContact(formData: FormData) {
+export async function updateSchoolContact(_prevState: unknown, formData: FormData): Promise<ActionResult> {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
   const id = Number(formData.get("school_id"));
-  if (!Number.isInteger(id) || id <= 0) redirect("/admin");
+  if (!Number.isInteger(id) || id <= 0) return { success: false, message: "Geçersiz okul kaydı." };
 
   const { error } = await supabase
     .from("schools")
@@ -634,34 +635,34 @@ export async function updateSchoolContact(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) return { success: false, message: error.message };
 
   const slug = await getSchoolSlug(supabase, id);
   revalidatePath(`/okullar/${slug}`);
-  redirectToTab(slug, "iletisim", "İletişim bilgileri kaydedildi.");
+  return { success: true, message: "İletişim bilgileri kaydedildi." };
 }
 
 // ─────────────────────────────────────────────────────────────────
 // Diğer Bilgiler (Tab 8) — kısmi güncelleme
 // ─────────────────────────────────────────────────────────────────
 
-export async function updateSchoolOtherInfo(formData: FormData) {
+export async function updateSchoolOtherInfo(_prevState: unknown, formData: FormData): Promise<ActionResult> {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
   const id = Number(formData.get("school_id"));
-  if (!Number.isInteger(id) || id <= 0) redirect("/admin");
+  if (!Number.isInteger(id) || id <= 0) return { success: false, message: "Geçersiz okul kaydı." };
 
   const { error } = await supabase
     .from("schools")
     .update({ other_info: toNullableString(formData.get("other_info")) })
     .eq("id", id);
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) return { success: false, message: error.message };
 
   const slug = await getSchoolSlug(supabase, id);
   revalidatePath(`/okullar/${slug}`);
-  redirectToTab(slug, "diger", "Bilgiler kaydedildi.");
+  return { success: true, message: "Bilgiler kaydedildi." };
 }
 
 // ─────────────────────────────────────────────────────────────────

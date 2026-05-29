@@ -1,10 +1,12 @@
 "use client";
 
+import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
 import { UnsavedChangesWarning } from "@/components/admin/UnsavedChangesWarning";
+import type { ActionResult } from "@/app/admin/okullar/actions";
 import { BasicInfoTab } from "@/components/admin/tabs/BasicInfoTab";
 import { ContactTab } from "@/components/admin/tabs/ContactTab";
 import { ScoresTab } from "@/components/admin/tabs/ScoresTab";
@@ -51,17 +53,19 @@ const TABS: { id: TabId; label: string }[] = [
 // Sekme 3-7 → kendi mini-action form'ları
 const MAIN_SAVE_TABS: TabId[] = ["temel", "iletisim", "diger"];
 
+type ActionFn = (_prevState: ActionResult | null, formData: FormData) => Promise<ActionResult>;
+
 type Props = {
   school?: School;
   cancelHref?: string;
   publicHref?: string;
   submitLabel: string;
   // Tab 1: tam okul kaydı (createSchool / updateSchool)
-  saveSchool: (formData: FormData) => void | Promise<void>;
+  saveSchool: ActionFn;
   // Tab 2: sadece iletişim alanları
-  saveContact: (formData: FormData) => void | Promise<void>;
+  saveContact: ActionFn;
   // Tab 8: sadece other_info
-  saveOtherInfo: (formData: FormData) => void | Promise<void>;
+  saveOtherInfo: ActionFn;
   // Tab 3 — Puanlar & Kontenjan
   upsertScore: (formData: FormData) => void | Promise<void>;
   upsertQuota: (formData: FormData) => void | Promise<void>;
@@ -133,14 +137,24 @@ export function SchoolFormTabs({
   quotas,
   schoolVocationalFields,
 }: Props) {
+  const [temelState, temelDispatch] = useActionState(saveSchool, null);
+  const [iletisimState, iletisimDispatch] = useActionState(saveContact, null);
+  const [digerState, digerDispatch] = useActionState(saveOtherInfo, null);
+
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId | null) ?? "temel";
   const isMainSaveTab = MAIN_SAVE_TABS.includes(activeTab);
 
   function mainSaveAction() {
-    if (activeTab === "iletisim") return saveContact;
-    if (activeTab === "diger") return saveOtherInfo;
-    return saveSchool;
+    if (activeTab === "iletisim") return iletisimDispatch;
+    if (activeTab === "diger") return digerDispatch;
+    return temelDispatch;
+  }
+
+  function activeState() {
+    if (activeTab === "iletisim") return iletisimState;
+    if (activeTab === "diger") return digerState;
+    return temelState;
   }
 
   function tabHref(id: TabId) {
@@ -183,6 +197,18 @@ export function SchoolFormTabs({
           {activeTab === "temel"    && <BasicInfoTab school={school} />}
           {activeTab === "iletisim" && <ContactTab school={school} />}
           {activeTab === "diger"    && <OtherInfoTab school={school} />}
+
+          {/* Başarı / Hata mesajı */}
+          {activeState()?.success === true && (
+            <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+              ✓ {activeState()!.message}
+            </div>
+          )}
+          {activeState()?.success === false && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              ✗ {activeState()!.message}
+            </div>
+          )}
 
           {/* Kayıt / İptal barı */}
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">

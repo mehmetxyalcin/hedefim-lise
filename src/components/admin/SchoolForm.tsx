@@ -9,7 +9,8 @@ import type { VocationalField } from "@/types/vocationalField";
 import type { ReactNode } from "react";
 
 type SchoolFormProps = {
-  action: (formData: FormData) => void | Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  action: (formData: FormData) => any;
   cancelHref?: string;
   publicHref?: string;
   school?: School;

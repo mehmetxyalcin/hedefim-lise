@@ -49,7 +49,7 @@ export default async function AdminNewSchoolPage({
           </div>
         )}
         <SchoolForm
-          action={createSchool}
+          action={createSchool.bind(null, null)}
           cancelHref="/admin"
           submitLabel="Okulu Kaydet"
           vocationalFields={(vocationalFieldsData ?? []).map(mapVocationalField)}

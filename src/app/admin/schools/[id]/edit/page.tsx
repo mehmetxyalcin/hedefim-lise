@@ -81,7 +81,7 @@ export default async function AdminEditSchoolPage({
           </div>
         )}
         <SchoolForm
-          action={updateSchool}
+          action={updateSchool.bind(null, null)}
           cancelHref="/admin"
           publicHref={publicHref}
           school={school}
