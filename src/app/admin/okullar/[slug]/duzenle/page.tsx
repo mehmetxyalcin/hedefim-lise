@@ -140,6 +140,7 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
         )}
 
         <SchoolFormTabs
+          key={`${school.id}:${school.updatedAt ?? ""}`}
           school={school}
           cancelHref="/admin"
           publicHref={publicHref}

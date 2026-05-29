@@ -422,6 +422,7 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
     school_hours_end: toNullableString(formData.get("school_hours_end")),
     school_hours_note: toNullableString(formData.get("school_hours_note")),
     institution_code: toNullableString(formData.get("institution_code")),
+    updated_at: new Date().toISOString(),
   };
 
   const { error } = await supabase.from("schools").update(payload).eq("id", id);
@@ -633,6 +634,7 @@ export async function updateSchoolContact(_prevState: unknown, formData: FormDat
       phone: toNullableString(formData.get("phone")),
       website: toNullableString(formData.get("website")),
       transportation_info: toNullableString(formData.get("transportation_info")),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", id);
 
@@ -657,7 +659,10 @@ export async function updateSchoolOtherInfo(_prevState: unknown, formData: FormD
 
   const { error } = await supabase
     .from("schools")
-    .update({ other_info: toNullableString(formData.get("other_info")) })
+    .update({
+      other_info: toNullableString(formData.get("other_info")),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", id);
 
   if (error) return { success: false, message: error.message };
