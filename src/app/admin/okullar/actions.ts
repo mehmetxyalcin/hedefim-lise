@@ -848,11 +848,25 @@ export async function syncSchoolVocationalFull(formData: FormData) {
   const fieldIds = toNumberArray(formData.getAll("vocational_field_ids"));
   const branchIds = formData.getAll("branch_ids").map(String).filter(Boolean);
 
-  // Mevcut meslek alanı ilişkilerini güncelle
-  await syncSchoolVocationalFields(supabase, schoolId, fieldIds);
+  // Mevcut meslek alanı ilişkilerini güncelle.
+  // syncSchoolVocationalFields hata durumunda throw eder; yakalamazsak
+  // server action 500 verir. Gerçek hata mesajını redirect ile gösteriyoruz.
+  try {
+    await syncSchoolVocationalFields(supabase, schoolId, fieldIds);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Meslek alanları kaydedilemedi.";
+    redirect(`/admin?error=${encodeURIComponent(message)}`);
+  }
 
   // Dal junction'ını güncelle
-  await supabase.from("school_vocational_branches").delete().eq("school_id", schoolId);
+  const { error: branchDeleteError } = await supabase
+    .from("school_vocational_branches")
+    .delete()
+    .eq("school_id", schoolId);
+  if (branchDeleteError) {
+    redirect(`/admin?error=${encodeURIComponent(branchDeleteError.message)}`);
+  }
   if (branchIds.length > 0) {
     const rows = branchIds.map((bid) => ({ school_id: schoolId, branch_id: bid }));
     const { error } = await supabase.from("school_vocational_branches").insert(rows);
