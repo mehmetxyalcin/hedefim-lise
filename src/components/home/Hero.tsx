@@ -29,7 +29,7 @@ export function Hero() {
   }
 
   return (
-    <div className="relative flex flex-col items-center overflow-hidden bg-[#071426] pt-24 pb-32 lg:pt-32 lg:pb-40">
+    <div className="relative flex flex-col items-center overflow-hidden bg-[#071426] pt-12 pb-32 lg:pt-16 lg:pb-40">
       <div className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(14,165,233,0.34),transparent_34%),radial-gradient(circle_at_82%_22%,rgba(6,182,212,0.26),transparent_30%),linear-gradient(135deg,#071426_0%,#0b2f4a_45%,#102033_100%)]" />
         <div className="absolute top-[-18%] left-[8%] h-[54%] w-[42%] rounded-full bg-cyan-400/20 blur-[120px]" />
