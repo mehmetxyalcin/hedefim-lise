@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronRight,
   GraduationCap,
+  Info,
   MapPin,
   Search,
   ShieldCheck,
@@ -114,6 +115,19 @@ export function Hero() {
           <div className="flex items-center gap-2 rounded-lg border border-orange-200/20 bg-white/[0.08] px-4 py-2 text-sm text-sky-50/90 shadow-sm shadow-sky-950/20 backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4 text-amber-300" />
             <span className="font-medium">Güncel Veriler (2026)</span>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-6 max-w-3xl px-4">
+          <div className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left backdrop-blur-sm">
+            <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/50" />
+            <p className="text-xs leading-relaxed text-white/60">
+              Bu platformda yer alan tüm bilgiler yalnızca bilgilendirme
+              amaçlıdır. Bu bilgiler yıllara göre değişebilir. Tercih yapmadan
+              önce bilgilerin güncelliğini resmi MEB kaynaklarından teyit etmeniz
+              önerilir. Tercih kararlarından doğacak sorumluluk tamamen
+              kullanıcıya aittir.
+            </p>
           </div>
         </div>
       </div>
