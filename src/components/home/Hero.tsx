@@ -43,7 +43,7 @@ export function Hero() {
       <div className="relative z-10 container mx-auto max-w-5xl px-6 text-center">
         <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-200/25 bg-white/10 px-4 py-2 text-sm font-medium text-cyan-50 shadow-lg shadow-cyan-950/20 backdrop-blur-md">
           <Star className="h-4 w-4 text-amber-300" />
-          <span>Mersin&apos;in Resmi Tercih Platformu</span>
+          <span>Mersin&apos;in LGS Tercih Platformu</span>
         </div>
 
         <h1 className="mb-6 text-4xl leading-[1.15] font-extrabold tracking-tight text-white md:text-6xl lg:text-7xl">
