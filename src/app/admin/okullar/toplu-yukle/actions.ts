@@ -98,22 +98,30 @@ export async function bulkUploadSchools(
       let schoolId: number = existingId ?? 0;
 
       if (existingId) {
-        const { error } = await supabase
-          .from("schools")
-          .update({
-            ...(row.name?.trim() && { name: row.name.trim() }),
-            ...(row.district?.trim() && { district: row.district.trim() }),
-            ...(row.school_type?.trim() && { type: row.school_type.trim() }),
-            ...(row.phone?.trim() && { phone: row.phone.trim() }),
-            ...(row.website?.trim() && { website: row.website.trim() }),
-            ...(row.address?.trim() && { address: row.address.trim() }),
-            ...(row.education_type != null && { education_type: row.education_type }),
-            ...(row.boarding_type != null && { boarding_type: row.boarding_type }),
-            ...(row.description?.trim() && { description: row.description.trim() }),
-          })
-          .eq("id", existingId);
+        // Boş hücreler mevcut veriyi korur (conditional spread → sadece dolu
+        // alanlar payload'a girer).
+        const schoolUpdate: Record<string, unknown> = {
+          ...(row.name?.trim() && { name: row.name.trim() }),
+          ...(row.district?.trim() && { district: row.district.trim() }),
+          ...(row.school_type?.trim() && { type: row.school_type.trim() }),
+          ...(row.phone?.trim() && { phone: row.phone.trim() }),
+          ...(row.website?.trim() && { website: row.website.trim() }),
+          ...(row.address?.trim() && { address: row.address.trim() }),
+          ...(row.education_type != null && { education_type: row.education_type }),
+          ...(row.boarding_type != null && { boarding_type: row.boarding_type }),
+          ...(row.description?.trim() && { description: row.description.trim() }),
+        };
 
-        if (error) throw new Error(error.message);
+        // Sadece kontenjan dolu, okul alanları boşsa boş update göndermeyiz;
+        // aksi halde kontenjan kaydı da engellenebilirdi.
+        if (Object.keys(schoolUpdate).length > 0) {
+          const { error } = await supabase
+            .from("schools")
+            .update(schoolUpdate)
+            .eq("id", existingId);
+
+          if (error) throw new Error(error.message);
+        }
         result.updated++;
       } else {
         if (!row.name?.trim() || !row.district?.trim() || !row.school_type?.trim()) {
@@ -435,8 +443,6 @@ export async function bulkUploadFacilities(
     const schoolId = (school as { id: number; name: string }).id;
     const schoolName = (school as { id: number; name: string }).name;
 
-    await supabase.from("school_facilities").delete().eq("school_id", schoolId);
-
     const facilityIds: string[] = [];
     for (const name of row.facility_names) {
       const facility = facilityMap.get(normalizeFac(name));
@@ -447,11 +453,16 @@ export async function bulkUploadFacilities(
       }
     }
 
-    if (facilityIds.length > 0) {
-      await supabase
-        .from("school_facilities")
-        .insert(facilityIds.map((facilityId) => ({ school_id: schoolId, facility_id: facilityId })));
+    // Boş veya tamamen eşleşmeyen liste → mevcut tesisleri KORU (silme).
+    // Sadece çözülmüş tesis varsa "değiştir" (sil + ekle) uygulanır.
+    if (facilityIds.length === 0) {
+      continue;
     }
+
+    await supabase.from("school_facilities").delete().eq("school_id", schoolId);
+    await supabase
+      .from("school_facilities")
+      .insert(facilityIds.map((facilityId) => ({ school_id: schoolId, facility_id: facilityId })));
 
     result.updated++;
   }
@@ -516,32 +527,48 @@ export async function bulkUploadVocational(
 
     const schoolId = (school as { id: number }).id;
 
-    // Delete existing (branches first, then fields)
-    await supabase.from("school_vocational_branches").delete().eq("school_id", schoolId);
-    await supabase.from("school_vocational_fields").delete().eq("school_id", schoolId);
-
-    const insertedFieldSet = new Set<number>();
-    const insertedBranchSet = new Set<number>();
-
+    // Önce satırlardaki geçerli (çözülebilen) alan ve dalları topla.
+    const fieldIds = new Set<number>();
+    const branchIds = new Set<number>();
     for (const row of schoolRows) {
       const field = fieldMap.get(normalizeVoc(row.vocational_field));
       if (!field) continue;
-
-      if (!insertedFieldSet.has(field.id)) {
-        const { error } = await supabase
-          .from("school_vocational_fields")
-          .insert({ school_id: schoolId, vocational_field_id: field.id });
-        if (!error) insertedFieldSet.add(field.id);
-      }
+      fieldIds.add(field.id);
 
       if (row.branch?.trim()) {
         const branch = branchMap.get(`${field.id}:${normalizeVoc(row.branch)}`);
-        if (branch && !insertedBranchSet.has(branch.id)) {
-          const { error } = await supabase
-            .from("school_vocational_branches")
-            .insert({ school_id: schoolId, branch_id: branch.id });
-          if (!error) insertedBranchSet.add(branch.id);
-        }
+        if (branch) branchIds.add(branch.id);
+      }
+    }
+
+    // Hiç geçerli alan çözülemediyse mevcut meslek alanlarını KORU (silme).
+    if (fieldIds.size === 0) {
+      result.errors.push({
+        institution_code: institutionCode,
+        reason: "Geçerli meslek alanı bulunamadı; mevcut kayıtlar korundu.",
+      });
+      continue;
+    }
+
+    // Geçerli veri var → dökümante edilen "değiştir" davranışı (sil + ekle).
+    await supabase.from("school_vocational_branches").delete().eq("school_id", schoolId);
+    await supabase.from("school_vocational_fields").delete().eq("school_id", schoolId);
+
+    const { error: fieldErr } = await supabase
+      .from("school_vocational_fields")
+      .insert([...fieldIds].map((id) => ({ school_id: schoolId, vocational_field_id: id })));
+    if (fieldErr) {
+      result.errors.push({ institution_code: institutionCode, reason: fieldErr.message });
+      continue;
+    }
+
+    if (branchIds.size > 0) {
+      const { error: branchErr } = await supabase
+        .from("school_vocational_branches")
+        .insert([...branchIds].map((id) => ({ school_id: schoolId, branch_id: id })));
+      if (branchErr) {
+        result.errors.push({ institution_code: institutionCode, reason: branchErr.message });
+        continue;
       }
     }
 
