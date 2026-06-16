@@ -21,7 +21,9 @@ type Props = {
   deleteQuota: (formData: FormData) => void | Promise<void>;
 };
 
+// Puanlar 2025/2024/2023 olarak kalır; sadece kontenjan yıl aralığı değişir.
 const YEARS = [2025, 2024, 2023];
+const QUOTA_YEARS = [2026, 2025, 2024];
 
 export function ScoresTab({
   schoolId,
@@ -355,7 +357,7 @@ export function ScoresTab({
         </div>
 
         <div className="space-y-3">
-          {YEARS.map((year) => {
+          {QUOTA_YEARS.map((year) => {
             const quota = quotaForYear(year);
             const isEditing = editingQuota === year;
 

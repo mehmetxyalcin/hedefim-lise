@@ -10,6 +10,8 @@ export type UploadSchoolRow = {
   education_type?: "normal" | "ikili" | null;
   boarding_type?: "yok" | "kiz" | "erkek" | "kiz_erkek" | null;
   description?: string | null;
+  sinavli_2026?: number;
+  sinavsiz_2026?: number;
   sinavli_2025?: number;
   sinavsiz_2025?: number;
   sinavli_2024?: number;
@@ -149,6 +151,19 @@ export async function bulkUploadSchools(
         if (error) throw new Error(error.message);
         schoolId = (inserted as { id: number }).id;
         result.added++;
+      }
+
+      if (row.sinavli_2026 !== undefined || row.sinavsiz_2026 !== undefined) {
+        const { error: q26err } = await supabase.from("school_quotas").upsert(
+          {
+            school_id: schoolId,
+            year: 2026,
+            ...(row.sinavli_2026 !== undefined && { sinavli_count: row.sinavli_2026 }),
+            ...(row.sinavsiz_2026 !== undefined && { sinavsiz_count: row.sinavsiz_2026 }),
+          },
+          { onConflict: "school_id,year" },
+        );
+        if (q26err) throw new Error(q26err.message);
       }
 
       if (row.sinavli_2025 !== undefined || row.sinavsiz_2025 !== undefined) {

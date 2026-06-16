@@ -60,6 +60,8 @@ type ParsedRow = {
   education_type: "normal" | "ikili" | null;
   boarding_type: "yok" | "kiz" | "erkek" | "kiz_erkek" | null | undefined;
   description: string | null;
+  sinavli_2026: number | null | undefined;
+  sinavsiz_2026: number | null | undefined;
   sinavli_2025: number | null | undefined;
   sinavsiz_2025: number | null | undefined;
   sinavli_2024: number | null | undefined;
@@ -81,6 +83,8 @@ type ExtractedRow = {
   edu_raw: string;
   boarding_type: "yok" | "kiz" | "erkek" | "kiz_erkek" | null | undefined;
   description: string | null;
+  sinavli_2026: number | null | undefined;
+  sinavsiz_2026: number | null | undefined;
   sinavli_2025: number | null | undefined;
   sinavsiz_2025: number | null | undefined;
   sinavli_2024: number | null | undefined;
@@ -131,6 +135,8 @@ function extractRow(raw: Record<string, unknown>, index: number): ExtractedRow {
     edu_raw: eduRaw,
     boarding_type: parseBoardingType(raw["Pansiyon"]),
     description: str(raw["Açıklama"]) || null,
+    sinavli_2026: parseQuota(raw["Sınavlı 2026"]),
+    sinavsiz_2026: parseQuota(raw["Sınavsız 2026"]),
     sinavli_2025: parseQuota(raw["Sınavlı 2025"]),
     sinavsiz_2025: parseQuota(raw["Sınavsız 2025"]),
     sinavli_2024: parseQuota(raw["Sınavlı 2024"]),
@@ -167,6 +173,8 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
   if (row.description && row.description.length > 1000) {
     errors.push("Açıklama en fazla 1000 karakter olabilir");
   }
+  if (row.sinavli_2026 === null) errors.push("Sınavlı 2026 geçersiz (negatif olmayan tam sayı olmalı)");
+  if (row.sinavsiz_2026 === null) errors.push("Sınavsız 2026 geçersiz (negatif olmayan tam sayı olmalı)");
   if (row.sinavli_2025 === null) errors.push("Sınavlı 2025 geçersiz (negatif olmayan tam sayı olmalı)");
   if (row.sinavsiz_2025 === null) errors.push("Sınavsız 2025 geçersiz (negatif olmayan tam sayı olmalı)");
   if (row.sinavli_2024 === null) errors.push("Sınavlı 2024 geçersiz (negatif olmayan tam sayı olmalı)");
@@ -181,6 +189,8 @@ function validateRow(row: ExtractedRow, isExisting: boolean): ParsedRow {
     education_type: row.education_type,
     boarding_type: row.boarding_type,
     description: row.description,
+    sinavli_2026: row.sinavli_2026,
+    sinavsiz_2026: row.sinavsiz_2026,
     sinavli_2025: row.sinavli_2025,
     sinavsiz_2025: row.sinavsiz_2025,
     sinavli_2024: row.sinavli_2024,
@@ -487,6 +497,10 @@ function BasicUploadWizard() {
         ...(r.boarding_type !== undefined &&
           r.boarding_type !== null && { boarding_type: r.boarding_type }),
         description: r.description,
+        ...(r.sinavli_2026 !== undefined &&
+          r.sinavli_2026 !== null && { sinavli_2026: r.sinavli_2026 }),
+        ...(r.sinavsiz_2026 !== undefined &&
+          r.sinavsiz_2026 !== null && { sinavsiz_2026: r.sinavsiz_2026 }),
         ...(r.sinavli_2025 !== undefined &&
           r.sinavli_2025 !== null && { sinavli_2025: r.sinavli_2025 }),
         ...(r.sinavsiz_2025 !== undefined &&
@@ -579,6 +593,8 @@ function BasicUploadWizard() {
                     "Öğretim Şekli",
                     "Pansiyon",
                     "Açıklama",
+                    "Sınavlı 2026",
+                    "Sınavsız 2026",
                     "Sınavlı 2025",
                     "Sınavsız 2025",
                     "Sınavlı 2024",
@@ -653,6 +669,16 @@ function BasicUploadWizard() {
                         ? row.description.length > 50
                           ? row.description.slice(0, 50) + "..."
                           : row.description
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center text-slate-600">
+                      {row.sinavli_2026 !== undefined && row.sinavli_2026 !== null
+                        ? row.sinavli_2026
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center text-slate-600">
+                      {row.sinavsiz_2026 !== undefined && row.sinavsiz_2026 !== null
+                        ? row.sinavsiz_2026
                         : "—"}
                     </td>
                     <td className="px-3 py-2 text-center text-slate-600">
