@@ -10,6 +10,7 @@ const gradientMap: Record<string, string> = {
   "Fen Lisesi": "from-purple-900 via-purple-800 to-purple-700",
   "Anadolu İmam Hatip Lisesi": "from-green-900 via-green-800 to-green-700",
   "Mesleki ve Teknik Anadolu Lisesi": "from-teal-900 via-teal-800 to-teal-700",
+  "Anadolu Meslek ve Teknik Programı": "from-teal-900 via-teal-800 to-teal-700",
   "Sosyal Bilimler Lisesi": "from-indigo-900 via-indigo-800 to-indigo-700",
   "Spor Lisesi": "from-orange-900 via-orange-800 to-orange-700",
   "Güzel Sanatlar Lisesi": "from-pink-900 via-pink-800 to-pink-700",

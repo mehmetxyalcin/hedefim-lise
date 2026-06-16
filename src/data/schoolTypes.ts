@@ -4,6 +4,7 @@ export const SCHOOL_TYPES = [
   "Anadolu İmam Hatip Lisesi",
   "Anadolu Meslek Programı",
   "Anadolu Teknik Programı",
+  "Anadolu Meslek ve Teknik Programı",
   "Mesleki Eğitim Merkezi",
   "Spor Lisesi",
   "Çok Programlı Anadolu Lisesi",
