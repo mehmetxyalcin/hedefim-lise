@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarDays, CircleHelp, ShieldCheck } from "lucide-react";
+import { CircleHelp } from "lucide-react";
 import { FaqSearch } from "@/components/faq/FaqSearch";
 import { getPublishedFaqs } from "@/lib/faqs";
 
@@ -29,34 +29,6 @@ export default async function SoruCevapPage() {
             Tercih, yerleştirme ve nakil sürecindeki önemli kuralları kolayca
             bulun ve anlaşılır yanıtlarla inceleyin.
           </p>
-
-          <div className="mx-auto mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
-            <div className="rounded-2xl border border-white bg-white/80 p-4 shadow-sm">
-              <CalendarDays className="mb-2 h-5 w-5 text-blue-600" />
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Tercih dönemi
-              </p>
-              <p className="mt-1 text-sm font-bold text-slate-800">
-                13-27 Temmuz 2026
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white bg-white/80 p-4 shadow-sm">
-              <ShieldCheck className="mb-2 h-5 w-5 text-emerald-600" />
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Resmî kaynak
-              </p>
-              <p className="mt-1 text-sm font-bold text-slate-800">MEB kılavuzu</p>
-            </div>
-            <div className="rounded-2xl border border-white bg-white/80 p-4 shadow-sm">
-              <CircleHelp className="mb-2 h-5 w-5 text-violet-600" />
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Yanıtlanan
-              </p>
-              <p className="mt-1 text-sm font-bold text-slate-800">
-                {faqs.length} önemli soru
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
