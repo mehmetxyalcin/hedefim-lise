@@ -66,6 +66,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
+              href="/admin/soru-cevap"
+              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              Soru-Cevap
+            </Link>
+            <Link
               href="/admin/mesajlar"
               className="relative inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
