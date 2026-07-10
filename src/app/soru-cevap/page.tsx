@@ -14,7 +14,7 @@ export default async function SoruCevapPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      <section className="border-b border-blue-100 bg-gradient-to-b from-blue-50 via-white to-slate-50 px-4 py-16 md:py-20">
+      <section className="border-b border-blue-100 bg-gradient-to-b from-blue-50 via-white to-slate-50 px-4 py-10 md:py-12">
         <div className="mx-auto max-w-5xl text-center">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
             <CircleHelp aria-hidden="true" className="h-7 w-7" />
@@ -32,7 +32,7 @@ export default async function SoruCevapPage() {
         </div>
       </section>
 
-      <section className="px-4 py-10 md:py-12">
+      <section className="relative z-10 -mt-5 px-4 pb-10 md:-mt-6 md:pb-12">
         <FaqSearch faqs={faqs} />
 
         <aside className="mx-auto mt-12 max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
