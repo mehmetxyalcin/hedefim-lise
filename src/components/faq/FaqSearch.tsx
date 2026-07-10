@@ -13,7 +13,9 @@ function normalize(value: string) {
     .toLocaleLowerCase("tr-TR")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ı/g, "i");
+    .replace(/ı/g, "i")
+    .replace(/[^a-z0-9çğıöşü]+/g, " ")
+    .trim();
 }
 
 export function FaqSearch({ faqs }: Props) {
@@ -24,11 +26,35 @@ export function FaqSearch({ faqs }: Props) {
     const normalizedQuery = normalize(query.trim());
     if (!normalizedQuery) return faqs;
 
-    return faqs.filter((faq) =>
-      normalize(`${faq.question} ${faq.answer} ${faq.category}`).includes(
-        normalizedQuery,
-      ),
-    );
+    const searchTerms = [...new Set(normalizedQuery.split(" ").filter(Boolean))];
+
+    return faqs
+      .map((faq, originalIndex) => {
+        const question = normalize(faq.question);
+        const answer = normalize(faq.answer);
+        const category = normalize(faq.category);
+        const allContent = `${question} ${answer} ${category}`;
+
+        if (!searchTerms.every((term) => allContent.includes(term))) {
+          return null;
+        }
+
+        const score = searchTerms.reduce((total, term) => {
+          if (question.includes(term)) return total + 10;
+          if (category.includes(term)) return total + 5;
+          return total + 2;
+        }, question.includes(normalizedQuery) ? 100 : 0);
+
+        return { faq, originalIndex, score };
+      })
+      .filter(
+        (result): result is { faq: Faq; originalIndex: number; score: number } =>
+          result !== null,
+      )
+      .sort(
+        (a, b) => b.score - a.score || a.originalIndex - b.originalIndex,
+      )
+      .map(({ faq }) => faq);
   }, [faqs, query]);
 
   const groupedFaqs = useMemo(() => {
