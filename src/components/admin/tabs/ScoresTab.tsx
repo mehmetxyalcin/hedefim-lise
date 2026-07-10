@@ -211,10 +211,10 @@ export function ScoresTab({
                                   <input
                                     type="number"
                                     name="lgs_score"
-                                    step="0.001"
+                                    step="0.0001"
                                     min="0"
                                     defaultValue={score.lgsScore ?? ""}
-                                    placeholder="0.000"
+                                    placeholder="0.0000"
                                     className={inputCls}
                                   />
                                 </label>
@@ -307,9 +307,9 @@ export function ScoresTab({
                         <input
                           type="number"
                           name="lgs_score"
-                          step="0.001"
+                          step="0.0001"
                           min="0"
-                          placeholder="0.000"
+                          placeholder="0.0000"
                           className={inputCls}
                         />
                       </label>

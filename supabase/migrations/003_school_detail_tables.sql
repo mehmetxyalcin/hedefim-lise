@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS public.school_scores (
   school_id   integer      NOT NULL REFERENCES public.schools(id) ON DELETE CASCADE,
   year        integer      NOT NULL,
   obp_score   numeric(6,3),
-  lgs_score   numeric(6,3),
+  lgs_score   numeric(7,4),
   percentile  numeric(6,3),
   UNIQUE (school_id, year)
 );
