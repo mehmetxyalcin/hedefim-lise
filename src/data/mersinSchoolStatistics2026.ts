@@ -12,7 +12,7 @@ export type SchoolStatistic = {
   quotas: Partial<Record<number, number>>;
 };
 
-export const STATISTICS_SOURCE = "Mersin_Lise_Tablo_2026.xlsx";
+export const STATISTICS_SOURCE = "Salim Ünsal";
 
 export const mersinSchoolStatistics2026: SchoolStatistic[] = [
   {
