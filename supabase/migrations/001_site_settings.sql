@@ -28,6 +28,7 @@ create table if not exists navigation_items (
 create table if not exists footer_settings (
   id             uuid        primary key default gen_random_uuid(),
   about_text     text,
+  partners_title text        not null default 'Proje Paydaşları',
   copyright_text text        not null default '© 2026 Hedefim Lise',
   contact_email  text,
   contact_phone  text,
@@ -161,7 +162,9 @@ insert into navigation_items (label, href, order_index, is_visible, target) valu
   ('Ana Sayfa',      '/',         0, true, '_self'),
   ('Tercih Robotu',  '/okullar',  1, true, '_self'),
   ('Meslek Atlası',  '/alanlar',  2, true, '_self'),
-  ('Proje Hakkında', '/hakkinda', 3, true, '_self');
+  ('Proje Hakkında', '/hakkinda', 3, true, '_self'),
+  ('İstatistikler',  '/istatistikler', 4, true, '_self'),
+  ('Soru-Cevap',     '/soru-cevap',    5, true, '_self');
 
 insert into footer_settings (id, about_text, copyright_text, contact_email, contact_phone, address)
 values (

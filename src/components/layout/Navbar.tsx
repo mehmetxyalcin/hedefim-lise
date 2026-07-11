@@ -55,18 +55,6 @@ export async function Navbar() {
               </Link>
             ))}
             <Link
-              href="/istatistikler"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
-            >
-              İstatistikler
-            </Link>
-            <Link
-              href="/soru-cevap"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
-            >
-              Soru-Cevap
-            </Link>
-            <Link
               href="/iletisim"
               className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
             >

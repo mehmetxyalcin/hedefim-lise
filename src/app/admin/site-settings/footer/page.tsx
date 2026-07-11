@@ -94,7 +94,8 @@ const FOOTER_SECTIONS = [
   { value: "kaynaklar", label: "Kaynaklar" },
 ];
 
-function sectionLabel(section: string) {
+function sectionLabel(section: string, partnersTitle: string) {
+  if (section === "paydaşlar") return partnersTitle;
   return FOOTER_SECTIONS.find((s) => s.value === section)?.label ?? section;
 }
 
@@ -114,6 +115,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
     getAdminFooterLinks(supabase),
     getAdminSocialLinks(supabase),
   ]);
+  const partnersTitle = settings?.partners_title ?? "Proje Paydaşları";
 
   // footer_links'i section'a göre grupla
   const linksBySection: Record<string, typeof footerLinks> = {};
@@ -194,6 +196,28 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
             </FormSection>
 
             <FormSection
+              title="Footer Bölüm Başlıkları"
+              description="Footer'daki bağlantı bölümlerinin görünen başlıklarını yönetin."
+            >
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-700">
+                  Paydaşlar Bölümü Başlığı
+                </span>
+                <input
+                  name="partners_title"
+                  defaultValue={partnersTitle}
+                  required
+                  maxLength={80}
+                  className={inputClassName}
+                  placeholder="Proje Paydaşları"
+                />
+                <span className="mt-2 block text-xs text-slate-500">
+                  Footer&apos;da paydaş bağlantılarının üzerinde gösterilir.
+                </span>
+              </label>
+            </FormSection>
+
+            <FormSection
               title="İletişim Bilgileri"
               description="Footer'ın iletişim sütununda görünen bilgiler."
             >
@@ -258,7 +282,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                 Object.entries(linksBySection).map(([section, links]) => (
                   <div key={section}>
                     <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                      {sectionLabel(section)}
+                      {sectionLabel(section, partnersTitle)}
                     </p>
                     <div className="space-y-2">
                       {links.map((link) => (
@@ -307,7 +331,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                       >
                         {FOOTER_SECTIONS.map((s) => (
                           <option key={s.value} value={s.value}>
-                            {s.label}
+                            {s.value === "paydaşlar" ? partnersTitle : s.label}
                           </option>
                         ))}
                       </select>

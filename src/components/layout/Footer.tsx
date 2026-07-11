@@ -119,7 +119,7 @@ export async function Footer() {
           {partnerLinks.length > 0 && (
             <div className="md:col-span-3">
               <h4 className="mb-6 font-semibold tracking-tight text-white">
-                Proje Paydaşları
+                {footerSettings.partners_title ?? "Proje Paydaşları"}
               </h4>
               <ul className="space-y-3 text-sm text-slate-400">
                 {partnerLinks.map((link) => (

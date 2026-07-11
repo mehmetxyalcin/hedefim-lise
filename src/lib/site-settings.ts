@@ -21,6 +21,7 @@ export type NavigationItem = {
 export type FooterSettings = {
   id: string;
   about_text: string | null;
+  partners_title: string;
   copyright_text: string;
   contact_email: string | null;
   contact_phone: string | null;
@@ -73,6 +74,7 @@ const defaultFooterSettings: FooterSettings = {
   id: FOOTER_SETTINGS_ID,
   about_text:
     "Öğrencilerin doğru lise tercihleri yapabilmesi amacıyla Akdeniz Rehberlik ve Araştırma Merkezi koordinatörlüğünde yürütülen sosyal sorumluluk projesidir.",
+  partners_title: "Proje Paydaşları",
   copyright_text: "© 2026 Hedefim Lise, Yolum Bilinçli Tercih Projesi.",
   contact_email: "akdenizram33@gmail.com",
   contact_phone: "0 (324) 336 11 84",
@@ -102,7 +104,10 @@ export const getNavigationItems = unstable_cache(
       .select("*")
       .eq("is_visible", true)
       .order("order_index");
-    return (data as NavigationItem[] | null) ?? [];
+    const items = (data as NavigationItem[] | null) ?? [];
+    return items.filter(
+      (item, index) => items.findIndex((other) => other.href === item.href) === index,
+    );
   },
   ["navigation-items"],
   { tags: ["navigation-items"], revalidate: 60 },

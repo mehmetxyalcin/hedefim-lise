@@ -39,20 +39,6 @@ export function MobileMenu({ navItems }: Props) {
               </Link>
             ))}
             <Link
-              href="/istatistikler"
-              onClick={() => setIsOpen(false)}
-              className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
-            >
-              İstatistikler
-            </Link>
-            <Link
-              href="/soru-cevap"
-              onClick={() => setIsOpen(false)}
-              className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
-            >
-              Soru-Cevap
-            </Link>
-            <Link
               href="/iletisim"
               onClick={() => setIsOpen(false)}
               className="rounded-lg px-4 py-3 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"

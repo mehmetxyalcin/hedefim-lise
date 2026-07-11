@@ -132,6 +132,19 @@ export async function createNavigationItem(formData: FormData) {
   const href = getRequired(formData, "href", "Bağlantı", NAV_REDIRECT);
   const target = String(formData.get("target") ?? "_self");
 
+  const { data: existingItem } = await supabase
+    .from("navigation_items")
+    .select("id")
+    .eq("href", href)
+    .limit(1)
+    .maybeSingle();
+
+  if (existingItem) {
+    redirect(
+      `${NAV_REDIRECT}?error=${encodeURIComponent("Bu bağlantı menüde zaten bulunuyor.")}`,
+    );
+  }
+
   const { data: last } = await supabase
     .from("navigation_items")
     .select("order_index")
@@ -170,6 +183,20 @@ export async function updateNavigationItem(formData: FormData) {
   const href = getRequired(formData, "href", "Bağlantı", NAV_REDIRECT);
   const target = String(formData.get("target") ?? "_self");
   const is_visible = formData.get("is_visible") === "on";
+
+  const { data: existingItem } = await supabase
+    .from("navigation_items")
+    .select("id")
+    .eq("href", href)
+    .neq("id", id)
+    .limit(1)
+    .maybeSingle();
+
+  if (existingItem) {
+    redirect(
+      `${NAV_REDIRECT}?error=${encodeURIComponent("Bu bağlantı başka bir menü öğesinde kullanılıyor.")}`,
+    );
+  }
 
   const { error } = await supabase
     .from("navigation_items")
@@ -296,11 +323,18 @@ export async function updateFooterSettings(formData: FormData) {
     "Telif hakkı metni",
     FOOTER_REDIRECT,
   );
+  const partners_title = getRequired(
+    formData,
+    "partners_title",
+    "Paydaşlar bölüm başlığı",
+    FOOTER_REDIRECT,
+  );
 
   const { error } = await supabase.from("footer_settings").upsert(
     {
       id: FOOTER_SETTINGS_ID,
       about_text: toNullableString(formData.get("about_text")),
+      partners_title,
       copyright_text,
       contact_email: toNullableString(formData.get("contact_email")),
       contact_phone: toNullableString(formData.get("contact_phone")),
