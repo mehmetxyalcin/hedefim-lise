@@ -8,6 +8,7 @@ import {
 } from "@/lib/site-settings";
 import {
   updateFooterSettings,
+  updateFooterSectionTitle,
   createFooterLink,
   deleteFooterLink,
   createSocialLink,
@@ -88,15 +89,11 @@ const SOCIAL_PLATFORMS = [
   "telegram",
 ];
 
-const FOOTER_SECTIONS = [
-  { value: "paydaşlar", label: "Proje Paydaşları" },
-  { value: "hukuki", label: "Hukuki" },
-  { value: "kaynaklar", label: "Kaynaklar" },
-];
-
 function sectionLabel(section: string, partnersTitle: string) {
   if (section === "paydaşlar") return partnersTitle;
-  return FOOTER_SECTIONS.find((s) => s.value === section)?.label ?? section;
+  if (section === "hukuki") return "Hukuki";
+  if (section === "kaynaklar") return "Kaynaklar";
+  return section;
 }
 
 export default async function FooterSettingsPage({ searchParams }: PageProps) {
@@ -196,28 +193,6 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
             </FormSection>
 
             <FormSection
-              title="Footer Bölüm Başlıkları"
-              description="Footer'daki bağlantı bölümlerinin görünen başlıklarını yönetin."
-            >
-              <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">
-                  Paydaşlar Bölümü Başlığı
-                </span>
-                <input
-                  name="partners_title"
-                  defaultValue={partnersTitle}
-                  required
-                  maxLength={80}
-                  className={inputClassName}
-                  placeholder="Proje Paydaşları"
-                />
-                <span className="mt-2 block text-xs text-slate-500">
-                  Footer&apos;da paydaş bağlantılarının üzerinde gösterilir.
-                </span>
-              </label>
-            </FormSection>
-
-            <FormSection
               title="İletişim Bilgileri"
               description="Footer'ın iletişim sütununda görünen bilgiler."
             >
@@ -272,7 +247,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
           {/* ── Footer Linkleri ── */}
           <FormSection
             title="Footer Bağlantıları"
-            description="Section adına göre gruplanmış bağlantılar. Mevcut section'lar: Proje Paydaşları, Hukuki, Kaynaklar."
+            description="Bağlantıları bölümler halinde yönetin; paydaşlar bölümünün görünen adını doğrudan değiştirebilirsiniz."
           >
             <div className="space-y-6">
               {/* Mevcut linkler — section'a göre gruplu */}
@@ -281,9 +256,33 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
               ) : (
                 Object.entries(linksBySection).map(([section, links]) => (
                   <div key={section}>
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                      {sectionLabel(section, partnersTitle)}
-                    </p>
+                    {section === "paydaşlar" ? (
+                      <form
+                        action={updateFooterSectionTitle}
+                        className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end"
+                      >
+                        <label className="min-w-0 flex-1">
+                          <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-400">
+                            Bölüm adı
+                          </span>
+                          <input
+                            name="partners_title"
+                            defaultValue={partnersTitle}
+                            required
+                            maxLength={80}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          />
+                        </label>
+                        <FormSubmitButton
+                          label="Başlığı Kaydet"
+                          pendingLabel="Kaydediliyor..."
+                        />
+                      </form>
+                    ) : (
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        {sectionLabel(section, partnersTitle)}
+                      </p>
+                    )}
                     <div className="space-y-2">
                       {links.map((link) => (
                         <div
@@ -322,19 +321,22 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                   <div className="grid gap-3 sm:grid-cols-3">
                     <label className="block">
                       <span className="mb-1 block text-xs font-semibold text-slate-600">
-                        Bölüm
+                        Bölüm Adı
                       </span>
-                      <select
-                        name="section"
+                      <input
+                        name="section_title"
                         required
+                        maxLength={80}
+                        list="footer-section-options"
+                        defaultValue={partnersTitle}
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                      >
-                        {FOOTER_SECTIONS.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            {s.value === "paydaşlar" ? partnersTitle : s.label}
-                          </option>
-                        ))}
-                      </select>
+                        placeholder="Örneğin: Proje Destekçileri"
+                      />
+                      <datalist id="footer-section-options">
+                        <option value={partnersTitle} />
+                        <option value="Hukuki" />
+                        <option value="Kaynaklar" />
+                      </datalist>
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-xs font-semibold text-slate-600">

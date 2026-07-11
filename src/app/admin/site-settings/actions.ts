@@ -323,18 +323,10 @@ export async function updateFooterSettings(formData: FormData) {
     "Telif hakkı metni",
     FOOTER_REDIRECT,
   );
-  const partners_title = getRequired(
-    formData,
-    "partners_title",
-    "Paydaşlar bölüm başlığı",
-    FOOTER_REDIRECT,
-  );
-
   const { error } = await supabase.from("footer_settings").upsert(
     {
       id: FOOTER_SETTINGS_ID,
       about_text: toNullableString(formData.get("about_text")),
-      partners_title,
       copyright_text,
       contact_email: toNullableString(formData.get("contact_email")),
       contact_phone: toNullableString(formData.get("contact_phone")),
@@ -354,13 +346,71 @@ export async function updateFooterSettings(formData: FormData) {
   redirect(`${FOOTER_REDIRECT}?success=${encodeURIComponent("Footer ayarları kaydedildi.")}`);
 }
 
+export async function updateFooterSectionTitle(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  if (!profile) redirect("/admin");
+
+  const partners_title = getRequired(
+    formData,
+    "partners_title",
+    "Bölüm başlığı",
+    FOOTER_REDIRECT,
+  );
+
+  const { error } = await supabase.from("footer_settings").upsert(
+    {
+      id: FOOTER_SETTINGS_ID,
+      partners_title,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "id" },
+  );
+
+  if (error) {
+    redirect(`${FOOTER_REDIRECT}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidateSiteLayout();
+  revalidatePath(FOOTER_REDIRECT);
+  redirect(
+    `${FOOTER_REDIRECT}?success=${encodeURIComponent("Bölüm başlığı güncellendi.")}`,
+  );
+}
+
 export async function createFooterLink(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
-  const section = getRequired(formData, "section", "Bölüm", FOOTER_REDIRECT);
+  const sectionTitle = getRequired(
+    formData,
+    "section_title",
+    "Bölüm adı",
+    FOOTER_REDIRECT,
+  );
   const label = getRequired(formData, "label", "Etiket", FOOTER_REDIRECT);
   const href = getRequired(formData, "href", "Bağlantı", FOOTER_REDIRECT);
+  const normalizedSection = sectionTitle.toLocaleLowerCase("tr-TR");
+  const section =
+    normalizedSection === "hukuki"
+      ? "hukuki"
+      : normalizedSection === "kaynaklar"
+        ? "kaynaklar"
+        : "paydaşlar";
+
+  if (section === "paydaşlar") {
+    const { error: titleError } = await supabase.from("footer_settings").upsert(
+      {
+        id: FOOTER_SETTINGS_ID,
+        partners_title: sectionTitle,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
+
+    if (titleError) {
+      redirect(`${FOOTER_REDIRECT}?error=${encodeURIComponent(titleError.message)}`);
+    }
+  }
 
   const { data: last } = await supabase
     .from("footer_links")
@@ -382,8 +432,7 @@ export async function createFooterLink(formData: FormData) {
     redirect(`${FOOTER_REDIRECT}?error=${encodeURIComponent(error.message)}`);
   }
 
-  revalidateTag("footer-links", {});
-  revalidatePath("/", "layout");
+  revalidateSiteLayout();
   revalidatePath(FOOTER_REDIRECT);
   redirect(`${FOOTER_REDIRECT}?success=${encodeURIComponent("Link eklendi.")}`);
 }
