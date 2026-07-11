@@ -113,7 +113,7 @@ export function SchoolScoreCard({ scores }: Props) {
                 <div className="flex items-center justify-between border-t border-gray-100 py-3">
                   <span className="text-sm text-gray-600">LGS Puanı</span>
                   <span className="font-semibold text-gray-800">
-                    {active.lgs_score.toFixed(2)}
+                    {active.lgs_score.toFixed(4)}
                   </span>
                 </div>
               )}
@@ -156,7 +156,7 @@ export function SchoolScoreCard({ scores }: Props) {
                     {score.obp_score != null ? score.obp_score.toFixed(2) : "—"}
                   </td>
                   <td className="px-1 py-2.5 text-right font-medium text-gray-800">
-                    {score.lgs_score != null ? score.lgs_score.toFixed(2) : "—"}
+                    {score.lgs_score != null ? score.lgs_score.toFixed(4) : "—"}
                   </td>
                   <td className="px-1 py-2.5 text-right">
                     {score.percentile != null ? (
