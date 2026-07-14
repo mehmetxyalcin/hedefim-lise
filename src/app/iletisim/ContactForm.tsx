@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Send, CheckCircle, Loader2 } from "lucide-react";
 import { sendContactMessage } from "./actions";
 import { createClient } from "@/lib/supabase/client";
+import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 
 const SCHOOL_SUBJECTS = [
   "Okul Bilgisi Güncelleme",
@@ -69,7 +70,7 @@ export default function ContactForm() {
       const { data } = await supabase
         .from("schools")
         .select("id, name, district")
-        .ilike("name", `%${schoolQuery.trim()}%`)
+        .regexIMatch("name", buildTurkishNameRegex(schoolQuery.trim()))
         .limit(8);
 
       setSchoolResults((data ?? []) as SchoolResult[]);

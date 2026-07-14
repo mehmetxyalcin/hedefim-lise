@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sparkles } from "lucide-react";
 import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
+import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
 import { SchoolList } from "@/components/schools/SchoolList";
 import { Pagination } from "@/components/schools/Pagination";
@@ -81,7 +82,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   // Helper: apply shared filters to any supabase query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function applyFilters<T extends ReturnType<typeof supabase.from>>(q: any): any {
-    if (ara) q = q.ilike("name", `%${ara}%`);
+    if (ara) q = q.regexIMatch("name", buildTurkishNameRegex(ara));
     if (ilce) q = q.eq("district", ilce);
     if (tur) q = q.eq("type", tur);
     if (yerlestirme) q = q.eq("placement_type", yerlestirme);
