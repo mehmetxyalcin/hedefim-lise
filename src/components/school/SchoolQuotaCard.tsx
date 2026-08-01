@@ -56,15 +56,15 @@ export function SchoolQuotaCard({ quotas }: Props) {
         )}
 
         {active.sinavsiz_count != null && (
-          <div className="flex items-center justify-between rounded-xl bg-green-50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-3">
             <div>
-              <p className="text-xs font-medium text-green-500">Sınavsız Kontenjan</p>
-              <p className="text-2xl font-bold text-green-700">
+              <p className="text-xs font-medium text-emerald-500">Sınavsız Kontenjan</p>
+              <p className="text-2xl font-bold text-emerald-700">
                 {active.sinavsiz_count}
                 <span className="ml-1 text-sm font-normal">öğrenci</span>
               </p>
             </div>
-            <Users className="h-8 w-8 text-green-200" />
+            <Users className="h-8 w-8 text-emerald-200" />
           </div>
         )}
 

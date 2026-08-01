@@ -33,10 +33,10 @@ function getRelevantScore(
 }
 
 function percentileColor(p: number): string {
-  if (p <= 20) return "text-red-600";
+  if (p <= 20) return "text-rose-600";
   if (p <= 40) return "text-orange-600";
-  if (p <= 60) return "text-yellow-600";
-  if (p <= 80) return "text-green-600";
+  if (p <= 60) return "text-amber-600";
+  if (p <= 80) return "text-emerald-600";
   return "text-blue-600";
 }
 

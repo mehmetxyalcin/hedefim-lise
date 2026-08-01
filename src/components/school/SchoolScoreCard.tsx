@@ -19,18 +19,18 @@ type SchoolScore = {
 type Props = { scores: SchoolScore[] };
 
 function getPercentileColor(p: number) {
-  if (p <= 20) return "bg-red-500";
+  if (p <= 20) return "bg-rose-500";
   if (p <= 40) return "bg-orange-500";
-  if (p <= 60) return "bg-yellow-500";
-  if (p <= 80) return "bg-green-500";
+  if (p <= 60) return "bg-amber-500";
+  if (p <= 80) return "bg-emerald-500";
   return "bg-blue-500";
 }
 
 function getPercentileTextColor(p: number) {
-  if (p <= 20) return "text-red-600";
+  if (p <= 20) return "text-rose-600";
   if (p <= 40) return "text-orange-600";
-  if (p <= 60) return "text-yellow-600";
-  if (p <= 80) return "text-green-600";
+  if (p <= 60) return "text-amber-600";
+  if (p <= 80) return "text-emerald-600";
   return "text-blue-600";
 }
 
@@ -85,7 +85,7 @@ export function SchoolScoreCard({ scores }: Props) {
                 <div className="mb-5">
                   <div className="mb-2 flex items-end justify-between">
                     <span className="text-sm text-slate-500">Taban Yüzdelik Dilim</span>
-                    <span className="text-3xl font-bold text-slate-900">
+                    <span className="tabular text-3xl font-bold text-slate-900">
                       %{active.percentile.toFixed(2)}
                     </span>
                   </div>
@@ -130,7 +130,7 @@ export function SchoolScoreCard({ scores }: Props) {
       {/* Çok satır / meslek alanı bazlı → tablo */}
       {!isSingleSchoolWide && activeYearScores.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="tabular w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200">
                 <th className="px-1 py-2 text-left text-xs font-medium text-slate-500">

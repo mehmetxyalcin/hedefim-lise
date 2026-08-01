@@ -191,8 +191,8 @@ export function AboutProject() {
 
             <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
               <h3 className="mb-6 flex items-center gap-3 text-xl font-bold tracking-tight text-slate-900">
-                <div className="rounded-xl bg-indigo-50 p-2">
-                  <Network className="h-5 w-5 text-indigo-600" />
+                <div className="rounded-xl bg-blue-50 p-2">
+                  <Network className="h-5 w-5 text-blue-600" />
                 </div>
                 Proje Paydaşları
               </h3>
@@ -203,7 +203,7 @@ export function AboutProject() {
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                  <Handshake className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
+                  <Handshake className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
                   <div>
                     <div className="text-sm font-bold text-slate-900">
                       İl ve İlçe Millî Eğitim Müdürlükleri
@@ -214,7 +214,7 @@ export function AboutProject() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-indigo-500" />
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
                   <div>
                     <div className="text-sm font-bold text-slate-900">
                       Rehberlik ve Araştırma Merkezleri

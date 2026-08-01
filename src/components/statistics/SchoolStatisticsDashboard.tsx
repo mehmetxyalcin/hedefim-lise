@@ -38,7 +38,7 @@ function normalize(value: string) {
 }
 
 function typeBadge(type: SchoolType) {
-  if (type === "Fen Lisesi") return "bg-violet-50 text-violet-700 ring-violet-200";
+  if (type === "Fen Lisesi") return "bg-blue-50 text-blue-700 ring-blue-200";
   if (type === "Sosyal Bilimler Lisesi") {
     return "bg-amber-50 text-amber-700 ring-amber-200";
   }
@@ -261,14 +261,14 @@ export function SchoolStatisticsDashboard({ schools, source }: Props) {
             <Users className="h-6 w-6 text-emerald-600" />
           </div>
         </article>
-        <article className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-violet-600">2025 Ortalama Dilim</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-600">2025 Ortalama Dilim</p>
               <p className="mt-2 text-3xl font-black text-slate-950">%{decimalFormatter.format(summary.averagePercentile)}</p>
               <p className="mt-1 text-xs text-slate-500">aritmetik ortalama</p>
             </div>
-            <BarChart3 className="h-6 w-6 text-violet-600" />
+            <BarChart3 className="h-6 w-6 text-blue-600" />
           </div>
         </article>
         <article className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
@@ -314,7 +314,7 @@ export function SchoolStatisticsDashboard({ schools, source }: Props) {
 
             <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
               <div className="mb-6">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">2025 yerleşme verisi</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">2025 yerleşme verisi</p>
                 <h2 className="mt-1 text-xl font-extrabold text-slate-950">Yüzdelik dilim sıralaması</h2>
                 <p className="mt-1 text-xs text-slate-500">Daha düşük değer daha seçici okulu gösterir.</p>
               </div>
@@ -330,11 +330,11 @@ export function SchoolStatisticsDashboard({ schools, source }: Props) {
                           <span className="mr-2 text-xs font-black text-slate-400">#{index + 1}</span>
                           <span className="text-sm font-bold text-slate-800">{school.school}</span>
                         </div>
-                        <span className="shrink-0 text-sm font-black tabular-nums text-violet-700">%{decimalFormatter.format(percentile)}</span>
+                        <span className="shrink-0 text-sm font-black tabular-nums text-blue-700">%{decimalFormatter.format(percentile)}</span>
                       </div>
                       <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-400"
+                          className="h-full rounded-full bg-gradient-to-r from-blue-600 to-fuchsia-400"
                           style={{ width: `${width}%` }}
                         />
                       </div>
@@ -439,7 +439,7 @@ export function SchoolStatisticsDashboard({ schools, source }: Props) {
                             {school.type}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-right font-black tabular-nums text-violet-700">
+                        <td className="px-4 py-4 text-right font-black tabular-nums text-blue-700">
                           {p2025 === undefined ? "—" : `%${decimalFormatter.format(p2025)}`}
                         </td>
                         <td className="px-4 py-4 text-right font-black tabular-nums text-slate-900">

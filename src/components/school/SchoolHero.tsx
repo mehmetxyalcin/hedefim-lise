@@ -8,7 +8,7 @@ type Props = { school: SchoolWithDetails };
 const gradientMap: Record<string, string> = {
   "Anadolu Lisesi": "from-blue-900 via-blue-800 to-blue-700",
   "Fen Lisesi": "from-purple-900 via-purple-800 to-purple-700",
-  "Anadolu İmam Hatip Lisesi": "from-green-900 via-green-800 to-green-700",
+  "Anadolu İmam Hatip Lisesi": "from-emerald-900 via-emerald-800 to-emerald-700",
   "Mesleki ve Teknik Anadolu Lisesi": "from-teal-900 via-teal-800 to-teal-700",
   "Anadolu Meslek ve Teknik Programı": "from-teal-900 via-teal-800 to-teal-700",
   "Sosyal Bilimler Lisesi": "from-indigo-900 via-indigo-800 to-indigo-700",

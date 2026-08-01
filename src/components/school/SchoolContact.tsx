@@ -20,7 +20,7 @@ export function SchoolContact({ address, phone, website }: Props) {
             rel="noopener noreferrer"
             className="group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50"
           >
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
             <span className="text-sm text-slate-700 transition-colors group-hover:text-blue-600">
               {address}
             </span>
@@ -32,7 +32,7 @@ export function SchoolContact({ address, phone, website }: Props) {
             href={`tel:${phone}`}
             className="group flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50"
           >
-            <Phone className="h-4 w-4 shrink-0 text-green-500" />
+            <Phone className="h-4 w-4 shrink-0 text-emerald-500" />
             <span className="text-sm text-slate-700 transition-colors group-hover:text-blue-600">
               {phone}
             </span>

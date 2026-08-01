@@ -166,7 +166,7 @@ export default function ContactForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={LABEL_CLASS}>
-            Ad Soyad <span className="text-red-500">*</span>
+            Ad Soyad <span className="text-rose-500">*</span>
           </label>
           <input
             id="name"
@@ -180,7 +180,7 @@ export default function ContactForm() {
         </div>
         <div>
           <label htmlFor="email" className={LABEL_CLASS}>
-            E-posta <span className="text-red-500">*</span>
+            E-posta <span className="text-rose-500">*</span>
           </label>
           <input
             id="email"
@@ -213,7 +213,7 @@ export default function ContactForm() {
       {/* Konu */}
       <div>
         <label htmlFor="subject" className={LABEL_CLASS}>
-          Konu <span className="text-red-500">*</span>
+          Konu <span className="text-rose-500">*</span>
         </label>
         <select
           id="subject"
@@ -344,7 +344,7 @@ export default function ContactForm() {
       {/* Mesaj */}
       <div>
         <label htmlFor="message" className={LABEL_CLASS}>
-          Mesajınız <span className="text-red-500">*</span>
+          Mesajınız <span className="text-rose-500">*</span>
         </label>
         <div className="relative">
           <textarea
@@ -367,7 +367,7 @@ export default function ContactForm() {
 
       {/* Sunucu hatası */}
       {serverError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
           {serverError}
         </div>
       )}

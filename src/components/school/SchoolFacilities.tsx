@@ -22,7 +22,7 @@ export function SchoolFacilities({ facilities }: Props) {
             key={facility.id}
             className="flex items-center gap-2 rounded-xl border border-transparent bg-slate-50 p-3 transition-colors duration-150 hover:border-blue-100 hover:bg-blue-50"
           >
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
             <span className="text-sm leading-tight text-slate-700">{facility.name}</span>
           </div>
         ))}

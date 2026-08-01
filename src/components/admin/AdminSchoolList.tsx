@@ -343,17 +343,17 @@ export function AdminSchoolList({
             {stats.passive}
           </p>
         </div>
-        <div className="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3">
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
                 Alan ilişkili
               </p>
-              <p className="mt-1 text-2xl font-extrabold text-violet-800">
+              <p className="mt-1 text-2xl font-extrabold text-blue-800">
                 {stats.withVocationalFields}
               </p>
             </div>
-            <Layers3 className="h-6 w-6 text-violet-400" />
+            <Layers3 className="h-6 w-6 text-blue-400" />
           </div>
         </div>
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">

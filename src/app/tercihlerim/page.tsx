@@ -32,7 +32,7 @@ export default function TercihlerimPage() {
             {favorites.length > 0 && (
               <button
                 onClick={clearAll}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
               >
                 Listeyi Temizle
               </button>
@@ -153,7 +153,7 @@ export default function TercihlerimPage() {
                 {/* Sil butonu */}
                 <button
                   onClick={() => removeFavorite(school.id)}
-                  className="no-print shrink-0 rounded-lg p-2 pt-2.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                  className="no-print shrink-0 rounded-lg p-2 pt-2.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
                   title="Listeden çıkar"
                 >
                   <X className="h-4 w-4" />

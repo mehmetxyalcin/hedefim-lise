@@ -13,17 +13,6 @@ type VocationalField = {
 
 type Props = { fields: VocationalField[] };
 
-const badgeColors = [
-  "bg-blue-100 text-blue-700",
-  "bg-green-100 text-green-700",
-  "bg-purple-100 text-purple-700",
-  "bg-orange-100 text-orange-700",
-  "bg-teal-100 text-teal-700",
-  "bg-pink-100 text-pink-700",
-  "bg-indigo-100 text-indigo-700",
-  "bg-yellow-100 text-yellow-700",
-];
-
 export function VocationalAccordion({ fields }: Props) {
   const [openIds, setOpenIds] = useState<string[]>([fields[0]?.id]);
 
@@ -38,10 +27,8 @@ export function VocationalAccordion({ fields }: Props) {
   return (
     <SectionCard icon={Briefcase} title="Meslek Alanları ve Dallar">
       <div className="space-y-2">
-        {fields.map((field, fieldIndex) => {
+        {fields.map((field) => {
           const isOpen = openIds.includes(field.id);
-          const color = badgeColors[fieldIndex % badgeColors.length];
-          const dotColor = color.split(" ")[0];
 
           return (
             <div
@@ -54,7 +41,7 @@ export function VocationalAccordion({ fields }: Props) {
                 className="flex w-full items-center justify-between bg-slate-50 px-4 py-3 text-left transition-colors duration-150 hover:bg-slate-100"
               >
                 <div className="flex items-center gap-2">
-                  <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
+                  <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
                   <span className="text-sm font-medium text-slate-800">
                     {field.name}
                   </span>
@@ -76,7 +63,7 @@ export function VocationalAccordion({ fields }: Props) {
                       {field.branches.map((branch) => (
                         <span
                           key={branch.id}
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${color}`}
+                          className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
                         >
                           {branch.name}
                         </span>

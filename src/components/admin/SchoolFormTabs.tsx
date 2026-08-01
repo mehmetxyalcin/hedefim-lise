@@ -209,12 +209,12 @@ export function SchoolFormTabs({
 
           {/* Başarı / Hata mesajı */}
           {activeState()?.success === true && (
-            <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
               ✓ {activeState()!.message}
             </div>
           )}
           {activeState()?.success === false && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
               ✗ {activeState()!.message}
             </div>
           )}

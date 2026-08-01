@@ -28,7 +28,7 @@ export function SchoolScholarships({ scholarships }: Props) {
                 <p className="mt-0.5 text-sm text-slate-600">{s.description}</p>
               )}
               {s.amount_info && (
-                <p className="mt-1 text-sm font-medium text-green-600">{s.amount_info}</p>
+                <p className="mt-1 text-sm font-medium text-emerald-600">{s.amount_info}</p>
               )}
             </div>
           </div>

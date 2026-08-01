@@ -34,19 +34,19 @@ type Props = { school: SchoolWithDetails };
 function heroGradient(type: string): string {
   const t = type.toLowerCase();
   if (t.includes("meslek") || t.includes("teknik"))
-    return "from-indigo-700 via-blue-700 to-purple-800";
+    return "from-blue-700 via-blue-700 to-blue-800";
   if (t.includes("fen"))
-    return "from-orange-600 via-red-600 to-rose-700";
+    return "from-orange-600 via-rose-600 to-rose-700";
   if (t.includes("anadolu"))
-    return "from-emerald-600 via-teal-600 to-cyan-700";
+    return "from-emerald-600 via-blue-600 to-cyan-700";
   return "from-slate-600 via-slate-700 to-slate-800";
 }
 
 function percentileBar(v: number) {
-  if (v <= 20) return { bar: "bg-red-500", label: "Çok yüksek başarı gerektirir" };
+  if (v <= 20) return { bar: "bg-rose-500", label: "Çok yüksek başarı gerektirir" };
   if (v <= 40) return { bar: "bg-orange-500", label: "Yüksek başarı gerektirir" };
-  if (v <= 60) return { bar: "bg-yellow-500", label: "Orta düzey başarı gerektirir" };
-  if (v <= 80) return { bar: "bg-green-500", label: "Ulaşılabilir hedef" };
+  if (v <= 60) return { bar: "bg-amber-500", label: "Orta düzey başarı gerektirir" };
+  if (v <= 80) return { bar: "bg-emerald-500", label: "Ulaşılabilir hedef" };
   return { bar: "bg-blue-500", label: "Geniş yerleşme imkânı" };
 }
 
@@ -219,9 +219,9 @@ function ScoreCard({
             </div>
           )}
           {score?.lgsScore != null && (
-            <div className="rounded-lg bg-purple-50 p-3 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-purple-400">LGS</p>
-              <p className="mt-1 text-lg font-bold tabular-nums text-purple-700">
+            <div className="rounded-lg bg-blue-50 p-3 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-400">LGS</p>
+              <p className="mt-1 text-lg font-bold tabular-nums text-blue-700">
                 {score.lgsScore}
               </p>
             </div>
@@ -704,7 +704,7 @@ type ChipColor = "slate" | "blue" | "purple" | "emerald" | "amber";
 const chipClasses: Record<ChipColor, string> = {
   slate: "bg-slate-100 text-slate-700",
   blue: "bg-blue-50 text-blue-700",
-  purple: "bg-purple-50 text-purple-700",
+  purple: "bg-blue-50 text-blue-700",
   emerald: "bg-emerald-50 text-emerald-700",
   amber: "bg-amber-50 text-amber-700",
 };

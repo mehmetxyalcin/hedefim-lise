@@ -69,7 +69,7 @@ export function FavoriteButton({ school }: Props) {
     return (
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-semibold text-white"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white"
       >
         <Check className="h-5 w-5" />
         Listeye Eklendi!
@@ -82,9 +82,9 @@ export function FavoriteButton({ school }: Props) {
       <button
         type="button"
         onClick={handleClick}
-        className="group flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 font-semibold text-slate-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+        className="group flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 font-semibold text-slate-700 transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
       >
-        <StarOff className="h-5 w-5 text-slate-400 group-hover:text-red-500" />
+        <StarOff className="h-5 w-5 text-slate-400 group-hover:text-rose-500" />
         <span className="group-hover:hidden">Tercihlerimde</span>
         <span className="hidden group-hover:inline">Listeden Çıkar</span>
       </button>
