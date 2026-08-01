@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { SmartSchoolBasicFields } from "@/components/admin/SmartSchoolBasicFields";
 import { UnsavedChangesWarning } from "@/components/admin/UnsavedChangesWarning";
@@ -275,7 +275,7 @@ export function SchoolForm({
             >
               İptal
             </Link>
-            <FormSubmitButton label={submitLabel} />
+            <SubmitButton label={submitLabel} />
           </div>
         </div>
       </div>

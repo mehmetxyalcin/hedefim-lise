@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { SchoolScore, SchoolQuota } from "@/types/schoolDetail";
 
 const inputCls =
@@ -243,7 +243,7 @@ export function ScoresTab({
                                 >
                                   İptal
                                 </button>
-                                <FormSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
+                                <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
                               </div>
                             </form>
                           )}
@@ -337,7 +337,7 @@ export function ScoresTab({
                       >
                         İptal
                       </button>
-                      <FormSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
+                      <SubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
                     </div>
                   </form>
                 )}
@@ -445,7 +445,7 @@ export function ScoresTab({
                       />
                     </label>
                     <div className="col-span-full flex justify-end">
-                      <FormSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
+                      <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
                     </div>
                   </form>
                 )}

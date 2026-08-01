@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { getAdminNavigationItems } from "@/lib/site-settings";
 import type { NavigationItem } from "@/lib/site-settings";
 import {
@@ -138,7 +138,7 @@ function EditRow({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 border-t border-blue-100 pt-4">
-          <FormSubmitButton label="Kaydet" pendingLabel="Kaydediliyor..." />
+          <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor..." />
           <Link
             href="/admin/site-settings/navigation"
             className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
@@ -403,7 +403,7 @@ export default async function NavigationPage({ searchParams }: PageProps) {
                 <option value="_blank">Yeni sekme</option>
               </select>
             </label>
-            <FormSubmitButton label="Ekle" pendingLabel="Ekleniyor..." />
+            <SubmitButton label="Ekle" pendingLabel="Ekleniyor..." />
           </form>
         </FormSection>
       </div>

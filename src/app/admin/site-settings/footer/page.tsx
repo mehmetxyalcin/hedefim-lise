@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import {
   getAdminFooterLinks,
   getAdminSocialLinks,
@@ -239,7 +239,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                 <p className="text-sm font-bold text-slate-900">
                   Footer genel ayarlarını kaydet
                 </p>
-                <FormSubmitButton label="Kaydet" />
+                <SubmitButton label="Kaydet" />
               </div>
             </div>
           </form>
@@ -273,7 +273,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                           />
                         </label>
-                        <FormSubmitButton
+                        <SubmitButton
                           label="Başlığı Kaydet"
                           pendingLabel="Kaydediliyor..."
                         />
@@ -361,7 +361,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                       />
                     </label>
                   </div>
-                  <FormSubmitButton label="Link Ekle" pendingLabel="Ekleniyor..." />
+                  <SubmitButton label="Link Ekle" pendingLabel="Ekleniyor..." />
                 </form>
               </div>
             </div>
@@ -440,7 +440,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                       />
                     </label>
                   </div>
-                  <FormSubmitButton label="Ekle" pendingLabel="Ekleniyor..." />
+                  <SubmitButton label="Ekle" pendingLabel="Ekleniyor..." />
                 </form>
               </div>
             </div>

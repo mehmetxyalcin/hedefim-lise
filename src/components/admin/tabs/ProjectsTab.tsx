@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
 import Image from "next/image";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { SchoolProject } from "@/types/schoolDetail";
 
 const inputCls =
@@ -86,7 +86,7 @@ export function ProjectsTab({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <FormSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
+                  <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
@@ -209,7 +209,7 @@ export function ProjectsTab({
             />
           </div>
           <div className="flex justify-end">
-            <FormSubmitButton label="Proje Ekle" pendingLabel="Ekleniyor…" />
+            <SubmitButton label="Proje Ekle" pendingLabel="Ekleniyor…" />
           </div>
         </form>
       </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { signInAdmin } from "./actions";
 
 export const metadata: Metadata = {
@@ -111,7 +111,7 @@ export default async function AdminLoginPage({ searchParams }: PageProps) {
               </span>
             </label>
 
-            <FormSubmitButton label="Giriş Yap" pendingLabel="Giriş yapılıyor…" />
+            <SubmitButton label="Giriş Yap" pendingLabel="Giriş yapılıyor…" />
           </form>
         </div>
       </div>

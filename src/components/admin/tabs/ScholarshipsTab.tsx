@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { SchoolScholarship } from "@/types/schoolDetail";
 
 const inputCls =
@@ -69,7 +69,7 @@ export function ScholarshipsTab({
                   className={inputCls}
                 />
                 <div className="flex items-center gap-2">
-                  <FormSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
+                  <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
@@ -164,7 +164,7 @@ export function ScholarshipsTab({
             className={inputCls}
           />
           <div className="flex justify-end">
-            <FormSubmitButton label="Burs Ekle" pendingLabel="Ekleniyor…" />
+            <SubmitButton label="Burs Ekle" pendingLabel="Ekleniyor…" />
           </div>
         </form>
       </div>

@@ -4,7 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { UnsavedChangesWarning } from "@/components/admin/UnsavedChangesWarning";
 import type { ActionResult } from "@/app/admin/okullar/actions";
 import { BasicInfoTab } from "@/components/admin/tabs/BasicInfoTab";
@@ -245,7 +245,7 @@ export function SchoolFormTabs({
                 >
                   İptal
                 </Link>
-                <FormSubmitButton label={submitLabel} />
+                <SubmitButton label={submitLabel} />
               </div>
             </div>
           </div>

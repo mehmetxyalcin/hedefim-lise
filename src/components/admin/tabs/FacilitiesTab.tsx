@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { Facility } from "@/types/schoolDetail";
 
 const inputCls =
@@ -75,7 +75,7 @@ export function FacilitiesTab({
         )}
 
         <div className="flex justify-end pt-2">
-          <FormSubmitButton label="Tesisleri Kaydet" pendingLabel="Kaydediliyor…" />
+          <SubmitButton label="Tesisleri Kaydet" pendingLabel="Kaydediliyor…" />
         </div>
       </form>
 
@@ -102,7 +102,7 @@ export function FacilitiesTab({
               placeholder="Tesis adı"
               className={inputCls}
             />
-            <FormSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
+            <SubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
           </form>
         )}
       </div>

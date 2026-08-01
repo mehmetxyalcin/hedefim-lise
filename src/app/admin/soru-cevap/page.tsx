@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CircleHelp, Eye, EyeOff, Trash2 } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { requireAdmin } from "@/lib/admin-auth";
 import { mapFaq, type FaqRow } from "@/types/faq";
 import { createFaq, deleteFaq, updateFaq } from "./actions";
@@ -174,7 +174,7 @@ export default async function AdminFaqPage({ searchParams }: PageProps) {
                 />
                 Yayında
               </label>
-              <FormSubmitButton label="Soru-Cevap Ekle" pendingLabel="Ekleniyor..." />
+              <SubmitButton label="Soru-Cevap Ekle" pendingLabel="Ekleniyor..." />
             </div>
           </form>
         </section>
@@ -307,7 +307,7 @@ export default async function AdminFaqPage({ searchParams }: PageProps) {
                         />
                         Yayında
                       </label>
-                      <FormSubmitButton label="Değişiklikleri Kaydet" />
+                      <SubmitButton label="Değişiklikleri Kaydet" />
                     </div>
                   </form>
 

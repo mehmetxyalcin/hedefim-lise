@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
 import { LogoUploadField } from "@/components/admin/LogoUploadField";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { updateSiteSettings } from "./actions";
 import type { ReactNode } from "react";
 
@@ -173,7 +173,7 @@ export default async function SiteSettingsPage({ searchParams }: PageProps) {
                 >
                   İptal
                 </Link>
-                <FormSubmitButton label="Kaydet" />
+                <SubmitButton label="Kaydet" />
               </div>
             </div>
           </div>

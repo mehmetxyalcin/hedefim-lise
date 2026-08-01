@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { FormSubmitButton } from "@/components/admin/FormSubmitButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { VocationalField } from "@/types/vocationalField";
 import type { VocationalBranch } from "@/types/schoolDetail";
 
@@ -119,7 +119,7 @@ export function VocationalTab({
                             placeholder="Dal adı"
                             className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                           />
-                          <FormSubmitButton label="Ekle" pendingLabel="…" />
+                          <SubmitButton label="Ekle" pendingLabel="…" />
                           <button
                             type="button"
                             onClick={() => setAddingBranchForField(null)}
@@ -147,7 +147,7 @@ export function VocationalTab({
         </div>
 
         <div className="mt-6 flex justify-end">
-          <FormSubmitButton label="Alanları ve Dalları Kaydet" pendingLabel="Kaydediliyor…" />
+          <SubmitButton label="Alanları ve Dalları Kaydet" pendingLabel="Kaydediliyor…" />
         </div>
       </form>
     </section>
