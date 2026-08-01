@@ -30,7 +30,7 @@ export function SectionCard({
     >
       <div className={cn("mb-4 flex items-center gap-2", headerClassName)}>
         <Icon className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
+        <h2 className="type-title text-slate-800">{title}</h2>
         {action != null && <div className="ml-auto">{action}</div>}
       </div>
       {children}
