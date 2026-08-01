@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Users } from "lucide-react";
+import { SectionCard } from "@/components/ui/SectionCard";
 
 type SchoolQuota = {
   year: number;
@@ -20,12 +21,7 @@ export function SchoolQuotaCard({ quotas }: Props) {
   const active = sorted.find((q) => q.year === activeYear)!;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <Users className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-800">Kontenjan Bilgileri</h2>
-      </div>
-
+    <SectionCard icon={Users} title="Kontenjan Bilgileri">
       {/* Yıl Tabları */}
       <div className="mb-5 flex gap-1 rounded-xl bg-slate-100 p-1">
         {sorted.map((q) => (
@@ -78,6 +74,6 @@ export function SchoolQuotaCard({ quotas }: Props) {
           </p>
         )}
       </div>
-    </div>
+    </SectionCard>
   );
 }

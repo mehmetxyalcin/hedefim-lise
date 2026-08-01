@@ -22,6 +22,7 @@ import { SCHOOL_TYPES } from "@/data/schoolTypes";
 import type { School, SchoolScoreRaw } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
 import { BottomSheet } from "@/components/ui/BottomSheet";
+import { Badge } from "@/components/ui/Badge";
 
 const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -402,13 +403,11 @@ export function SchoolList({
               >
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <span className="rounded-md border border-blue-100 bg-blue-50/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700">
-                      {school.type}
-                    </span>
-                    <span className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-100/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                    <Badge tone="blue">{school.type}</Badge>
+                    <Badge tone="slate">
                       <MapPin className="h-3 w-3" />
                       {school.district}
-                    </span>
+                    </Badge>
                     {school.phone && (
                       <a
                         href={`tel:${school.phone}`}

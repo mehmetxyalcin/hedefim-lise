@@ -1,4 +1,5 @@
 import { Globe, MapPin, Phone } from "lucide-react";
+import { SectionCard } from "@/components/ui/SectionCard";
 
 type Props = {
   address: string | null;
@@ -10,12 +11,7 @@ export function SchoolContact({ address, phone, website }: Props) {
   if (!address && !phone && !website) return null;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center gap-2">
-        <Phone className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-800">İletişim</h2>
-      </div>
-
+    <SectionCard icon={Phone} title="İletişim">
       <div className="space-y-3">
         {address && (
           <a
@@ -57,6 +53,6 @@ export function SchoolContact({ address, phone, website }: Props) {
           </a>
         )}
       </div>
-    </div>
+    </SectionCard>
   );
 }

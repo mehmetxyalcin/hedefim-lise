@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Briefcase, ChevronDown, ChevronUp } from "lucide-react";
+import { SectionCard } from "@/components/ui/SectionCard";
 
 type Branch = { id: string; name: string };
 type VocationalField = {
@@ -35,14 +36,7 @@ export function VocationalAccordion({ fields }: Props) {
   if (!fields || fields.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center gap-2">
-        <Briefcase className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-800">
-          Meslek Alanları ve Dallar
-        </h2>
-      </div>
-
+    <SectionCard icon={Briefcase} title="Meslek Alanları ve Dallar">
       <div className="space-y-2">
         {fields.map((field, fieldIndex) => {
           const isOpen = openIds.includes(field.id);
@@ -99,6 +93,6 @@ export function VocationalAccordion({ fields }: Props) {
           );
         })}
       </div>
-    </div>
+    </SectionCard>
   );
 }

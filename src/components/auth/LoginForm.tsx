@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/Button";
 
 type LoginFormProps = {
   nextPath?: string;
@@ -74,13 +75,9 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-      >
+      <Button type="submit" fullWidth size="lg" disabled={isSubmitting}>
         {isSubmitting ? "Gönderiliyor..." : "E-posta ile Giriş Yap"}
-      </button>
+      </Button>
 
       {status && (
         <p className="text-sm text-slate-600" role="status">

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ExternalLink, FolderOpen } from "lucide-react";
+import { SectionCard } from "@/components/ui/SectionCard";
 
 type Project = {
   id: string;
@@ -15,12 +16,7 @@ export function SchoolProjects({ projects }: Props) {
   if (!projects || projects.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center gap-2">
-        <FolderOpen className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-800">Projeler</h2>
-      </div>
-
+    <SectionCard icon={FolderOpen} title="Projeler">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {projects.map((p) => (
           <div
@@ -64,6 +60,6 @@ export function SchoolProjects({ projects }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </SectionCard>
   );
 }

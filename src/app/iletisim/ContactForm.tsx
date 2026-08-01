@@ -5,6 +5,7 @@ import { Send, CheckCircle, Loader2 } from "lucide-react";
 import { sendContactMessage } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
+import { Button } from "@/components/ui/Button";
 
 const SCHOOL_SUBJECTS = [
   "Okul Bilgisi Güncelleme",
@@ -152,13 +153,9 @@ export default function ContactForm() {
             En kısa sürede size dönüş yapacağız. Teşekkür ederiz.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={resetForm}
-          className="mt-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-        >
+        <Button onClick={resetForm} size="lg" className="mt-2">
           Yeni Mesaj Gönder
-        </button>
+        </Button>
       </div>
     );
   }
@@ -376,11 +373,7 @@ export default function ContactForm() {
       )}
 
       {/* Submit */}
-      <button
-        type="submit"
-        disabled={!isFormValid() || submitting}
-        className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button type="submit" size="lg" disabled={!isFormValid() || submitting}>
         {submitting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -392,7 +385,7 @@ export default function ContactForm() {
             Mesaj Gönder
           </>
         )}
-      </button>
+      </Button>
     </form>
   );
 }

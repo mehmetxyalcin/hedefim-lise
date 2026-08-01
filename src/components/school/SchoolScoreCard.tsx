@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { SectionCard } from "@/components/ui/SectionCard";
 
 type VocationalField = { id: number; name: string };
 
@@ -54,11 +55,7 @@ export function SchoolScoreCard({ scores }: Props) {
     activeYearScores.length === 1 && !activeYearScores[0].vocational_field_id;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <TrendingUp className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-800">Puan Bilgileri</h2>
-      </div>
+    <SectionCard icon={TrendingUp} title="Puan Bilgileri">
 
       {/* Yıl Tabları */}
       <div className="mb-5 flex gap-1 rounded-xl bg-slate-100 p-1">
@@ -183,6 +180,6 @@ export function SchoolScoreCard({ scores }: Props) {
           {activeYear} yılı puan bilgisi henüz eklenmemiş.
         </p>
       )}
-    </div>
+    </SectionCard>
   );
 }
