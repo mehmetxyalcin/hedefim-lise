@@ -42,10 +42,12 @@ function getPercentileLabel(p: number) {
 }
 
 export function SchoolScoreCard({ scores }: Props) {
+  // Hook'lar koşulsuz çağrılmalı: yıl listesini ve state'i erken return'den önce kur.
+  const years = [...new Set((scores ?? []).map((s) => s.year))].sort((a, b) => b - a);
+  const [activeYear, setActiveYear] = useState(years[0]);
+
   if (!scores || scores.length === 0) return null;
 
-  const years = [...new Set(scores.map((s) => s.year))].sort((a, b) => b - a);
-  const [activeYear, setActiveYear] = useState(years[0]);
   const activeYearScores = scores.filter((s) => s.year === activeYear);
 
   const isSingleSchoolWide =
