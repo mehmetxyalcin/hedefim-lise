@@ -271,7 +271,7 @@ export function SchoolList({
     <div className="flex gap-3">
       <button
         onClick={clearFilters}
-        className="flex-1 rounded-xl border border-gray-300 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+        className="flex-1 rounded-xl border border-slate-300 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
       >
         Temizle
       </button>
@@ -287,11 +287,11 @@ export function SchoolList({
   return (
     <>
       {/* ── Mobil sticky filtre çubuğu ─────────────────────────────────────── */}
-      <div className="sticky top-20 z-30 mb-4 border-b border-gray-200 bg-white px-0 py-3 lg:hidden">
+      <div className="sticky top-20 z-30 mb-4 border-b border-slate-200 bg-white px-0 py-3 lg:hidden">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
             <SlidersHorizontal className="h-4 w-4" />
             Filtrele
@@ -304,7 +304,7 @@ export function SchoolList({
 
           <button
             onClick={() => setIsSortOpen(true)}
-            className="ml-auto flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="ml-auto flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
             <ArrowUpDown className="h-4 w-4" />
             <span className="max-w-[140px] truncate">{activeSortLabel}</span>
@@ -497,22 +497,22 @@ export function SchoolList({
       >
         {/* Arama */}
         <div className="mb-5">
-          <p className="mb-2 text-sm font-semibold text-gray-700">Okul Ara</p>
+          <p className="mb-2 text-sm font-semibold text-slate-700">Okul Ara</p>
           <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Okul adı ara..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 py-2.5 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full rounded-xl border border-slate-200 py-2.5 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
         </div>
 
         {/* İlçe */}
         <div className="mb-5">
-          <p className="mb-3 text-sm font-semibold text-gray-700">İlçe</p>
+          <p className="mb-3 text-sm font-semibold text-slate-700">İlçe</p>
           <div className="grid grid-cols-3 gap-2">
             {DISTRICTS.map((d) => (
               <button
@@ -521,7 +521,7 @@ export function SchoolList({
                 className={`rounded-xl border px-2 py-2 text-center text-sm font-medium transition-colors ${
                   ilce === d
                     ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-blue-300"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
                 }`}
               >
                 {d}
@@ -532,7 +532,7 @@ export function SchoolList({
 
         {/* Okul Türü */}
         <div className="mb-5">
-          <p className="mb-3 text-sm font-semibold text-gray-700">Okul Türü</p>
+          <p className="mb-3 text-sm font-semibold text-slate-700">Okul Türü</p>
           <div className="space-y-2">
             {SCHOOL_TYPES.map((t) => (
               <button
@@ -541,7 +541,7 @@ export function SchoolList({
                 className={`flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                   tur === t
                     ? "border-blue-300 bg-blue-50 text-blue-700"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-blue-200"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"
                 }`}
               >
                 {t}
@@ -553,7 +553,7 @@ export function SchoolList({
 
         {/* Yerleştirme */}
         <div className="mb-5">
-          <p className="mb-3 text-sm font-semibold text-gray-700">Yerleştirme Türü</p>
+          <p className="mb-3 text-sm font-semibold text-slate-700">Yerleştirme Türü</p>
           <div className="grid grid-cols-3 gap-2">
             {PLACEMENT_OPTIONS.map((opt) => (
               <button
@@ -562,7 +562,7 @@ export function SchoolList({
                 className={`rounded-xl border py-2 text-sm font-medium transition-colors ${
                   placement === opt.value
                     ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-blue-300"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
                 }`}
               >
                 {opt.label}
@@ -573,22 +573,22 @@ export function SchoolList({
 
         {/* Meslek Alanı */}
         <div>
-          <p className="mb-3 text-sm font-semibold text-gray-700">Meslek Alanı</p>
+          <p className="mb-3 text-sm font-semibold text-slate-700">Meslek Alanı</p>
           <div className="relative mb-2">
-            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Alan ara..."
               value={fieldSearch}
               onChange={(e) => setFieldSearch(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 py-2 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full rounded-xl border border-slate-200 py-2 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
-          <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-100 p-2">
+          <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-100 p-2">
             <button
               onClick={() => setAlan("")}
               className={`mb-1 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                alan === "" ? "bg-blue-50 text-blue-700" : "text-gray-500 hover:bg-gray-50"
+                alan === "" ? "bg-blue-50 text-blue-700" : "text-slate-500 hover:bg-slate-50"
               }`}
             >
               Tüm Meslek Alanları
@@ -601,7 +601,7 @@ export function SchoolList({
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                   alan === String(f.id)
                     ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700 hover:bg-gray-50"
+                    : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
                 {f.title}
@@ -626,7 +626,7 @@ export function SchoolList({
               className={`flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-sm transition-colors ${
                 siralama === opt.value
                   ? "bg-blue-50 font-semibold text-blue-700"
-                  : "text-gray-700 hover:bg-gray-50"
+                  : "text-slate-700 hover:bg-slate-50"
               }`}
             >
               {opt.label}

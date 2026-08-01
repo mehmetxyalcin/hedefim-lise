@@ -15,17 +15,17 @@ export function SchoolProjects({ projects }: Props) {
   if (!projects || projects.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-center gap-2">
         <FolderOpen className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-gray-800">Projeler</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Projeler</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {projects.map((p) => (
           <div
             key={p.id}
-            className="overflow-hidden rounded-xl border border-gray-100 transition-shadow hover:shadow-md"
+            className="overflow-hidden rounded-xl border border-slate-100 transition-shadow hover:shadow-md"
           >
             {p.image_url ? (
               <div className="relative aspect-video">
@@ -43,9 +43,9 @@ export function SchoolProjects({ projects }: Props) {
             )}
 
             <div className="p-4">
-              <h3 className="text-sm font-semibold text-gray-800">{p.title}</h3>
+              <h3 className="text-sm font-semibold text-slate-800">{p.title}</h3>
               {p.description && (
-                <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+                <p className="mt-1 line-clamp-2 text-xs text-slate-500">
                   {p.description}
                 </p>
               )}

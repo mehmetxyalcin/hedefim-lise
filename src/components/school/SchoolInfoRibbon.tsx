@@ -81,7 +81,7 @@ export function SchoolInfoRibbon({ school }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-md md:p-6">
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-md md:p-6">
       <div className="relative">
         {/* Sağ fade — sağda içerik olduğunu gösterir */}
         <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-8 bg-gradient-to-l from-white to-transparent lg:hidden" />
@@ -90,18 +90,18 @@ export function SchoolInfoRibbon({ school }: Props) {
           <div className="flex min-w-max items-stretch gap-4">
             {items.map((item, index) => (
               <React.Fragment key={item.label}>
-                <div className="flex min-w-[120px] flex-col items-center gap-1.5 rounded-xl bg-gray-50 px-6 py-3">
+                <div className="flex min-w-[120px] flex-col items-center gap-1.5 rounded-xl bg-slate-50 px-6 py-3">
                   {item.icon}
-                  <span className="whitespace-nowrap text-xs text-gray-500">{item.label}</span>
-                  <span className="whitespace-nowrap text-center text-sm font-semibold text-gray-800">
+                  <span className="whitespace-nowrap text-xs text-slate-500">{item.label}</span>
+                  <span className="whitespace-nowrap text-center text-sm font-semibold text-slate-800">
                     {item.value}
                   </span>
                   {item.note && (
-                    <p className="mt-1 text-xs italic text-gray-400">{item.note}</p>
+                    <p className="mt-1 text-xs italic text-slate-400">{item.note}</p>
                   )}
                 </div>
                 {index < items.length - 1 && (
-                  <div className="h-12 w-px self-center bg-gray-200" />
+                  <div className="h-12 w-px self-center bg-slate-200" />
                 )}
               </React.Fragment>
             ))}
@@ -111,9 +111,9 @@ export function SchoolInfoRibbon({ school }: Props) {
 
       {/* Kaydırma ipucu — mobilde, kartlar taşıyorsa anlamlı */}
       <div className="mt-2 flex items-center justify-center gap-1 lg:hidden">
-        <ChevronLeft className="h-3 w-3 text-gray-400" />
-        <span className="text-xs text-gray-400">kaydırın</span>
-        <ChevronRight className="h-3 w-3 text-gray-400" />
+        <ChevronLeft className="h-3 w-3 text-slate-400" />
+        <span className="text-xs text-slate-400">kaydırın</span>
+        <ChevronRight className="h-3 w-3 text-slate-400" />
       </div>
     </div>
   );

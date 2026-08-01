@@ -23,8 +23,8 @@ export default function IletisimPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Sol — Form */}
           <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 text-lg font-bold text-gray-900">Mesaj Gönder</h2>
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+              <h2 className="mb-6 text-lg font-bold text-slate-900">Mesaj Gönder</h2>
               <ContactForm />
             </div>
           </div>
@@ -32,7 +32,7 @@ export default function IletisimPage() {
           {/* Sağ — Bilgi kartları */}
           <div className="flex flex-col gap-4">
             {/* İletişim Bilgileri */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
               <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
                 İletişim Bilgileri
               </h3>
@@ -66,7 +66,7 @@ export default function IletisimPage() {
             </div>
 
             {/* Sık İletişim Konuları */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
               <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
                 Sık İletişim Konuları
               </h3>

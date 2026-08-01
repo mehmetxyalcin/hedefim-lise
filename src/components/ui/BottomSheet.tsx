@@ -37,15 +37,15 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Props)
       >
         {/* Handle bar */}
         <div className="flex justify-center pb-1 pt-3">
-          <div className="h-1 w-10 rounded-full bg-gray-300" />
+          <div className="h-1 w-10 rounded-full bg-slate-300" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
           >
             <X className="h-5 w-5" />
           </button>
@@ -56,7 +56,7 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Props)
 
         {/* Footer */}
         {footer && (
-          <div className="border-t border-gray-100 bg-white px-4 py-4">
+          <div className="border-t border-slate-100 bg-white px-4 py-4">
             {footer}
           </div>
         )}

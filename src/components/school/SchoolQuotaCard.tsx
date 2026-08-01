@@ -20,14 +20,14 @@ export function SchoolQuotaCard({ quotas }: Props) {
   const active = sorted.find((q) => q.year === activeYear)!;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
         <Users className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-gray-800">Kontenjan Bilgileri</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Kontenjan Bilgileri</h2>
       </div>
 
       {/* Yıl Tabları */}
-      <div className="mb-5 flex gap-1 rounded-xl bg-gray-100 p-1">
+      <div className="mb-5 flex gap-1 rounded-xl bg-slate-100 p-1">
         {sorted.map((q) => (
           <button
             key={q.year}
@@ -36,7 +36,7 @@ export function SchoolQuotaCard({ quotas }: Props) {
             className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-all duration-150 ${
               activeYear === q.year
                 ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
             {q.year}
@@ -73,7 +73,7 @@ export function SchoolQuotaCard({ quotas }: Props) {
         )}
 
         {active.sinavli_count == null && active.sinavsiz_count == null && (
-          <p className="py-2 text-center text-sm text-gray-400">
+          <p className="py-2 text-center text-sm text-slate-400">
             {activeYear} yılı kontenjan bilgisi henüz eklenmemiş.
           </p>
         )}

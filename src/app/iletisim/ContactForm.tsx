@@ -26,8 +26,8 @@ type SchoolResult = {
 };
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
-const LABEL_CLASS = "mb-1.5 block text-sm font-medium text-gray-700";
+  "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+const LABEL_CLASS = "mb-1.5 block text-sm font-medium text-slate-700";
 
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -147,8 +147,8 @@ export default function ContactForm() {
           <CheckCircle className="h-8 w-8 text-emerald-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Mesajınız Gönderildi!</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h2 className="text-xl font-bold text-slate-900">Mesajınız Gönderildi!</h2>
+          <p className="mt-2 text-sm text-slate-500">
             En kısa sürede size dönüş yapacağız. Teşekkür ederiz.
           </p>
         </div>
@@ -298,11 +298,11 @@ export default function ContactForm() {
               />
               {schoolLoading && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
                 </div>
               )}
               {schoolDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg">
+                <div className="absolute z-10 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
                   {schoolResults.map((school) => (
                     <button
                       key={school.id}
@@ -312,10 +312,10 @@ export default function ContactForm() {
                         setSchoolDropdownOpen(false);
                         setSchoolQuery("");
                       }}
-                      className="flex w-full flex-col px-4 py-3 text-left text-sm hover:bg-gray-50 first:rounded-t-xl last:rounded-b-xl"
+                      className="flex w-full flex-col px-4 py-3 text-left text-sm hover:bg-slate-50 first:rounded-t-xl last:rounded-b-xl"
                     >
-                      <span className="font-medium text-gray-900">{school.name}</span>
-                      <span className="text-xs text-gray-500">{school.district}</span>
+                      <span className="font-medium text-slate-900">{school.name}</span>
+                      <span className="text-xs text-slate-500">{school.district}</span>
                     </button>
                   ))}
                   <button
@@ -360,7 +360,7 @@ export default function ContactForm() {
           />
           <span
             className={`absolute bottom-2.5 right-3 text-xs ${
-              message.length < 20 ? "text-gray-400" : "text-emerald-600"
+              message.length < 20 ? "text-slate-400" : "text-emerald-600"
             }`}
           >
             {message.length} karakter

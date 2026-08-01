@@ -78,7 +78,7 @@ export function VocationalSchoolList({ schools, fieldId }: Props) {
 
             <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs">
               {hasScore ? (
-                <div className="flex flex-wrap items-center gap-3 text-gray-600">
+                <div className="flex flex-wrap items-center gap-3 text-slate-600">
                   {hasPercentile && (
                     <span>
                       Yüzdelik:{" "}
@@ -92,15 +92,15 @@ export function VocationalSchoolList({ schools, fieldId }: Props) {
                   {hasObp && (
                     <span>
                       OBP:{" "}
-                      <span className="ml-1 font-semibold text-gray-800">
+                      <span className="ml-1 font-semibold text-slate-800">
                         {score!.obp_score!.toFixed(2)}
                       </span>
                     </span>
                   )}
-                  <span className="text-gray-400">({score!.year})</span>
+                  <span className="text-slate-400">({score!.year})</span>
                 </div>
               ) : (
-                <span className="italic text-gray-400">
+                <span className="italic text-slate-400">
                   Puan bilgisi henüz eklenmemiş
                 </span>
               )}

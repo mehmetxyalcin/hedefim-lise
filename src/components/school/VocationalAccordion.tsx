@@ -35,10 +35,10 @@ export function VocationalAccordion({ fields }: Props) {
   if (!fields || fields.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-center gap-2">
         <Briefcase className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-slate-800">
           Meslek Alanları ve Dallar
         </h2>
       </div>
@@ -52,26 +52,26 @@ export function VocationalAccordion({ fields }: Props) {
           return (
             <div
               key={field.id}
-              className="overflow-hidden rounded-xl border border-gray-200"
+              className="overflow-hidden rounded-xl border border-slate-200"
             >
               <button
                 type="button"
                 onClick={() => toggle(field.id)}
-                className="flex w-full items-center justify-between bg-gray-50 px-4 py-3 text-left transition-colors duration-150 hover:bg-gray-100"
+                className="flex w-full items-center justify-between bg-slate-50 px-4 py-3 text-left transition-colors duration-150 hover:bg-slate-100"
               >
                 <div className="flex items-center gap-2">
                   <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm font-medium text-slate-800">
                     {field.name}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-slate-400">
                     ({field.branches.length} dal)
                   </span>
                 </div>
                 {isOpen ? (
-                  <ChevronUp className="h-4 w-4 text-gray-400" />
+                  <ChevronUp className="h-4 w-4 text-slate-400" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
                 )}
               </button>
 
@@ -89,7 +89,7 @@ export function VocationalAccordion({ fields }: Props) {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm italic text-gray-400">
+                    <p className="text-sm italic text-slate-400">
                       Bu alan için dal bilgisi eklenmemiş.
                     </p>
                   )}
