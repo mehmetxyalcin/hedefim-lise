@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-02T00:00:00.000Z",
+  "title": "Design System: Hedefim Lise",
+  "extensions": {
+    "colorMeta": {
+      "exam-blue": { "role": "primary", "displayName": "Exam Blue", "canonical": "#2563eb", "tonalRamp": ["#0a1f5c", "#12307f", "#1b3fa6", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#dbeafe"] },
+      "ink": { "role": "neutral", "displayName": "Ink (Slate 900)", "canonical": "#0f172a", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#e2e8f0"] },
+      "surface": { "role": "neutral", "displayName": "Surface (Slate 50)", "canonical": "#f8fafc", "tonalRamp": ["#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9", "#f8fafc"] },
+      "night-chrome": { "role": "neutral", "displayName": "Night Chrome", "canonical": "#0a0f1c", "tonalRamp": ["#05070d", "#0a0f1c", "#0f1524", "#141c30", "#1b2540", "#2a3757", "#3b4d77", "#64748b"] },
+      "success": { "role": "tertiary", "displayName": "Success Emerald", "canonical": "#059669", "tonalRamp": ["#022c22", "#064e3b", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#d1fae5"] },
+      "danger": { "role": "tertiary", "displayName": "Danger Rose", "canonical": "#e11d48", "tonalRamp": ["#4c0519", "#881337", "#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af", "#ffe4e6"] },
+      "highlight": { "role": "tertiary", "displayName": "Highlight Amber", "canonical": "#b45309", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fcd34d", "#fef3c7"] },
+      "cyan-glow": { "role": "secondary", "displayName": "Hero Cyan Glow", "canonical": "#22d3ee", "tonalRamp": ["#083344", "#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headline only; often with a gradient-clipped keyword." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles and section leads." },
+      "title": { "displayName": "Title", "purpose": "Card titles (school names) and dialog headers." },
+      "body": { "displayName": "Body", "purpose": "Descriptions, form values, helper text." },
+      "label": { "displayName": "Label", "purpose": "Uppercase, bold, wide-tracked meta tags (type, district, eyebrows)." }
+    },
+    "shadows": [
+      { "name": "resting", "value": "0 1px 2px 0 rgba(0,0,0,0.05)", "purpose": "Default flat rest on cards, bars, inputs." },
+      { "name": "card-hover-lift", "value": "0 20px 25px -5px rgba(148,163,184,0.5), 0 8px 10px -6px rgba(148,163,184,0.5)", "purpose": "School cards on hover, paired with a -2px translate." },
+      { "name": "action-glow", "value": "0 4px 14px 0 rgba(37,99,235,0.2)", "purpose": "Primary buttons; deepens to 0.4 alpha on hover." },
+      { "name": "hero-float", "value": "0 25px 50px -12px rgba(8,47,73,0.45)", "purpose": "The hero search panel lifting off the dark hero." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for color/transform state transitions." },
+      { "name": "duration-standard", "value": "200ms", "purpose": "Hover/focus transitions on buttons, cards, inputs." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single main action per surface (Ara, Detaylı İncele).",
+      "html": "<button class=\"ds-btn-primary\">Detaylı İncele</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: #fff; font-weight: 600; font-size: 14px; padding: 12px 20px; border: none; border-radius: 12px; box-shadow: 0 4px 14px 0 rgba(37,99,235,0.2); cursor: pointer; transition: background 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s, box-shadow 0.2s; } .ds-btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 6px 20px 0 rgba(37,99,235,0.4); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.2); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Low-emphasis action (Filtreleri Temizle).",
+      "html": "<button class=\"ds-btn-secondary\">Filtreleri Temizle</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: #334155; font-weight: 600; font-size: 14px; padding: 10px 16px; border: none; border-radius: 12px; cursor: pointer; transition: background 0.2s cubic-bezier(0.4,0,0.2,1); } .ds-btn-secondary:hover { background: #e2e8f0; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Inset search field with a leading icon; warms to white on focus with a soft blue ring.",
+      "html": "<div class=\"ds-field\"><svg class=\"ds-field-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></svg><input class=\"ds-input\" type=\"text\" placeholder=\"Okul adı ara...\" /></div>",
+      "css": ".ds-field { position: relative; display: flex; align-items: center; } .ds-field-icon { position: absolute; left: 14px; width: 16px; height: 16px; color: #94a3b8; pointer-events: none; } .ds-input { width: 100%; background: #f8fafc; color: #334155; font-size: 14px; font-weight: 500; padding: 10px 40px 10px 40px; border: 1px solid #e2e8f0; border-radius: 12px; outline: none; transition: background 0.2s, border-color 0.2s, box-shadow 0.2s; } .ds-input::placeholder { color: #94a3b8; } .ds-input:focus { background: #fff; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }"
+    },
+    {
+      "name": "Meta Badge",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Signature uppercase meta tag — school type / district. Bold, wide-tracked, tiny.",
+      "html": "<span class=\"ds-badge\">Anadolu Lisesi</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(239,246,255,0.8); color: #1d4ed8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 10px; border: 1px solid #dbeafe; border-radius: 6px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Active filter pill with a clear affordance.",
+      "html": "<button class=\"ds-chip\">Arama: “Anadolu”<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M18 6 6 18M6 6l12 12\"></path></svg></button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1d4ed8; font-size: 12px; font-weight: 600; padding: 6px 12px; border: 1px solid #bfdbfe; border-radius: 8px; cursor: pointer; transition: background 0.2s; } .ds-chip:hover { background: #dbeafe; } .ds-chip svg { width: 14px; height: 14px; }"
+    },
+    {
+      "name": "School Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The core result surface: flat at rest on a hairline border, lifts with a soft tinted shadow on hover.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-tags\"><span class=\"ds-badge\">Anadolu Lisesi</span><span class=\"ds-badge ds-badge-slate\">Yenişehir</span></div><h3 class=\"ds-card-title\">Mersin Anadolu Lisesi</h3><p class=\"ds-card-desc\">İlçe merkezinde, güçlü akademik geçmişe sahip köklü bir lise.</p></article>",
+      "css": ".ds-card { display: block; background: #fff; border: 1px solid rgba(226,232,240,0.8); border-radius: 24px; padding: 24px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; } .ds-card:hover { border-color: #cbd5e1; box-shadow: 0 20px 25px -5px rgba(148,163,184,0.5); } .ds-card-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; } .ds-badge-slate { background: rgba(241,245,249,0.8); color: #475569; border-color: #e2e8f0; } .ds-card-title { margin: 0 0 8px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: #0f172a; } .ds-card-desc { margin: 0; font-size: 14px; line-height: 1.6; color: #64748b; }"
+    },
+    {
+      "name": "Navbar Link",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Dark-chrome navigation link: muted slate that warms to white on a translucent hover fill.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#\">Okullar</a><a class=\"ds-nav-link\" href=\"#\">Alanlar</a><a class=\"ds-nav-cta\" href=\"#\">İletişim</a></nav>",
+      "css": ".ds-nav { display: inline-flex; align-items: center; gap: 4px; background: #0a0f1c; padding: 12px 16px; border-radius: 12px; } .ds-nav-link { color: #cbd5e1; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 8px; text-decoration: none; transition: background 0.2s, color 0.2s; } .ds-nav-link:hover { background: rgba(255,255,255,0.05); color: #fff; } .ds-nav-cta { color: #fff; font-size: 14px; font-weight: 600; padding: 8px 20px; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: background 0.2s; } .ds-nav-cta:hover { background: rgba(255,255,255,0.15); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Güvenilir Rehberlik Masası (The Trusted Guidance Desk)",
+    "overview": "Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a deep-navy chrome-and-headline world (navbar #0a0f1c, hero #071426 with soft cyan/amber aurora glows and a faint grid) frames the product like a confident night sky you're navigating by, while the body is a bright, orderly workspace of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. The temperament is reassuring and calm: measured spacing, soft rounded surfaces, hairline borders, and shadows so light they read as breath rather than weight. This is an Operate system wearing a Persuade hero.",
+    "keyCharacteristics": [
+      "Dark, trustworthy chrome + hero over a bright, scannable data body.",
+      "One decisive accent (Exam Blue) rationed against a broad cool-slate neutral field.",
+      "Soft, resting surfaces — generous radii, hairline borders, whisper-light shadows.",
+      "Semantic color (emerald/rose/amber) used only to carry meaning, never decoration.",
+      "Calm density: roomy on marketing surfaces, efficient but never cramped in tools."
+    ],
+    "rules": [
+      { "name": "The One-Signal Rule", "body": "Exam Blue is the only color that invites action. It should cover well under ~10% of any body screen — its scarcity is what makes 'act here' legible. Never use blue as a decorative fill.", "section": "colors" },
+      { "name": "The Meaning-Only Rule", "body": "Emerald, rose, and amber never appear for decoration — each is a claim (good / destructive / caution). If a color isn't carrying meaning, it's slate.", "section": "colors" },
+      { "name": "The Two-Worlds Rule", "body": "Cyan and the aurora glows live only in the dark chrome/hero. The light body is blue-and-slate; a cyan glow in a data card breaks the system.", "section": "colors" },
+      { "name": "The Heavy-Head Rule", "body": "Hierarchy is carried by weight, not size alone: headings are 700–800 with slightly negative tracking; body stays 400–500. Never set a heading below 700.", "section": "typography" },
+      { "name": "The Uppercase-Label Rule", "body": "Category/meta text is uppercase, bold, wide-tracked, and tiny (≤11px). It is a texture, not a headline — never uppercase running copy.", "section": "typography" },
+      { "name": "The Flat-Rest Rule", "body": "Surfaces are flat at rest and defined by their hairline border. Shadow is a response to state (hover, focus, the hero's lifted search) — never ambient decoration on a static card.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do ration Exam Blue (#2563eb) to the single most important action per surface; keep it well under ~10% of a body screen.",
+      "Do define surfaces with hairline Line (#e2e8f0) borders and keep them flat at rest; let shadow appear only on hover/focus.",
+      "Do use the uppercase, bold, wide-tracked ≤11px label for category/meta text, and carry hierarchy with weight (700–800 heads).",
+      "Do keep radii in the 12 / 16–24px family and never mix radii within one component.",
+      "Do reserve emerald/rose/amber for genuine meaning (success / destructive / caution).",
+      "Do confine cyan and aurora glows to the dark chrome and hero only."
+    ],
+    "donts": [
+      "Don't let the Inter override stand — unify the body/UI font on Inter (remove or fix the body { font-family: Arial… } rule) so type is consistent with intent.",
+      "Don't mix gray-* and slate-* neutrals; the system is slate — legacy gray-* classes (mobile sheets) are drift to migrate.",
+      "Don't introduce a second accent hue into the body; blue is the only action color.",
+      "Don't put gradient-clipped text or cyan glows on body/data surfaces — they are hero-only devices.",
+      "Don't add ambient drop-shadows to resting cards; depth is tonal + hairline first.",
+      "Don't set headings below 700 weight or uppercase running body copy."
+    ]
+  }
+}
