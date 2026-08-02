@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   ChevronRight,
+  Database,
   GraduationCap,
   Info,
   MapPin,
   Search,
-  ShieldCheck,
   Star,
 } from "lucide-react";
 import { DISTRICTS } from "@/data/districts";
@@ -43,7 +43,7 @@ export function Hero() {
       <div className="relative z-10 container mx-auto max-w-5xl px-6 text-center">
         <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-200/25 bg-white/10 px-4 py-2 text-sm font-medium text-cyan-50 shadow-lg shadow-cyan-950/20 backdrop-blur-md">
           <Star className="h-4 w-4 text-amber-300" />
-          <span>Mersin&apos;in LGS Tercih Platformu</span>
+          <span>Mersin için LGS tercih rehberi</span>
         </div>
 
         <h1 className="mb-6 text-4xl leading-[1.15] font-extrabold tracking-tight text-white md:text-6xl lg:text-7xl">
@@ -109,8 +109,10 @@ export function Hero() {
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <div className="flex items-center gap-2 rounded-lg border border-cyan-200/20 bg-white/[0.08] px-4 py-2 text-sm text-sky-50/90 shadow-sm shadow-sky-950/20 backdrop-blur-md">
-            <ShieldCheck className="h-4 w-4 text-cyan-300" />
-            <span className="font-medium">RAM Onaylı İçerik</span>
+            <Database className="h-4 w-4 text-cyan-300" />
+            <span className="font-medium">
+              MEB ve okul kaynaklarından derlenmiş, düzenli güncellenen veriler
+            </span>
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-orange-200/20 bg-white/[0.08] px-4 py-2 text-sm text-sky-50/90 shadow-sm shadow-sky-950/20 backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4 text-amber-300" />
