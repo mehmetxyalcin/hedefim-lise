@@ -12,8 +12,17 @@ export async function Navbar() {
   ]);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1c]/90 text-white backdrop-blur-lg relative">
-      <div className="container mx-auto max-w-7xl px-6">
+    <nav
+      className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1c]/90 text-white backdrop-blur-lg relative"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
+      <div
+        className="container mx-auto max-w-7xl px-6"
+        style={{
+          paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
+          paddingRight: "max(1.5rem, env(safe-area-inset-right))",
+        }}
+      >
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="group flex items-center space-x-3">
             {settings.logo_url ? (

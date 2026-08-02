@@ -328,32 +328,32 @@ export function SchoolList({
             {initialSearch && (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
                 &ldquo;{initialSearch}&rdquo;
-                <button onClick={() => { setSearch(""); router.push(buildSearchUrl({ ara: "" })); }}>
-                  <X className="h-3 w-3" />
+                <button onClick={() => { setSearch(""); router.push(buildSearchUrl({ ara: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </span>
             )}
             {initialIlce && (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
                 {initialIlce}
-                <button onClick={() => { setIlce(""); router.push(buildSearchUrl({ ilce: "" })); }}>
-                  <X className="h-3 w-3" />
+                <button onClick={() => { setIlce(""); router.push(buildSearchUrl({ ilce: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </span>
             )}
             {initialTur && (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
                 {initialTur}
-                <button onClick={() => { setTur(""); router.push(buildSearchUrl({ tur: "" })); }}>
-                  <X className="h-3 w-3" />
+                <button onClick={() => { setTur(""); router.push(buildSearchUrl({ tur: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </span>
             )}
             {initialPlacement && (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
                 {PLACEMENT_OPTIONS.find((p) => p.value === initialPlacement)?.label ?? initialPlacement}
-                <button onClick={() => { setPlacement(""); router.push(buildSearchUrl({ yerlestirme: "" })); }}>
-                  <X className="h-3 w-3" />
+                <button onClick={() => { setPlacement(""); router.push(buildSearchUrl({ yerlestirme: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </span>
             )}

@@ -83,6 +83,17 @@ body {
   display: none;
 }
 
+/* Dokunmalı cihazlarda form kontrolleri en az 16px: iOS Safari'nin odakta
+   otomatik yakınlaştırmasını engeller. Masaüstünde (fine pointer) text-sm
+   görünümü olduğu gibi korunur. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 @media print {
   nav,
   header,

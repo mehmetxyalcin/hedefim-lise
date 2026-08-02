@@ -52,11 +52,21 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Props)
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>
+        <div
+          className="flex-1 overflow-y-auto px-4 pt-4"
+          style={{
+            paddingBottom: footer ? "1rem" : "max(1rem, env(safe-area-inset-bottom))",
+          }}
+        >
+          {children}
+        </div>
 
         {/* Footer */}
         {footer && (
-          <div className="border-t border-slate-100 bg-white px-4 py-4">
+          <div
+            className="border-t border-slate-100 bg-white px-4 pt-4"
+            style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+          >
             {footer}
           </div>
         )}

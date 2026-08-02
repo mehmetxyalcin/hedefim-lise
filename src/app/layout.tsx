@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
@@ -38,6 +38,14 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Çentikli cihazlarda güvenli alan (env safe-area-inset-*) desteğini açar.
+  viewportFit: "cover",
+  themeColor: "#0a0f1c",
 };
 
 export default function RootLayout({

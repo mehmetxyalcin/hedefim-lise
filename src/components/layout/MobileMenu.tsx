@@ -24,7 +24,7 @@ export function MobileMenu({ navItems }: Props) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-20 z-40 border-b border-white/10 bg-[#0a0f1c]/95 px-6 py-4 backdrop-blur-lg md:hidden">
+        <div className="absolute left-0 right-0 top-full z-40 border-b border-white/10 bg-[#0a0f1c]/95 px-6 py-4 backdrop-blur-lg md:hidden">
           <div className="flex flex-col gap-1">
             {navItems.map((item) => (
               <Link

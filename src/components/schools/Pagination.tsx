@@ -53,13 +53,13 @@ export function Pagination({ currentPage, totalPages, searchParams }: Props) {
       {prevHref ? (
         <Link
           href={prevHref}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 sm:h-10 sm:w-10"
           aria-label="Önceki sayfa"
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
       ) : (
-        <span className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300">
+        <span className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300 sm:h-10 sm:w-10">
           <ChevronLeft className="h-4 w-4" />
         </span>
       )}
@@ -97,13 +97,13 @@ export function Pagination({ currentPage, totalPages, searchParams }: Props) {
       {nextHref ? (
         <Link
           href={nextHref}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 sm:h-10 sm:w-10"
           aria-label="Sonraki sayfa"
         >
           <ChevronRight className="h-4 w-4" />
         </Link>
       ) : (
-        <span className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300">
+        <span className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300 sm:h-10 sm:w-10">
           <ChevronRight className="h-4 w-4" />
         </span>
       )}
