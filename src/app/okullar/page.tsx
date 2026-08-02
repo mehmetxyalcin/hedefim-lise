@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Sparkles } from "lucide-react";
 import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
@@ -220,12 +219,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 pt-10 pb-24">
       <div className="container mx-auto max-w-7xl px-6">
-        <div className="mb-10 max-w-3xl">
-          <div className="mb-4 flex items-center gap-2">
-            <span className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-100/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-700 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" /> Akıllı Tercih Sistemi
-            </span>
-          </div>
+        <div className="mb-8 max-w-3xl">
           <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
             Sana Uygun Liseleri Keşfet
           </h1>
@@ -234,36 +228,15 @@ export default async function OkullarPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <div className="mb-5 flex items-center justify-between">
-          <p className="text-sm text-slate-500">
-            {totalCount === 0 ? (
-              "Sonuç bulunamadı."
-            ) : (
-              <>
-                <span className="font-semibold text-slate-700">{totalCount}</span> okul
-                {totalCount !== 1 && " bulundu"}
-                {totalPages > 1 && (
-                  <>
-                    {" "}— {startItem}–{endItem} gösteriliyor
-                  </>
-                )}
-              </>
-            )}
-          </p>
-          {totalPages > 1 && (
-            <p className="text-sm text-slate-500">
-              Sayfa{" "}
-              <span className="font-semibold text-slate-700">
-                {currentPage}/{totalPages}
-              </span>
-            </p>
-          )}
-        </div>
-
         <SchoolList
           key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}`}
           schools={schools}
           vocationalFields={vocationalFields}
+          totalCount={totalCount}
+          startItem={startItem}
+          endItem={endItem}
+          currentPage={currentPage}
+          totalPages={totalPages}
           initialSearch={ara}
           initialIlce={ilce}
           initialTur={tur}

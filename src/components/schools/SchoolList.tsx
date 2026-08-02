@@ -35,6 +35,11 @@ const PLACEMENT_OPTIONS = [
 type Props = {
   schools: School[];
   vocationalFields: VocationalField[];
+  totalCount: number;
+  startItem: number;
+  endItem: number;
+  currentPage: number;
+  totalPages: number;
   initialSearch?: string;
   initialIlce?: string;
   initialTur?: string;
@@ -73,6 +78,11 @@ const SORT_OPTIONS = [
 export function SchoolList({
   schools,
   vocationalFields,
+  totalCount,
+  startItem,
+  endItem,
+  currentPage,
+  totalPages,
   initialSearch = "",
   initialIlce = "",
   initialTur = "",
@@ -351,50 +361,60 @@ export function SchoolList({
         )}
       </div>
 
-      {/* ── Masaüstü sonuç sayısı + sıralama çubuğu ──────────────────────── */}
-      <div className="relative z-20 mb-6 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
-            {filteredSchools.length}
-            <span className="ml-1 font-medium text-slate-500">sonuç</span>
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="whitespace-nowrap text-xs text-slate-500">Sayfa başına:</span>
-            <select
-              value={limit}
-              onChange={(e) => handleLimitChange(Number(e.target.value))}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-            >
-              {LIMIT_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {/* Masaüstü sıralama select */}
-        <div className="group relative hidden lg:block">
-          <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <select
-            value={siralama}
-            onChange={(e) => handleSortChange(e.target.value)}
-            className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-          <ChevronRight className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 rotate-90 text-slate-400" />
-        </div>
-      </div>
-
-      {/* ── Ana grid: sidebar + kartlar ───────────────────────────────────── */}
+      {/* ── Ana grid: sidebar + (çubuk + kartlar) ─────────────────────────── */}
       <div className="relative flex flex-col items-start gap-8 lg:flex-row">
         {/* Masaüstü sidebar */}
         <div className="hidden w-[300px] shrink-0 lg:sticky lg:top-24 lg:block lg:self-start">
           {sidebarContent}
         </div>
 
-        {/* Okul kartları */}
+        {/* Sonuç sütunu: meta çubuğu + okul kartları */}
         <div className="min-w-0 flex-1">
+          {/* Tek doğru meta çubuğu: gerçek toplam + aralık + sayfa başına + sıralama */}
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <p className="text-sm text-slate-500">
+                {totalCount === 0 ? (
+                  "Sonuç bulunamadı."
+                ) : (
+                  <>
+                    <span className="font-bold text-slate-900">{totalCount}</span> okul
+                    {totalPages > 1 && (
+                      <span className="text-slate-400">
+                        {" "}· {startItem}–{endItem} arası · Sayfa {currentPage}/{totalPages}
+                      </span>
+                    )}
+                  </>
+                )}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <span className="whitespace-nowrap text-xs text-slate-500">Sayfa başına:</span>
+                <select
+                  value={limit}
+                  onChange={(e) => handleLimitChange(Number(e.target.value))}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                >
+                  {LIMIT_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Masaüstü sıralama select (mobilde sıralama alt-sayfadan) */}
+            <div className="group relative hidden lg:block">
+              <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <select
+                value={siralama}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              <ChevronRight className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 rotate-90 text-slate-400" />
+            </div>
+          </div>
+
           <div className="grid gap-5">
             {filteredSchools.map((school) => (
               <div
