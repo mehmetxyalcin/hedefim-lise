@@ -38,20 +38,20 @@ const toneClasses = {
   orange:
     "text-orange-600 bg-orange-50 border-orange-100 shadow-orange-100/70 group-hover:border-orange-300 group-hover:bg-gradient-to-br group-hover:from-amber-400 group-hover:to-rose-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-orange-200/70",
   blue:
-    "text-cyan-700 bg-cyan-50 border-cyan-100 shadow-cyan-100/70 group-hover:border-cyan-300 group-hover:bg-gradient-to-br group-hover:from-cyan-400 group-hover:to-sky-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-cyan-200/70",
+    "text-blue-700 bg-blue-50 border-blue-100 shadow-blue-100/70 group-hover:border-blue-300 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:to-blue-700 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200/70",
   emerald:
-    "text-emerald-600 bg-emerald-50 border-emerald-100 shadow-emerald-100/70 group-hover:border-emerald-300 group-hover:bg-gradient-to-br group-hover:from-emerald-400 group-hover:to-cyan-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-emerald-200/70",
+    "text-emerald-600 bg-emerald-50 border-emerald-100 shadow-emerald-100/70 group-hover:border-emerald-300 group-hover:bg-gradient-to-br group-hover:from-emerald-400 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-emerald-200/70",
 };
 
 const arrowClasses = {
   orange: "text-orange-500",
-  blue: "text-cyan-500",
+  blue: "text-blue-500",
   emerald: "text-emerald-500",
 };
 
 const linkClasses = {
   orange: "text-orange-700 group-hover:text-rose-700",
-  blue: "text-cyan-700 group-hover:text-sky-700",
+  blue: "text-blue-700 group-hover:text-blue-800",
   emerald: "text-emerald-700",
 };
 
@@ -64,7 +64,7 @@ export function FeatureSection() {
       </div>
       <div className="relative z-10 container mx-auto max-w-7xl px-6">
         <div className="mx-auto mb-16 max-w-2xl text-center">
-          <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-cyan-700">
+          <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-blue-700">
             Platform Özellikleri
           </span>
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">

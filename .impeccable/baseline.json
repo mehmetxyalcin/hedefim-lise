@@ -1,0 +1,295 @@
+[
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/app/globals.css",
+    "line": 97,
+    "snippet": "font-size: 18px is off the DESIGN.md type ramp",
+    "ignoreValue": "18px",
+    "importedBy": [
+      "layout.tsx"
+    ]
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/app/globals.css",
+    "line": 103,
+    "snippet": "Undocumented color #ddd is outside DESIGN.md colors",
+    "ignoreValue": "#ddd",
+    "importedBy": [
+      "layout.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/app/tercihlerim/page.tsx",
+    "line": 156,
+    "snippet": "text-slate-400 on bg-rose-50"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/about/AboutProject.tsx",
+    "line": 51,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/admin/SmartSchoolBasicFields.tsx",
+    "line": 21,
+    "snippet": "text-slate-900 on bg-rose-50"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/admin/SmartSchoolBasicFields.tsx",
+    "line": 21,
+    "snippet": "text-slate-400 on bg-rose-50"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/faq/FaqSearch.tsx",
+    "line": 158,
+    "snippet": "text-slate-500 on bg-blue-100"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/home/Hero.tsx",
+    "line": 53,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/layout/FavoritesNavIcon.tsx",
+    "line": 24,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px",
+    "importedBy": [
+      "MobileMenu.tsx",
+      "Navbar.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/school/FavoriteButton.tsx",
+    "line": 85,
+    "snippet": "text-slate-700 on bg-rose-50",
+    "importedBy": [
+      "SchoolDetail.tsx"
+    ]
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/school/SchoolHero.tsx",
+    "line": 10,
+    "snippet": "from-purple-900 gradient",
+    "importedBy": [
+      "SchoolDetail.tsx"
+    ]
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/school/SchoolHero.tsx",
+    "line": 14,
+    "snippet": "from-indigo-900 gradient",
+    "importedBy": [
+      "SchoolDetail.tsx"
+    ]
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolDetail.tsx",
+    "line": 196,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolDetail.tsx",
+    "line": 215,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolDetail.tsx",
+    "line": 223,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolList.tsx",
+    "line": 590,
+    "snippet": "text-slate-500 on bg-blue-50"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolList.tsx",
+    "line": 195,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolList.tsx",
+    "line": 300,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolList.tsx",
+    "line": 414,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/schools/SchoolList.tsx",
+    "line": 451,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/statistics/SchoolStatisticsDashboard.tsx",
+    "line": 388,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/statistics/SchoolStatisticsDashboard.tsx",
+    "line": 403,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/ui/Badge.tsx",
+    "line": 18,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/vocational/VocationalAtlas.tsx",
+    "line": 68,
+    "snippet": "text-slate-700 on bg-orange-600"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/components/vocational/VocationalAtlas.tsx",
+    "line": 50,
+    "snippet": "text-[…] class: 10px is off the DESIGN.md type ramp",
+    "ignoreValue": "10px"
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/mehmetyalcin/Desktop/web-projem/hedefim-lise/src/data/schools.ts",
+    "line": 110,
+    "snippet": "from-indigo-500 gradient"
+  }
+]

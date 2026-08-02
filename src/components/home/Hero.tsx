@@ -118,7 +118,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="mx-auto mt-6 max-w-3xl px-4">
+        <div className="mx-auto mt-6 max-w-2xl px-4">
           <div className="flex items-start gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-left backdrop-blur-sm">
             <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/80" />
             <p className="text-xs leading-relaxed text-white/90">
