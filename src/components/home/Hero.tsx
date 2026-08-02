@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
+import { Button } from "@/components/ui/Button";
 
 export function Hero() {
   const [ilce, setIlce] = useState("");
@@ -97,14 +98,14 @@ export function Hero() {
             <ChevronRight className="pointer-events-none absolute right-4 h-5 w-5 rotate-90 text-slate-400" />
           </div>
 
-          <button
-            type="button"
+          <Button
             onClick={handleSearch}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:from-amber-400 hover:via-orange-500 hover:to-rose-500 hover:shadow-orange-500/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-200 md:w-auto"
+            size="lg"
+            className="w-full text-base md:w-auto"
           >
             <Search className="h-5 w-5" />
             Okul Ara
-          </button>
+          </Button>
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">

@@ -228,7 +228,7 @@ Soft, consistent, generously rounded. The radius vocabulary is tight: **12px (`r
 - **Mobile:** collapses to a sheet; the schools page adds a sticky filter/sort bar and bottom-sheets.
 
 ### Hero Search (signature)
-A white, `rounded-2xl`, heavily-lifted panel (`shadow-2xl`) straddling the dark hero, holding inset slate-50 select fields that warm to `sky-50` on hover and gain a cyan focus ring — the one place the cyan world touches an interactive control.
+A white, `rounded-2xl`, heavily-lifted panel (`shadow-2xl`) straddling the dark hero, holding inset slate-50 select fields that warm to `sky-50` on hover and gain a cyan focus ring — the one place the cyan world touches an interactive control. Its "Okul Ara" submit is the standard **Primary (Exam Blue)** button; the hero's decision action obeys the One-Signal Rule like every other surface — no amber/orange CTA exception.
 
 ## Do's and Don'ts
 
