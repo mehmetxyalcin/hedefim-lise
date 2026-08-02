@@ -1,10 +1,10 @@
 import {
   ArrowRight,
+  BookOpen,
   CheckCircle2,
-  Handshake,
+  Landmark,
   Lightbulb,
   Network,
-  ShieldCheck,
   Star,
   Target,
   Users,
@@ -194,33 +194,36 @@ export function AboutProject() {
                 <div className="rounded-xl bg-blue-50 p-2">
                   <Network className="h-5 w-5 text-blue-600" />
                 </div>
-                Proje Paydaşları
+                Yararlanılan Kaynaklar
               </h3>
               <p className="mb-6 text-sm text-slate-500">
-                Bu platform, Akdeniz Rehberlik ve Araştırma Merkezi öncülüğünde
-                kurumlar arası güçlü bir iş birliği ile hayata geçirilmiştir.
+                Platformdaki okul ve yönlendirme bilgileri, kamuya açık resmi
+                eğitim kaynaklarından ve okulların paylaştığı verilerden
+                derlenmiştir.
               </p>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                  <Handshake className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
+                  <Landmark className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
                   <div>
                     <div className="text-sm font-bold text-slate-900">
                       İl ve İlçe Millî Eğitim Müdürlükleri
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      Resmiyet, erişim ve koordinasyön desteği.
+                      Okul, kontenjan ve yerleştirme verilerinde başvurulan resmi
+                      kaynaklar.
                     </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
+                  <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
                   <div>
                     <div className="text-sm font-bold text-slate-900">
                       Rehberlik ve Araştırma Merkezleri
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      İçerik üretimi, denetim ve müşavirlik.
+                      Rehberlik ve yönlendirme konularında yararlanılan yayın ve
+                      kaynaklar.
                     </div>
                     <div className="mt-2 text-xs leading-relaxed text-slate-400">
                       Akdeniz RAM, Toroslar RAM, Yenişehir RAM, Mezitli RAM,
