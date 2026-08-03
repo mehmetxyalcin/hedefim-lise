@@ -135,12 +135,7 @@ export default async function Home() {
 
   return (
     <div className="landing">
-      <Hero
-        schoolCount={schoolCount}
-        districtCount={districtCount}
-        latestYear={latestYear}
-        percentiles={percentiles}
-      />
+      <Hero latestYear={latestYear} percentiles={percentiles} />
       {featured && <FeaturedSchoolStrip school={featured} />}
       <FeatureSection
         schoolCount={schoolCount}

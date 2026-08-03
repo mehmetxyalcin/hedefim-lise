@@ -2,7 +2,9 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { DISTRICTS } from "@/data/districts";
+import { SCHOOL_TYPES } from "@/data/schoolTypes";
 
 type Props = {
   percentiles: number[]; // sıralı (artan), aktif okulların son yıl yüzdelik dilimleri
@@ -25,6 +27,10 @@ type Handle = "low" | "high";
 // ölçekte. Kullanıcı iki tutamakla bir ARALIK seçer; aralıktaki okullar teal,
 // dışındakiler soluk. "Okulları gör" o aralığı gerçek filtre olarak uygular.
 // LGS: düşük yüzdelik dilimi = daha rekabetçi (solda).
+//
+// İlçe ve okul türü daraltıcıları da bu şeridin içinde: landing'de /okullar'a
+// giden TEK kontrol yüzeyi olsun, kullanıcı iki arama kutusu arasında seçim
+// yapmak zorunda kalmasın. Üçü de aynı submit'te aynı URL'e gider.
 export function PercentileScale({ percentiles, latestYear }: Props) {
   const router = useRouter();
 
@@ -39,6 +45,8 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
   const [highRaw, setHighRaw] = useState(fmt(max));
   const [dragging, setDragging] = useState<Handle | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ilce, setIlce] = useState("");
+  const [tur, setTur] = useState("");
 
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -146,6 +154,8 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
       params.set("yuzdelik_min", String(round2(lowVal)));
       params.set("yuzdelik_max", String(round2(highVal)));
     }
+    if (ilce) params.set("ilce", ilce);
+    if (tur) params.set("tur", tur);
     params.set("siralama", "yuzdelik_asc");
     router.push(`/okullar?${params.toString()}`);
   }
@@ -290,12 +300,12 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
         </p>
       )}
 
-      {/* Aralık girişleri + eylem */}
-      <div className="mt-6 flex flex-col gap-3 border-t border-[var(--line)] pt-5 sm:flex-row sm:items-center">
-        <span className="text-sm font-medium text-[var(--ink-soft)]">
-          Yüzdelik aralığı
-        </span>
-        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+      {/* Arama şeridi: aralık → daraltıcılar → tek eylem */}
+      <div className="mt-6 border-t border-[var(--line)] pt-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <span className="text-sm font-medium text-[var(--ink-soft)]">
+            Yüzdelik aralığı
+          </span>
           <div className="flex items-center gap-2">
             <input
               aria-label="Aralık başlangıcı"
@@ -335,10 +345,28 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
               className="tabular w-24 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
             />
           </div>
+        </div>
+
+        {/* Daraltıcılar + tek eylem. Boş seçenek "tümü" demek: geri alınabilir. */}
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Select
+            label="İlçe"
+            value={ilce}
+            onChange={setIlce}
+            allLabel="Tüm ilçeler"
+            options={DISTRICTS}
+          />
+          <Select
+            label="Okul türü"
+            value={tur}
+            onChange={setTur}
+            allLabel="Tüm okul türleri"
+            options={SCHOOL_TYPES}
+          />
           <button
             type="button"
             onClick={submit}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] sm:ml-auto"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] sm:ml-auto sm:shrink-0"
           >
             Okulları gör
             <ArrowRight className="h-4 w-4" />
@@ -351,10 +379,48 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
         </p>
       ) : (
         <p className="mt-3 font-mono text-[11px] text-[var(--ink-faint)]">
-          Tutamakları sürükleyerek aralık seç; listede yalnızca bu aralıktaki
-          okullar gösterilir.
+          Tutamakları sürükleyerek aralık seç; ilçe ve okul türü isteğe bağlı
+          daraltır.
         </p>
       )}
+    </div>
+  );
+}
+
+function Select({
+  label,
+  value,
+  onChange,
+  allLabel,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  allLabel: string;
+  options: readonly string[];
+}) {
+  return (
+    // min-w-0: <select>'in min-content genişliği en uzun option'a göre hesaplanır
+    // ("Özel Eğitim Meslek Lisesi (İşitme Engelliler)"); şeridi taşırmasın diye kırılır.
+    <div className="relative min-w-0 flex-1">
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full min-w-0 cursor-pointer appearance-none truncate rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] py-3 pr-10 pl-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
+      >
+        <option value="">{allLabel}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[var(--ink-faint)]"
+      />
     </div>
   );
 }
