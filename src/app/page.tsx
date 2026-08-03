@@ -31,6 +31,7 @@ type LandingData = {
   latestYear: number | null;
   featured: FeaturedSchool | null;
   percentiles: number[];
+  obpScores: number[];
 };
 
 async function getLandingData(): Promise<LandingData> {
@@ -58,27 +59,43 @@ async function getLandingData(): Promise<LandingData> {
       .limit(1);
     const latestYear = (yearRows?.[0]?.year as number | undefined) ?? null;
 
-    // Yüzdelik dağılımı: son yıldaki aktif okulların yüzdelik dilimleri (eksen için)
+    // Ölçek dağılımları: son yıldaki aktif okulların değerleri.
+    // İKİ metrik ayrı ayrı çizilir çünkü okulların çoğu yalnızca birine sahip:
+    // merkezi yerleştirme yüzdelik dilimi, yerel yerleştirme OBP puanı üretir.
+    //
+    // Her iki dağılımda da okul başına TEK değer alınır: okulun EN REKABETÇİ
+    // değeri. Bir okulun aynı yıl içinde meslek alanı başına birden çok kaydı
+    // olabilir; ölçek okulları çizer, kayıtları değil. Rekabetçilik yönü
+    // metriğe göre terstir — yüzdelikte düşük, OBP'de yüksek daha rekabetçi.
+    // /okullar filtresi birebir aynı tanımı kullanır (işaret = listedeki okul).
     let percentiles: number[] = [];
+    let obpScores: number[] = [];
     if (latestYear != null) {
       const { data: distRows } = await supabase
         .from("school_scores")
-        .select("school_id, percentile")
-        .eq("year", latestYear)
-        .not("percentile", "is", null);
-      // Okul başına TEK değer: son yılın en rekabetçi (en düşük) yüzdeliği.
-      // Bir okulun aynı yıl içinde meslek alanı başına birden çok kaydı
-      // olabilir; ölçek okulları çizer, kayıtları değil. /okullar filtresi
-      // birebir aynı tanımı kullanır (ölçekteki işaret = listedeki okul).
-      const lowestBySchool = new Map<number, number>();
+        .select("school_id, percentile, obp_score")
+        .eq("year", latestYear);
+
+      const lowestPercentile = new Map<number, number>();
+      const highestObp = new Map<number, number>();
       for (const r of distRows ?? []) {
         const id = r.school_id as number;
-        const p = r.percentile as number;
-        if (!activeIds.has(id) || !Number.isFinite(p)) continue;
-        const prev = lowestBySchool.get(id);
-        if (prev == null || p < prev) lowestBySchool.set(id, p);
+        if (!activeIds.has(id)) continue;
+
+        const p = r.percentile as number | null;
+        if (p != null && Number.isFinite(p)) {
+          const prev = lowestPercentile.get(id);
+          if (prev == null || p < prev) lowestPercentile.set(id, p);
+        }
+
+        const o = r.obp_score as number | null;
+        if (o != null && Number.isFinite(o)) {
+          const prev = highestObp.get(id);
+          if (prev == null || o > prev) highestObp.set(id, o);
+        }
       }
-      percentiles = [...lowestBySchool.values()].sort((a, b) => a - b);
+      percentiles = [...lowestPercentile.values()].sort((a, b) => a - b);
+      obpScores = [...highestObp.values()].sort((a, b) => a - b);
     }
 
     // Öne çıkan okul: son yılın en rekabetçi aktif okulu.
@@ -115,7 +132,14 @@ async function getLandingData(): Promise<LandingData> {
       }
     }
 
-    return { schoolCount, districtCount, latestYear, featured, percentiles };
+    return {
+      schoolCount,
+      districtCount,
+      latestYear,
+      featured,
+      percentiles,
+      obpScores,
+    };
   } catch {
     // Veri/ağ yoksa (ör. build ortamı DB'ye erişemiyorsa) zarif düşüş:
     // Hero rakamsız fallback'ine döner, şerit gizlenir.
@@ -125,17 +149,28 @@ async function getLandingData(): Promise<LandingData> {
       latestYear: null,
       featured: null,
       percentiles: [],
+      obpScores: [],
     };
   }
 }
 
 export default async function Home() {
-  const { schoolCount, districtCount, latestYear, featured, percentiles } =
-    await getLandingData();
+  const {
+    schoolCount,
+    districtCount,
+    latestYear,
+    featured,
+    percentiles,
+    obpScores,
+  } = await getLandingData();
 
   return (
     <div className="landing">
-      <Hero latestYear={latestYear} percentiles={percentiles} />
+      <Hero
+        latestYear={latestYear}
+        percentiles={percentiles}
+        obpScores={obpScores}
+      />
       {featured && <FeaturedSchoolStrip school={featured} />}
       <FeatureSection
         schoolCount={schoolCount}

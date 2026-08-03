@@ -7,7 +7,8 @@ import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 
 type Props = {
-  percentiles: number[]; // sıralı (artan), aktif okulların son yıl yüzdelik dilimleri
+  percentiles: number[]; // sıralı (artan), merkezi yerleştirmeli okulların yüzdelik dilimleri
+  obpScores: number[]; // sıralı (artan), yerel yerleştirmeli okulların OBP puanları
   latestYear: number | null;
 };
 
@@ -22,27 +23,80 @@ const parseNum = (s: string): number | null => {
 };
 
 type Handle = "low" | "high";
+type Metric = "yuzdelik" | "obp";
 
-// Sahiplenilmiş görsel fikir: Mersin liselerinin yüzdelik dağılımı tek bir
-// ölçekte. Kullanıcı iki tutamakla bir ARALIK seçer; aralıktaki okullar teal,
-// dışındakiler soluk. "Okulları gör" o aralığı gerçek filtre olarak uygular.
-// LGS: düşük yüzdelik dilimi = daha rekabetçi (solda).
+// Metrik sözleşmesi. İki metrik AYRI dağılımlardır çünkü okulların çoğu
+// yalnızca birine sahiptir: merkezi yerleştirme yüzdelik dilimi, yerel
+// yerleştirme OBP puanı üretir. Rekabetçilik yönü de terstir — bu yüzden
+// "en rekabetçi" etiketi eksenin sabit bir ucuna çivilenmez, metriğe göre
+// taşınır. Eksen her iki durumda da soldan sağa ARTAR: sayı doğrusu yalan
+// söylemesin, yalnızca açıklaması yer değiştirsin.
+const METRICS: Record<
+  Metric,
+  {
+    tab: string;
+    axisLabel: string;
+    scope: string;
+    unit: (v: number) => string;
+    competitiveEnd: "start" | "end";
+    minParam: string;
+    maxParam: string;
+    sort: string;
+    inputLabel: string;
+  }
+> = {
+  yuzdelik: {
+    tab: "Yüzdelik dilimi",
+    axisLabel: "yüzdelik dilim ölçeği",
+    scope: "LGS ile merkezi yerleştirmeyle öğrenci alan okullar.",
+    unit: (v) => `%${fmt(v)}`,
+    competitiveEnd: "start", // düşük yüzdelik = daha rekabetçi
+    minParam: "yuzdelik_min",
+    maxParam: "yuzdelik_max",
+    sort: "yuzdelik_asc",
+    inputLabel: "Yüzdelik aralığı",
+  },
+  obp: {
+    tab: "OBP puanı",
+    axisLabel: "OBP puanı ölçeği",
+    scope: "Yerel yerleştirmeyle (OBP) öğrenci alan okullar.",
+    unit: (v) => fmt(v),
+    competitiveEnd: "end", // yüksek OBP = daha rekabetçi
+    minParam: "obp_min",
+    maxParam: "obp_max",
+    sort: "obp_desc",
+    inputLabel: "OBP aralığı",
+  },
+};
+
+// Sahiplenilmiş görsel fikir: Mersin liselerinin dağılımı tek bir ölçekte.
+// Kullanıcı önce metriği seçer (elindeki sayı hangisiyse), sonra iki tutamakla
+// bir ARALIK seçer; aralıktaki okullar teal, dışındakiler soluk.
+// "Okulları gör" o aralığı gerçek filtre olarak uygular.
 //
 // İlçe ve okul türü daraltıcıları da bu şeridin içinde: landing'de /okullar'a
 // giden TEK kontrol yüzeyi olsun, kullanıcı iki arama kutusu arasında seçim
-// yapmak zorunda kalmasın. Üçü de aynı submit'te aynı URL'e gider.
-export function PercentileScale({ percentiles, latestYear }: Props) {
+// yapmak zorunda kalmasın. Hepsi aynı submit'te aynı URL'e gider.
+export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
   const router = useRouter();
 
-  const { min, max } = useMemo(() => {
-    if (percentiles.length === 0) return { min: 0, max: 100 };
-    return { min: percentiles[0], max: percentiles[percentiles.length - 1] };
-  }, [percentiles]);
+  const bounds = useMemo(() => {
+    const of = (vals: number[]) =>
+      vals.length === 0
+        ? { min: 0, max: 100 }
+        : { min: vals[0], max: vals[vals.length - 1] };
+    return { yuzdelik: of(percentiles), obp: of(obpScores) };
+  }, [percentiles, obpScores]);
 
-  const [low, setLow] = useState(min);
-  const [high, setHigh] = useState(max);
-  const [lowRaw, setLowRaw] = useState(fmt(min));
-  const [highRaw, setHighRaw] = useState(fmt(max));
+  // Veri olmayan metrikle açılmayalım: yüzdelik boşsa OBP'den başla.
+  const initialMetric: Metric =
+    percentiles.length === 0 && obpScores.length > 0 ? "obp" : "yuzdelik";
+
+  const [metric, setMetric] = useState<Metric>(initialMetric);
+  const [low, setLow] = useState(bounds[initialMetric].min);
+  const [high, setHigh] = useState(bounds[initialMetric].max);
+  const [lowRaw, setLowRaw] = useState(fmt(bounds[initialMetric].min));
+  const [highRaw, setHighRaw] = useState(fmt(bounds[initialMetric].max));
   const [dragging, setDragging] = useState<Handle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ilce, setIlce] = useState("");
@@ -50,17 +104,32 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
 
   const trackRef = useRef<HTMLDivElement>(null);
 
+  const cfg = METRICS[metric];
+  const values = metric === "yuzdelik" ? percentiles : obpScores;
+  const { min, max } = bounds[metric];
+
   const span = max - min;
   const pctToLeft = (p: number) => (span === 0 ? 50 : ((p - min) / span) * 100);
   const lowLeft = pctToLeft(low);
   const highLeft = pctToLeft(high);
 
-  const inRangeCount = percentiles.filter(
-    (p) => p >= low && p <= high,
-  ).length;
+  const inRangeCount = values.filter((p) => p >= low && p <= high).length;
 
   // Tam aralık seçiliyse bu bir filtre değildir.
   const isFullRange = low <= min + 0.001 && high >= max - 0.001;
+
+  // Metrik değişince aralık yeni ölçeğin uçlarına sıfırlanır: eski metriğin
+  // sayıları yeni eksende anlamsızdır (%0,94 ile 0,94 OBP aynı şey değil).
+  function switchMetric(next: Metric) {
+    if (next === metric) return;
+    const b = bounds[next];
+    setMetric(next);
+    setLow(b.min);
+    setHigh(b.max);
+    setLowRaw(fmt(b.min));
+    setHighRaw(fmt(b.max));
+    setError(null);
+  }
 
   function commit(which: Handle, value: number) {
     const v = round2(Math.min(max, Math.max(min, value)));
@@ -114,7 +183,8 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
       const current = which === "low" ? low : high;
       let next: number | null = null;
       if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = current - step;
-      else if (e.key === "ArrowRight" || e.key === "ArrowUp") next = current + step;
+      else if (e.key === "ArrowRight" || e.key === "ArrowUp")
+        next = current + step;
       else if (e.key === "PageDown") next = current - step * 10;
       else if (e.key === "PageUp") next = current + step * 10;
       else if (e.key === "Home") next = min;
@@ -136,11 +206,11 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
     const lowVal = parseNum(lowRaw);
     const highVal = parseNum(highRaw);
     if (lowVal == null || highVal == null) {
-      setError("Aralık için iki sayı gir, örn. 1,00 ve 8,00");
+      setError("Aralık için iki sayı gir");
       return;
     }
     if (lowVal < 0 || lowVal > 100 || highVal < 0 || highVal > 100) {
-      setError("Yüzdelik değerleri 0 ile 100 arasında olmalı");
+      setError("Değerler 0 ile 100 arasında olmalı");
       return;
     }
     if (lowVal > highVal) {
@@ -151,16 +221,16 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
 
     const params = new URLSearchParams();
     if (!isFullRange) {
-      params.set("yuzdelik_min", String(round2(lowVal)));
-      params.set("yuzdelik_max", String(round2(highVal)));
+      params.set(cfg.minParam, String(round2(lowVal)));
+      params.set(cfg.maxParam, String(round2(highVal)));
     }
     if (ilce) params.set("ilce", ilce);
     if (tur) params.set("tur", tur);
-    params.set("siralama", "yuzdelik_asc");
+    params.set("siralama", cfg.sort);
     router.push(`/okullar?${params.toString()}`);
   }
 
-  const hasData = percentiles.length > 0;
+  const hasData = values.length > 0;
   // Tutamaklar birbirine yakınsa tek birleşik etiket (çakışma yapısal olarak önlenir).
   const merged = highLeft - lowLeft < 16;
   const trackTransition = dragging
@@ -169,11 +239,48 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
 
   return (
     <div className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-5 shadow-sm sm:p-7">
+      {/* Metrik seçimi — elindeki sayı hangisiyse */}
+      <div
+        role="tablist"
+        aria-label="Ölçek metriği"
+        className="mb-6 inline-flex rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] p-1"
+      >
+        {(Object.keys(METRICS) as Metric[]).map((m) => {
+          const selected = m === metric;
+          const count =
+            m === "yuzdelik" ? percentiles.length : obpScores.length;
+          return (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => switchMetric(m)}
+              disabled={count === 0}
+              className={`rounded-lg px-4 py-2.5 font-display text-sm font-bold tracking-tight transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] ${
+                selected
+                  ? "bg-[var(--teal)] text-white"
+                  : "text-[var(--ink-soft)] hover:text-[var(--ink)]"
+              }`}
+            >
+              {METRICS[m].tab}
+              <span
+                className={`tabular ml-2 font-mono text-[11px] font-medium ${
+                  selected ? "text-white/70" : "text-[var(--ink-faint)]"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Başlık + canlı okuma */}
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
-          {latestYear ?? ""} yüzdelik dilim ölçeği ·{" "}
-          <span className="tabular">{percentiles.length}</span> okul
+          {latestYear ?? ""} {cfg.axisLabel} ·{" "}
+          <span className="tabular">{values.length}</span> okul
         </p>
         <p aria-live="polite" className="text-sm text-[var(--ink-soft)]">
           {hasData && (
@@ -198,7 +305,7 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
 
           {/* dağılım tick'leri */}
           <div className="absolute inset-x-0 top-0 h-20">
-            {percentiles.map((p, i) => {
+            {values.map((p, i) => {
               const inRange = p >= low && p <= high;
               return (
                 <span
@@ -229,14 +336,12 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
                 role="slider"
                 tabIndex={0}
                 aria-label={
-                  which === "low"
-                    ? "Aralık başlangıcı (en rekabetçi uç)"
-                    : "Aralık bitişi"
+                  which === "low" ? "Aralık başlangıcı" : "Aralık bitişi"
                 }
                 aria-valuemin={min}
                 aria-valuemax={max}
                 aria-valuenow={value}
-                aria-valuetext={`%${fmt(value)}`}
+                aria-valuetext={cfg.unit(value)}
                 onPointerDown={handlePointerDown(which)}
                 onPointerMove={handlePointerMove(which)}
                 onPointerUp={handlePointerUp()}
@@ -261,7 +366,7 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
                 transform: "translateX(-50%)",
               }}
             >
-              %{fmt(low)} – %{fmt(high)}
+              {cfg.unit(low)} – {cfg.unit(high)}
             </span>
           ) : (
             <>
@@ -269,11 +374,10 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
                 className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
                 style={{
                   left: `${lowLeft}%`,
-                  transform:
-                    lowLeft < 8 ? "translateX(0)" : "translateX(-50%)",
+                  transform: lowLeft < 8 ? "translateX(0)" : "translateX(-50%)",
                 }}
               >
-                %{fmt(low)}
+                {cfg.unit(low)}
               </span>
               <span
                 className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
@@ -283,15 +387,21 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
                     highLeft > 92 ? "translateX(-100%)" : "translateX(-50%)",
                 }}
               >
-                %{fmt(high)}
+                {cfg.unit(high)}
               </span>
             </>
           )}
 
-          {/* uç etiketleri */}
+          {/* uç etiketleri — "en rekabetçi" metriğin rekabetçi ucuna yazılır */}
           <div className="tabular absolute inset-x-0 top-[5.75rem] flex justify-between font-mono text-[10px] text-[var(--ink-faint)]">
-            <span>%{fmt(min)} · en rekabetçi</span>
-            <span>%{fmt(max)}</span>
+            <span>
+              {cfg.unit(min)}
+              {cfg.competitiveEnd === "start" && " · en rekabetçi"}
+            </span>
+            <span>
+              {cfg.unit(max)}
+              {cfg.competitiveEnd === "end" && " · en rekabetçi"}
+            </span>
           </div>
         </div>
       ) : (
@@ -304,11 +414,11 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
       <div className="mt-6 border-t border-[var(--line)] pt-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <span className="text-sm font-medium text-[var(--ink-soft)]">
-            Yüzdelik aralığı
+            {cfg.inputLabel}
           </span>
           <div className="flex items-center gap-2">
             <input
-              aria-label="Aralık başlangıcı"
+              aria-label={`${cfg.inputLabel} başlangıcı`}
               type="text"
               inputMode="decimal"
               value={lowRaw}
@@ -327,7 +437,7 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
             />
             <span className="text-[var(--ink-faint)]">–</span>
             <input
-              aria-label="Aralık bitişi"
+              aria-label={`${cfg.inputLabel} bitişi`}
               type="text"
               inputMode="decimal"
               value={highRaw}
@@ -379,8 +489,8 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
         </p>
       ) : (
         <p className="mt-3 font-mono text-[11px] text-[var(--ink-faint)]">
-          Tutamakları sürükleyerek aralık seç; ilçe ve okul türü isteğe bağlı
-          daraltır.
+          {cfg.scope} Tutamakları sürükleyerek aralık seç; ilçe ve okul türü
+          isteğe bağlı daraltır.
         </p>
       )}
     </div>

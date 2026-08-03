@@ -48,6 +48,8 @@ type Props = {
     siralama?: string;
     yuzdelik_min?: string;
     yuzdelik_max?: string;
+    obp_min?: string;
+    obp_max?: string;
   }>;
 };
 
@@ -71,6 +73,11 @@ export default async function OkullarPage({ searchParams }: Props) {
   const yuzdelikMax = parseRangeParam(params.yuzdelik_max);
   const hasYuzdelikRange =
     yuzdelikMin != null && yuzdelikMax != null && yuzdelikMin <= yuzdelikMax;
+  // OBP aralığı: ikinci metrik. Okulların çoğu yalnızca birine sahip olduğu
+  // için iki aralık bağımsızdır; ikisi birden verilirse kesişim uygulanır.
+  const obpMin = parseRangeParam(params.obp_min);
+  const obpMax = parseRangeParam(params.obp_max);
+  const hasObpRange = obpMin != null && obpMax != null && obpMin <= obpMax;
   const limit = parseLimit(params.limit);
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
@@ -89,10 +96,12 @@ export default async function OkullarPage({ searchParams }: Props) {
     schoolIdFilter = (svfData ?? []).map((r) => r.school_id as number);
   }
 
-  // Step 1b: Yüzdelik aralığı filtresi. Landing ölçeğiyle AYNI tanım kullanılır:
-  // yalnızca en son yılın (school_scores'taki max year) yüzdelik dilimleri.
-  // Böylece ölçekte "77 okul" diyen tam aralık, listede de 77 okul döndürür.
-  if (hasYuzdelikRange) {
+  // Step 1b: Puan aralığı filtreleri. Landing ölçeğiyle AYNI tanım kullanılır:
+  // yalnızca en son yılın (school_scores'taki max year) değerleri ve okul
+  // başına TEK değer — okulun EN REKABETÇİ değeri. Yön metriğe göre terstir:
+  // yüzdelikte en düşük, OBP'de en yüksek. Böylece ölçekte "N okul" diyen tam
+  // aralık, listede de tam olarak N okul döndürür.
+  if (hasYuzdelikRange || hasObpRange) {
     const { data: yearRows } = await supabase
       .from("school_scores")
       .select("year")
@@ -100,35 +109,69 @@ export default async function OkullarPage({ searchParams }: Props) {
       .limit(1);
     const scaleYear = (yearRows?.[0]?.year as number | undefined) ?? null;
 
-    const { data: scoreRows } = scaleYear
+    type ScoreRow = {
+      school_id: number;
+      percentile: number | null;
+      obp_score: number | null;
+    };
+    const { data: rawScoreRows } = scaleYear
       ? await supabase
           .from("school_scores")
-          .select("school_id, percentile")
+          .select("school_id, percentile, obp_score")
           .eq("year", scaleYear)
-          .not("percentile", "is", null)
-      : { data: [] as { school_id: number; percentile: number }[] };
+      : { data: null };
+    const scoreRows = (rawScoreRows ?? []) as ScoreRow[];
 
-    // Okul başına tek değer: son yılın en rekabetçi (en düşük) yüzdeliği —
-    // landing ölçeğindeki işaretle birebir aynı değer.
-    const lowestBySchool = new Map<number, number>();
-    for (const r of scoreRows ?? []) {
-      const id = r.school_id as number;
-      const p = r.percentile as number;
-      if (!Number.isFinite(p)) continue;
-      const prev = lowestBySchool.get(id);
-      if (prev == null || p < prev) lowestBySchool.set(id, p);
+    // Bir metriğin aralığını, okul başına en rekabetçi değere göre çözer.
+    const idsInRange = (
+      read: (r: ScoreRow) => number | null,
+      moreCompetitive: (candidate: number, current: number) => boolean,
+      lo: number,
+      hi: number,
+    ): number[] => {
+      const bestBySchool = new Map<number, number>();
+      for (const r of scoreRows) {
+        const v = read(r);
+        if (v == null || !Number.isFinite(v)) continue;
+        const id = r.school_id;
+        const prev = bestBySchool.get(id);
+        if (prev == null || moreCompetitive(v, prev)) bestBySchool.set(id, v);
+      }
+      const out: number[] = [];
+      bestBySchool.forEach((v, id) => {
+        if (v >= lo && v <= hi) out.push(id);
+      });
+      return out;
+    };
+
+    const narrow = (ids: number[]) => {
+      if (schoolIdFilter === null) {
+        schoolIdFilter = ids;
+      } else {
+        const allowed = new Set(ids);
+        schoolIdFilter = schoolIdFilter.filter((id) => allowed.has(id));
+      }
+    };
+
+    if (hasYuzdelikRange) {
+      narrow(
+        idsInRange(
+          (r) => r.percentile,
+          (c, cur) => c < cur, // düşük yüzdelik = daha rekabetçi
+          yuzdelikMin!,
+          yuzdelikMax!,
+        ),
+      );
     }
-
-    const inRange: number[] = [];
-    lowestBySchool.forEach((p, id) => {
-      if (p >= yuzdelikMin! && p <= yuzdelikMax!) inRange.push(id);
-    });
-
-    if (schoolIdFilter === null) {
-      schoolIdFilter = inRange;
-    } else {
-      const allowed = new Set(inRange);
-      schoolIdFilter = schoolIdFilter.filter((id) => allowed.has(id));
+    if (hasObpRange) {
+      narrow(
+        idsInRange(
+          (r) => r.obp_score,
+          (c, cur) => c > cur, // yüksek OBP = daha rekabetçi
+          obpMin!,
+          obpMax!,
+        ),
+      );
     }
   }
 
@@ -273,6 +316,19 @@ export default async function OkullarPage({ searchParams }: Props) {
     paginationSearchParams.yuzdelik_min = String(yuzdelikMin);
     paginationSearchParams.yuzdelik_max = String(yuzdelikMax);
   }
+  if (hasObpRange) {
+    paginationSearchParams.obp_min = String(obpMin);
+    paginationSearchParams.obp_max = String(obpMax);
+  }
+
+  // Bir aralığı temizlemek yalnızca O aralığı düşürmeli; diğer filtreler kalır.
+  const urlWithout = (...drop: string[]) => {
+    const qs = new URLSearchParams(paginationSearchParams);
+    for (const k of drop) qs.delete(k);
+    const s = qs.toString();
+    return `/okullar${s ? `?${s}` : ""}`;
+  };
+  const trFixed = (v: number) => v.toFixed(2).replace(".", ",");
 
   const startItem = totalCount === 0 ? 0 : offset + 1;
   const endItem = Math.min(offset + limit, totalCount);
@@ -287,27 +343,46 @@ export default async function OkullarPage({ searchParams }: Props) {
           <p className="text-lg leading-relaxed text-slate-500">
             İlçe, okul türü ve meslek alanlarına göre filtrele, en uygun eşleşmeleri hızla bul.
           </p>
-          {hasYuzdelikRange && (
-            <p className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
-              Yüzdelik aralığı:{" "}
-              <span className="tabular font-semibold">
-                %{yuzdelikMin!.toFixed(2).replace(".", ",")} – %
-                {yuzdelikMax!.toFixed(2).replace(".", ",")}
-              </span>
-              <Link
-                href="/okullar"
-                className="font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-900"
-              >
-                temizle
-              </Link>
-            </p>
+          {(hasYuzdelikRange || hasObpRange) && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {hasYuzdelikRange && (
+                <p className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
+                  Yüzdelik aralığı:{" "}
+                  <span className="tabular font-semibold">
+                    %{trFixed(yuzdelikMin!)} – %{trFixed(yuzdelikMax!)}
+                  </span>
+                  <Link
+                    href={urlWithout("yuzdelik_min", "yuzdelik_max")}
+                    className="font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-900"
+                  >
+                    temizle
+                  </Link>
+                </p>
+              )}
+              {hasObpRange && (
+                <p className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
+                  OBP aralığı:{" "}
+                  <span className="tabular font-semibold">
+                    {trFixed(obpMin!)} – {trFixed(obpMax!)}
+                  </span>
+                  <Link
+                    href={urlWithout("obp_min", "obp_max")}
+                    className="font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-900"
+                  >
+                    temizle
+                  </Link>
+                </p>
+              )}
+            </div>
           )}
         </div>
 
         <SchoolList
-          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}-${yuzdelikMin}-${yuzdelikMax}`}
+          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}-${yuzdelikMin}-${yuzdelikMax}-${obpMin}-${obpMax}`}
           yuzdelikMin={hasYuzdelikRange ? yuzdelikMin : null}
           yuzdelikMax={hasYuzdelikRange ? yuzdelikMax : null}
+          obpMin={hasObpRange ? obpMin : null}
+          obpMax={hasObpRange ? obpMax : null}
           schools={schools}
           vocationalFields={vocationalFields}
           totalCount={totalCount}
