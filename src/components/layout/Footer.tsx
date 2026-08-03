@@ -8,7 +8,6 @@ import {
   getSocialLinks,
 } from "@/lib/site-settings";
 import type { FooterSocialLink } from "@/lib/site-settings";
-import { MersinSkyline } from "./MersinSkyline";
 
 function SocialIcon({ platform }: { platform: string }) {
   const p = platform.toLowerCase();
@@ -68,24 +67,11 @@ export async function Footer() {
   );
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/5 bg-[#0a0f1c] pt-20 pb-44 md:pb-52">
+    <footer className="relative overflow-hidden border-t border-white/5 bg-[#0a0f1c] pt-16">
       <div className="absolute top-0 left-1/2 h-px w-full -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
-      {/* Ufuk: şehir ışığı parıltısı → silüet bunun önünde koyu okunur */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[radial-gradient(120%_100%_at_50%_100%,rgba(37,99,235,0.20),rgba(37,99,235,0.06)_45%,transparent_75%)]"
-      />
-      {/* Üstten gelen scrim: metin alanı sakin kalsın */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-40 h-40 bg-gradient-to-b from-[#0a0f1c] to-transparent md:bottom-48"
-      />
-      {/* Mersin silüeti — bu proje için çizilmiş özgün SVG */}
-      <MersinSkyline className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full text-[#05080f] md:h-48" />
-
       <div className="relative z-10 container mx-auto max-w-7xl px-6">
-        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-12">
+        <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-12">
 
           {/* Sütun 1: Logo + hakkında */}
           <div className="md:col-span-5">
@@ -229,6 +215,23 @@ export async function Footer() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Mersin silüeti — footer'ın kapanış bandı. Ufuk parıltısı arkada. */}
+      <div className="relative mt-10 w-full">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(120%_120%_at_50%_100%,rgba(37,99,235,0.18),rgba(37,99,235,0.05)_45%,transparent_75%)]"
+        />
+        <Image
+          src="/mersin-silueti.png"
+          alt=""
+          aria-hidden
+          width={1600}
+          height={290}
+          sizes="100vw"
+          className="relative block h-auto w-full select-none"
+        />
       </div>
     </footer>
   );
