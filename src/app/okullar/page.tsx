@@ -45,6 +45,7 @@ type Props = {
     sayfa?: string;
     yerlestirme?: string;
     siralama?: string;
+    yuzdelik?: string;
   }>;
 };
 
@@ -57,6 +58,9 @@ export default async function OkullarPage({ searchParams }: Props) {
   const alan = (params.alan ?? "").trim(); // vocational field ID
   const yerlestirme = params.yerlestirme ?? "";
   const siralama = params.siralama ?? "isim_asc";
+  const yuzdelikParam = (params.yuzdelik ?? "").trim();
+  const yuzdelikNum = yuzdelikParam ? Number(yuzdelikParam) : NaN;
+  const hasYuzdelikHint = yuzdelikParam !== "" && !Number.isNaN(yuzdelikNum);
   const limit = parseLimit(params.limit);
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
@@ -212,6 +216,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (yerlestirme) paginationSearchParams.yerlestirme = yerlestirme;
   if (limit !== 20) paginationSearchParams.limit = String(limit);
   if (siralama !== "isim_asc") paginationSearchParams.siralama = siralama;
+  if (hasYuzdelikHint) paginationSearchParams.yuzdelik = yuzdelikParam;
 
   const startItem = totalCount === 0 ? 0 : offset + 1;
   const endItem = Math.min(offset + limit, totalCount);
@@ -226,6 +231,15 @@ export default async function OkullarPage({ searchParams }: Props) {
           <p className="text-lg leading-relaxed text-slate-500">
             İlçe, okul türü ve meslek alanlarına göre filtrele, en uygun eşleşmeleri hızla bul.
           </p>
+          {hasYuzdelikHint && (
+            <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
+              Yüzdeliğin:{" "}
+              <span className="tabular font-semibold">
+                %{yuzdelikNum.toFixed(2)}
+              </span>{" "}
+              · okullar yüzdeliğe göre sıralı
+            </p>
+          )}
         </div>
 
         <SchoolList

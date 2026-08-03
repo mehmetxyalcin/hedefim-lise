@@ -16,15 +16,32 @@ import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 import { Button } from "@/components/ui/Button";
 
-export function Hero() {
+type HeroProps = {
+  schoolCount?: number | null;
+  districtCount?: number | null;
+  latestYear?: number | null;
+};
+
+export function Hero({
+  schoolCount = null,
+  districtCount = null,
+  latestYear = null,
+}: HeroProps) {
   const [ilce, setIlce] = useState("");
   const [tur, setTur] = useState("");
+  const [yuzdelik, setYuzdelik] = useState("");
   const router = useRouter();
 
   function handleSearch() {
     const params = new URLSearchParams();
     if (ilce) params.set("ilce", ilce);
     if (tur) params.set("tur", tur);
+    // Yüzdelik yalnızca sıralama sinyali: eşik filtresi UYGULANMAZ.
+    const y = yuzdelik.trim().replace(",", ".");
+    if (y && !Number.isNaN(Number(y))) {
+      params.set("yuzdelik", y);
+      params.set("siralama", "yuzdelik_asc");
+    }
     const qs = params.toString();
     router.push(qs ? `/okullar?${qs}` : "/okullar");
   }
@@ -108,16 +125,52 @@ export function Hero() {
           </Button>
         </div>
 
+        {/* Yüzdelik girişi (opsiyonel): eşik filtresi değil, sıralama sinyali */}
+        <div className="mx-auto mt-4 flex max-w-4xl flex-col gap-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label
+              htmlFor="hero-yuzdelik"
+              className="text-sm font-medium text-sky-50/90"
+            >
+              Yüzdeliğini biliyor musun?
+            </label>
+            <input
+              id="hero-yuzdelik"
+              type="text"
+              inputMode="decimal"
+              placeholder="Örn. 5,00"
+              value={yuzdelik}
+              onChange={(e) => setYuzdelik(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
+              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-sky-50/40 outline-none backdrop-blur-md focus:border-cyan-200/60 focus:ring-4 focus:ring-cyan-500/15 sm:w-40"
+            />
+          </div>
+          <p className="text-xs text-sky-50/70">
+            Sayını gir, okulları yüzdeliğe göre sıralayalım.
+          </p>
+        </div>
+
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <div className="flex items-center gap-2 rounded-lg border border-cyan-200/20 bg-white/[0.08] px-4 py-2 text-sm text-sky-50/90 shadow-sm shadow-sky-950/20 backdrop-blur-md">
             <Database className="h-4 w-4 text-cyan-300" />
             <span className="font-medium">
-              MEB ve okul kaynaklarından derlenmiş, düzenli güncellenen veriler
+              {schoolCount != null && districtCount != null ? (
+                <>
+                  <span className="tabular">{schoolCount}</span> okul ·{" "}
+                  <span className="tabular">{districtCount}</span> ilçe
+                </>
+              ) : (
+                "MEB ve okul kaynaklarından derlenmiş, düzenli güncellenen veriler"
+              )}
             </span>
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-orange-200/20 bg-white/[0.08] px-4 py-2 text-sm text-sky-50/90 shadow-sm shadow-sky-950/20 backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4 text-amber-300" />
-            <span className="font-medium">Güncel Veriler (2026)</span>
+            <span className="font-medium">
+              {latestYear != null ? `${latestYear} verileri` : "Güncel veriler"}
+            </span>
           </div>
         </div>
 
