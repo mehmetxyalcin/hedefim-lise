@@ -30,6 +30,7 @@ type LandingData = {
   districtCount: number | null;
   latestYear: number | null;
   featured: FeaturedSchool | null;
+  percentiles: number[];
 };
 
 async function getLandingData(): Promise<LandingData> {
@@ -56,6 +57,21 @@ async function getLandingData(): Promise<LandingData> {
       .order("year", { ascending: false })
       .limit(1);
     const latestYear = (yearRows?.[0]?.year as number | undefined) ?? null;
+
+    // Yüzdelik dağılımı: son yıldaki aktif okulların yüzdelik dilimleri (eksen için)
+    let percentiles: number[] = [];
+    if (latestYear != null) {
+      const { data: distRows } = await supabase
+        .from("school_scores")
+        .select("school_id, percentile")
+        .eq("year", latestYear)
+        .not("percentile", "is", null);
+      percentiles = (distRows ?? [])
+        .filter((r) => activeIds.has(r.school_id as number))
+        .map((r) => r.percentile as number)
+        .filter((p) => Number.isFinite(p))
+        .sort((a, b) => a - b);
+    }
 
     // Öne çıkan okul: son yılın en rekabetçi aktif okulu.
     // LGS'de düşük yüzdelik dilimi = daha rekabetçi → ascending (en küçük önce).
@@ -91,29 +107,31 @@ async function getLandingData(): Promise<LandingData> {
       }
     }
 
-    return { schoolCount, districtCount, latestYear, featured };
+    return { schoolCount, districtCount, latestYear, featured, percentiles };
   } catch {
     // Veri/ağ yoksa (ör. build ortamı DB'ye erişemiyorsa) zarif düşüş:
-    // Hero rakamsız chip'lerine döner, şerit gizlenir.
+    // Hero rakamsız fallback'ine döner, şerit gizlenir.
     return {
       schoolCount: null,
       districtCount: null,
       latestYear: null,
       featured: null,
+      percentiles: [],
     };
   }
 }
 
 export default async function Home() {
-  const { schoolCount, districtCount, latestYear, featured } =
+  const { schoolCount, districtCount, latestYear, featured, percentiles } =
     await getLandingData();
 
   return (
-    <>
+    <div className="landing">
       <Hero
         schoolCount={schoolCount}
         districtCount={districtCount}
         latestYear={latestYear}
+        percentiles={percentiles}
       />
       {featured && <FeaturedSchoolStrip school={featured} />}
       <FeatureSection
@@ -121,6 +139,6 @@ export default async function Home() {
         districtCount={districtCount}
         latestYear={latestYear}
       />
-    </>
+    </div>
   );
 }

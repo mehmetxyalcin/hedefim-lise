@@ -24,6 +24,18 @@ colors:
   highlight: "#b45309"
   highlight-tint: "#fffbeb"
   cyan-glow: "#22d3ee"
+  landing-doc-ground: "#f3f5f4"
+  landing-doc-panel: "#ffffff"
+  landing-ink: "#16211c"
+  landing-ink-soft: "#3a4742"
+  landing-ink-faint: "#5f6c68"
+  landing-line: "#d8dedb"
+  landing-teal: "#0c4a45"
+  landing-teal-deep: "#083a36"
+  landing-teal-tint: "#e3ece9"
+  landing-vermilion: "#dc5a34"
+  landing-vermilion-deep: "#c24325"
+  landing-teal-ring: "rgba(12, 74, 69, 0.16)"
 typography:
   display:
     fontFamily: "Inter, Arial, Helvetica, sans-serif"
@@ -55,6 +67,24 @@ typography:
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "0.08em"
+  landing-display:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "clamp(2.5rem, 7vw, 5.5rem)"
+    fontWeight: 800
+    lineHeight: 1.02
+    letterSpacing: "-0.02em"
+  landing-body:
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.6
+    letterSpacing: "normal"
+  landing-micro:
+    fontFamily: "Roboto Mono, monospace"
+    fontSize: "0.6875rem"
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: "0.18em"
 rounded:
   md: "8px"
   lg: "12px"
@@ -96,6 +126,21 @@ components:
     textColor: "{colors.exam-blue-deep}"
     rounded: "{rounded.md}"
     padding: "4px 10px"
+  button-landing-primary:
+    backgroundColor: "{colors.landing-teal}"
+    textColor: "{colors.landing-doc-panel}"
+    rounded: "{rounded.lg}"
+    padding: "12px 24px"
+  button-landing-primary-hover:
+    backgroundColor: "{colors.landing-teal-deep}"
+    textColor: "{colors.landing-doc-panel}"
+    rounded: "{rounded.lg}"
+    padding: "12px 24px"
+  input-landing:
+    backgroundColor: "{colors.landing-doc-ground}"
+    textColor: "{colors.landing-ink}"
+    rounded: "{rounded.lg}"
+    padding: "12px 16px"
 ---
 
 # Design System: Hedefim Lise
@@ -104,12 +149,14 @@ components:
 
 **Creative North Star: "Güvenilir Rehberlik Masası" (The Trusted Guidance Desk)**
 
-Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a **deep-navy "chrome and headline" world** — the sticky navbar (`#0a0f1c`) and the hero (`#071426`) with soft cyan/amber aurora glows and a faint grid — frames the product like a confident night sky you're navigating by, while the **body is a bright, orderly workspace** of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. Nothing shouts except the one place a decision happens.
+Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a **deep-navy chrome world** — the sticky navbar (`#0a0f1c`), the footer, and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı) — frames the product like a confident night sky you're navigating by, while the **body is a bright, orderly workspace** of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. Nothing shouts except the one place a decision happens.
+
+> **Scope note (2026-08).** The landing route (`/`) no longer uses the old dark-navy `#071426` hero with cyan/amber aurora glows — that hero and its search panel were deleted. The landing now runs its own light, landing-scoped visual world documented in **Landing Surface World (Yön #3 — Yerleştirme Kılavuzu)** below. Everything else — okullar, school detail, alanlar, istatistikler, admin, Navbar/Footer, and the `ui/` primitives — still runs the Exam Blue system this document describes.
 
 The temperament is **reassuring and calm**: measured spacing, soft rounded surfaces, thin hairline borders, and shadows so light they read as breath rather than weight. Color is rationed — the blue is a signal, not a mood — and the semantic hues (emerald, rose, amber) appear only to mean something. This is an Operate system wearing a Persuade hero: the landing frame earns trust, then gets out of the way so filtering, comparing, and shortlisting stay effortless.
 
 **Key Characteristics:**
-- Dark, trustworthy chrome + hero over a bright, scannable data body.
+- Dark, trustworthy chrome (navbar, footer, interior page headers) over a bright, scannable data body.
 - One decisive accent (Exam Blue) rationed against a broad cool-slate neutral field.
 - Soft, "resting" surfaces — generous radii, hairline borders, whisper-light shadows.
 - Semantic color (emerald/rose/amber) used only to carry meaning, never decoration.
@@ -136,9 +183,9 @@ A disciplined cool palette: one confident blue signal over an extensive slate-ne
 - **Canvas** (#ffffff): Card and elevated-surface background.
 
 ### Chrome (the dark frame)
-- **Night Chrome** (#0a0f1c): The sticky navbar, ~90% opacity with backdrop blur; white text, slate-300 links.
-- **Night Hero** (#071426): The hero base, layered with radial cyan/sky/orange/rose glows and a faint white grid.
-- **Cyan Glow** (#22d3ee): Hero-only atmospheric accent (aurora blur, focus rings inside the hero search).
+- **Night Chrome** (#0a0f1c): The sticky navbar (~90% opacity with backdrop blur; white text, slate-300 links), the footer, and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı).
+- **Night Hero** (#071426): **Retired.** This was the base of the old landing hero; the hero was deleted in the 2026-08 landing redesign and the value no longer appears in the codebase. Do not reintroduce it.
+- **Cyan Glow** (#22d3ee): Atmospheric accent for the *dark chrome world only* — soft blurs and eyebrow accents on the dark interior page headers (istatistikler, statistics dashboard, hakkında). It no longer appears on the landing.
 
 ### Semantic
 - **Success** (#059669 — emerald-600) on **Success Tint** (#ecfdf5): positive stats, confirmations.
@@ -150,20 +197,21 @@ A disciplined cool palette: one confident blue signal over an extensive slate-ne
 
 **The Meaning-Only Rule.** Emerald, rose, and amber never appear for decoration — each is a claim (good / destructive / caution). If a color isn't carrying meaning, it's slate.
 
-**The Two-Worlds Rule.** Cyan and the aurora glows live *only* in the dark chrome/hero. The light body is blue-and-slate; a cyan glow in a data card breaks the system.
+**The Two-Worlds Rule (amended 2026-08).** Cyan and glow treatments live *only* in the dark chrome world (navbar, footer, dark interior page headers). The light Exam Blue body is blue-and-slate; a cyan glow in a data card breaks the system. The old third member of this rule — the dark aurora hero — no longer exists: the landing is now its own light **document world** (see Landing Surface World), and neither cyan, aurora glows, nor Exam Blue may appear inside it.
 
 ## Typography
 
 **Display / UI Font (intended):** Inter (loaded as `--font-geist-sans`)
-**Body Font (as-shipped):** Arial / Helvetica system stack
-**Mono Font:** Roboto Mono (`--font-geist-mono`), rare — code/numeric affordances only.
+**Body Font (as-shipped):** Inter / system stack (`body { font-family: var(--font-sans), "Inter", … }` in `globals.css`)
+**Mono Font:** Roboto Mono (`--font-geist-mono`) — code/numeric affordances site-wide; on the landing it is the micro-label voice.
+**Landing Fonts (scoped):** Archivo (`--font-archivo`) and Source Serif 4 (`--font-source-serif`) are loaded **globally** in `layout.tsx` via next/font, but they *apply only within the `.landing` scope* — Archivo through the `font-display` utility, Source Serif 4 as the `.landing` base `font-family` and the `font-reading` utility. Do not use them on Exam Blue surfaces.
 
 **Character:** A neutral, highly legible grotesque program. Personality comes from *weight contrast and tight tracking*, not from a characterful typeface — headings run heavy (extrabold) with negative letter-spacing, body stays quiet and readable. This restraint is on-brand: the data is the star.
 
-> **Known drift:** Inter is loaded and declared as `--font-sans`, but `globals.css` hardcodes `body { font-family: Arial, Helvetica, sans-serif }`, so most text currently renders in the system stack, not Inter. Treat Inter as the intended UI face and unify on it (see Don'ts).
+> **Drift resolved:** the old `body { font-family: Arial, … }` hardcode has been fixed; `globals.css` now sets `body { font-family: var(--font-sans), "Inter", system-ui, … }`, so Inter is the actual rendered UI face.
 
 ### Hierarchy
-- **Display** (800, `clamp(2.25rem, 6vw, 4.5rem)`, line-height 1.15, tracking -0.02em): Hero headline only. Frequently pairs a gradient-clipped keyword (amber→orange→rose) inside white text — a hero-only device.
+- **Display** (800, `clamp(2.25rem, 6vw, 4.5rem)`, line-height 1.15, tracking -0.02em): Page-level display headlines on Exam Blue surfaces (`.type-display`). The old landing-hero use — white text with a gradient-clipped amber keyword — no longer exists; the landing's larger Archivo display is documented in Landing Surface World.
 - **Headline** (800, ~1.75–2.25rem, tracking -0.01em): Page titles ("Sana Uygun Liseleri Keşfet"), section leads.
 - **Title** (700, ~1.25–1.5rem): Card titles (school names), dialog headers.
 - **Body** (400–500, 1rem, line-height ~1.6): Descriptions, form values, helper text.
@@ -180,13 +228,13 @@ A centered, max-width column system on a slate-50 page. Marketing surfaces use `
 
 ## Elevation & Depth
 
-**Flat-by-default with whisper shadows.** Surfaces rest on hairline `Line` borders, not drop shadows; depth is primarily tonal (canvas cards floating on the slate-50 surface). Shadows are soft and mostly reserved for hover and for the hero search bar. The dominant token is `shadow-sm`; hover on school cards lifts to a soft, tinted `shadow-xl shadow-slate-200/50`. Primary buttons carry a faint colored shadow (`shadow-blue-600/20`) that deepens on hover.
+**Flat-by-default with whisper shadows.** Surfaces rest on hairline `Line` borders, not drop shadows; depth is primarily tonal (canvas cards floating on the slate-50 surface). Shadows are soft and mostly reserved for hover. The dominant token is `shadow-sm`; hover on school cards lifts to a soft, tinted `shadow-xl shadow-slate-200/50`. Primary buttons carry a faint colored shadow (`shadow-blue-600/20`) that deepens on hover.
 
 ### Shadow Vocabulary
 - **Resting** (`box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05)` — `shadow-sm`): default on cards, bars, inputs.
 - **Card Hover Lift** (`shadow-xl` tinted `slate-200/50`): school cards on hover, paired with `hover:-translate-y-0.5` and a border shift to `slate-300`.
 - **Action Glow** (`shadow-blue-600/20 → /40`): primary buttons, deepening on hover.
-- **Hero Float** (`shadow-2xl shadow-sky-950/45`): the hero search panel lifting off the dark hero.
+- ~~**Hero Float**~~ Retired with the old dark hero: the `shadow-2xl shadow-sky-950/45` hero-search float no longer exists.
 
 ### Named Rules
 **The Flat-Rest Rule.** Surfaces are flat at rest and defined by their hairline border. Shadow is a *response to state* (hover, focus, the hero's lifted search) — never ambient decoration on a static card.
@@ -227,8 +275,69 @@ Soft, consistent, generously rounded. The radius vocabulary is tight: **12px (`r
 - **Links:** `slate-300`, `text-sm font-medium`, hover to white on `white/5`; the primary nav action is a translucent `white/10` pill.
 - **Mobile:** collapses to a sheet; the schools page adds a sticky filter/sort bar and bottom-sheets.
 
-### Hero Search (signature)
-A white, `rounded-2xl`, heavily-lifted panel (`shadow-2xl`) straddling the dark hero, holding inset slate-50 select fields that warm to `sky-50` on hover and gain a cyan focus ring — the one place the cyan world touches an interactive control. Its "Okul Ara" submit is the standard **Primary (Exam Blue)** button; the hero's decision action obeys the One-Signal Rule like every other surface — no amber/orange CTA exception.
+### Hero Search — removed (2026-08)
+The old signature — a white `rounded-2xl` panel with `shadow-2xl` straddling the dark hero, cyan focus rings, "Okul Ara" submit — was deleted with the dark hero. The landing's decision control is now the **Percentile Scale** (`src/components/home/PercentileScale.tsx`), documented in Landing Surface World below. Do not rebuild the hero search.
+
+## Landing Surface World (Yön #3 — Yerleştirme Kılavuzu)
+
+**Scope (critical):** This world exists **only inside the `.landing` wrapper** that `src/app/page.tsx` puts around the landing route (`/`). Its tokens are CSS custom properties defined on `.landing` in `globals.css`; they do not exist outside it. The Navbar and Footer that frame the landing remain incumbent Night Chrome. Every other page keeps the Exam Blue system above. The two palettes never mix on one surface: no Exam Blue, cyan, or aurora inside `.landing`; no teal/vermilion outside it.
+
+**Creative North Star (landing): "Yerleştirme Kılavuzu" (The Placement Guide).** The landing is a confident data *document* — a printed statistics bulletin, not an edu-SaaS hero. Numbers run at poster scale; the percentile axis is the hero. The direction contract (seed 87596005) is embedded greppable in `layout.tsx`.
+
+### Colors (landing-scoped)
+
+Color is a **separation tool, not decoration**: neutrals and typography carry the load; the two hues each mean exactly one thing.
+
+- **Doc Ground** (`--doc-ground`, #F3F5F4): the page paper — a cool, faintly green-cast off-white.
+- **Doc Panel** (`--doc-panel`, #FFFFFF): raised panels (percentile scale card, featured strip, bento cards).
+- **Ink / Ink Soft / Ink Faint** (#16211C / #3A4742 / #5F6C68): headings and figures / body copy / micro-labels and de-emphasized ticks. Ink Faint is 5.0:1 on Doc Ground — AA for the 10–11px labels.
+- **Line** (`--line`, #D8DEDB): every hairline — section dividers, panel borders, the axis baseline.
+- **Teal / Teal Deep / Teal Tint** (#0C4A45 / #083A36 / #E3ECE9): **authority + the primary action.** Button fills (hover → deep), reachable axis ticks, the highlighted keyword in the h1, focused input borders, link accents, tinted type badges. Focus rings use `--teal-ring` (rgba(12,74,69,0.16), ring-4).
+- **Vermilion / Vermilion Deep** (#DC5A34 / #C24325): **the single warm signal — the user's own position and act-here only.** The "sen" marker on the axis (line + diamond) is Vermilion; its label and inline validation errors are Vermilion Deep. `::selection` inside `.landing` is Vermilion Deep with white text (5.1:1).
+
+**The Sen Rule.** Vermilion marks exactly one thing: *you*. It never fills a button, tints a card, or decorates. If vermilion appears, it is either the user's position on the scale or an error the user must act on.
+
+**The One-Authority Rule.** Teal is the only action color on the landing. Exam Blue never crosses into `.landing`; teal/vermilion never leave it.
+
+### Typography (landing-scoped)
+
+- **Archivo** (`font-display`, `--font-archivo`): headlines and every large numeral — grotesk authority.
+- **Source Serif 4** (`font-reading`, `--font-source-serif`): the `.landing` base font — warm reading body.
+- **Roboto Mono** (`font-mono`): the document meta-grammar — micro-labels at 10–11px, uppercase, wide-tracked (0.14–0.18em), medium/bold, in Ink Faint. Used for the masthead tagline, "{year} verileri", axis end-labels, figure captions, section codes, source disclaimers, and inline errors.
+- **Poster headline:** the h1 is Archivo 800 at `clamp(2.5rem, 7vw, 5.5rem)`, line-height 1.02, tracking -0.02em, with one teal keyword ("ölçekte").
+- **Proof figures:** giant tabular Archivo numerals (`text-5xl`/`text-6xl`, 800, leading-none) sitting on a hairline-topped baseline row, each captioned by a mono micro-label. Featured-school score runs `text-4xl` in teal.
+
+**The Tabular Rule.** Every numeral that represents data gets `font-variant-numeric: tabular-nums` (the `.tabular` utility).
+
+**The Turkish-Comma Rule.** Every percentile prints with a comma decimal (`5,00`, `%1,23`) via the shared `fmt()` pattern (`toFixed(2).replace(".", ",")`). Never a dot.
+
+### Layout & structure
+
+A `max-w-6xl` centered column with `px-6` gutters on the Doc Ground. The page reads as one continuous document: a slim **masthead strip** (brand + mono tagline left, "{year} verileri" right) under a hairline, then headline → percentile scale panel → proof-figure baseline → featured strip → bento, each section separated by a full-width `border-t` hairline rather than background changes. Panels are `rounded-2xl`, Doc Panel fill, `Line` border, `shadow-sm`. The bento is asymmetric: one dominant 2×2 card (the tercih robotu) plus two supporting cards, each carrying a mono section code eyebrow ("01 — birincil araç", "02 — alan rehberi", "03 — proje okulları").
+
+### Motion (landing-scoped)
+
+Quiet and functional. Axis ticks transition `background-color`/`opacity` over 200ms. The user marker slides via `transition: left 300ms cubic-bezier(0.16, 1, 0.3, 1)` (expo-out) and first appears with the `marker-in` 300ms opacity fade (no pop). Cards hover-lift `-translate-y-1` over 300ms with a teal top-rule + arrow reveal.
+
+### Percentile Scale (landing signature)
+
+`src/components/home/PercentileScale.tsx` — the owned visual idea: Mersin's high schools as a strip-plot on one axis, inside a Doc Panel card.
+
+- **Distribution:** one 1px full-height tick per active school's latest-year percentile (data-driven count, currently ~77), positioned across a min→max axis over a hairline baseline. **Low percentile = more competitive = the left end**; the end-labels read `%{min} · en rekabetçi` / `%{max}` in 10px mono.
+- **Resting state:** no input → all ticks teal at 0.32 opacity.
+- **With input:** ticks with percentile ≥ the user's value (reachable) go teal at 0.6; more-competitive ticks fade to Ink Faint at 0.14. A live "N okul erişiminde" readout updates (`aria-live="polite"`).
+- **The marker:** a 2px Vermilion line with a rotated-square diamond cap and an above-axis mono label `sen · %X,XX` in Vermilion Deep. The label sits *above* the axis so it never collides with the end-labels; its alignment snaps to `left-0` under 8% and `right-0` over 92% so it can't overflow the panel.
+- **Input contract:** free-text decimal accepting comma or dot; only values 0–100 are valid — invalid submits show an inline mono error in Vermilion Deep ("Yüzdelik 0 ile 100 arasında bir sayı olmalı, örn. 5,00"). The marker only drops for valid input.
+- **The Sort-Not-Filter Rule.** The percentile input is a *sort signal, never a threshold filter*: submit routes to `/okullar?yuzdelik=X&siralama=yuzdelik_asc`, and the helper text says so ("Eşik filtresi değil…"). No school is ever hidden by the user's number.
+- **Empty data:** falls back to a one-line "Ölçek verisi şu anda yüklenemedi." and a plain route to `/okullar`; the Hero likewise drops its figure row when counts are null (graceful ISR/DB-failure degradation, `revalidate = 86400`).
+
+### Do's and Don'ts (landing)
+
+- **Do** carry all meta text in the mono micro-label voice (10–11px, uppercase, 0.14–0.18em tracking, Ink Faint).
+- **Do** keep panels flat: `Line` hairline + `shadow-sm`, hover states only.
+- **Don't** use vermilion for anything but the user's position or an actionable error.
+- **Don't** import Exam Blue, cyan, gradients, or aurora glows into `.landing`.
+- **Don't** turn the percentile input into a filter, print a percentile with a dot decimal, or set data numerals without `.tabular`.
 
 ## Do's and Don'ts
 
@@ -238,12 +347,12 @@ A white, `rounded-2xl`, heavily-lifted panel (`shadow-2xl`) straddling the dark 
 - **Do** use the uppercase, bold, wide-tracked ≤11px label for category/meta text, and carry hierarchy with weight (700–800 heads).
 - **Do** keep radii in the 12 / 16–24px family and never mix radii within one component.
 - **Do** reserve emerald/rose/amber for genuine meaning (success / destructive / caution).
-- **Do** confine cyan and aurora glows to the dark chrome and hero only.
+- **Do** confine cyan and glow treatments to the dark chrome world (navbar, footer, dark interior page headers) only.
 
 ### Don't:
-- **Don't** let the Inter override stand — unify the body/UI font on Inter (remove or fix the `body { font-family: Arial… }` rule) so type is consistent with intent.
 - **Don't** mix `gray-*` and `slate-*` neutrals; the system is `slate` — legacy `gray-*` classes (mobile sheets) are drift to migrate.
-- **Don't** introduce a second accent hue into the body; blue is the only action color.
-- **Don't** put gradient-clipped text or cyan glows on body/data surfaces — they are hero-only devices.
+- **Don't** introduce a second accent hue into the Exam Blue body; blue is the only action color there.
+- **Don't** put gradient-clipped text or cyan glows on body/data surfaces — they belong to the dark chrome world, and the old hero devices (aurora, gradient keyword) are retired entirely.
+- **Don't** cross the landing boundary in either direction: no Exam Blue/cyan inside `.landing`, no landing teal/vermilion/Archivo/Source Serif on Exam Blue surfaces.
 - **Don't** add ambient drop-shadows to resting cards; depth is tonal + hairline first.
 - **Don't** set headings below 700 weight or uppercase running body copy.

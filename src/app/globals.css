@@ -10,6 +10,49 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Landing dünyası (Yön #3) — font-display/font-reading utility'leri üretir. */
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-reading: var(--font-source-serif), Georgia, serif;
+}
+
+/* ── Landing paleti (Yön #3: Yerleştirme Kılavuzu) ─────────────────────────
+   Yalnızca .landing kapsamında geçerli; sitenin geri kalanı (Button, Badge,
+   diğer sayfalar) mevcut Exam Blue sistemini korur. Renk = ayrım aracı:
+   teal = otorite/birincil eylem · vermilyon = tek sıcak sinyal (sen/act-here)
+   · nötr = geri kalan her şey. Yük nötr + tipografide. */
+.landing {
+  --doc-ground: #f3f5f4;
+  --doc-panel: #ffffff;
+  --ink: #16211c;
+  --ink-soft: #3a4742;
+  --ink-faint: #5f6c68; /* 5.0:1 on doc-ground — 10–11px etiketler için AA */
+  --line: #d8dedb;
+  --teal: #0c4a45;
+  --teal-deep: #083a36;
+  --teal-tint: #e3ece9;
+  --vermilion: #dc5a34;
+  --vermilion-deep: #c24325;
+  --teal-ring: rgba(12, 74, 69, 0.16);
+  background-color: var(--doc-ground);
+  color: var(--ink);
+  font-family: var(--font-reading);
+}
+.landing ::selection {
+  background: var(--vermilion-deep); /* 5.1:1 beyaz metinle */
+  color: #fff;
+}
+
+/* Yüzdelik işaretinin ilk belirişi: pop yerine kısa fade. */
+@keyframes marker-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.landing .marker-in {
+  animation: marker-in 300ms ease-out;
 }
 
 body {

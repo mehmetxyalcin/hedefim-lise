@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-02T00:00:00.000Z",
+  "generatedAt": "2026-08-03T00:00:00.000Z",
   "title": "Design System: Hedefim Lise",
   "extensions": {
     "colorMeta": {
@@ -11,24 +11,31 @@
       "success": { "role": "tertiary", "displayName": "Success Emerald", "canonical": "#059669", "tonalRamp": ["#022c22", "#064e3b", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#d1fae5"] },
       "danger": { "role": "tertiary", "displayName": "Danger Rose", "canonical": "#e11d48", "tonalRamp": ["#4c0519", "#881337", "#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af", "#ffe4e6"] },
       "highlight": { "role": "tertiary", "displayName": "Highlight Amber", "canonical": "#b45309", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fcd34d", "#fef3c7"] },
-      "cyan-glow": { "role": "secondary", "displayName": "Hero Cyan Glow", "canonical": "#22d3ee", "tonalRamp": ["#083344", "#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"] }
+      "cyan-glow": { "role": "secondary", "displayName": "Chrome Cyan Glow (dark chrome world only; the old aurora hero is retired)", "canonical": "#22d3ee", "tonalRamp": ["#083344", "#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"] },
+      "landing-teal": { "role": "primary", "displayName": "Landing Petrol Teal (authority + primary action, .landing scope only)", "canonical": "#0c4a45", "tonalRamp": ["#04201d", "#083a36", "#0c4a45", "#14635c", "#217a72", "#4a9a92", "#8dc0ba", "#e3ece9"] },
+      "landing-vermilion": { "role": "secondary", "displayName": "Landing Vermilion (the single warm signal: the user's own position / act-here, .landing scope only)", "canonical": "#dc5a34", "tonalRamp": ["#571f0e", "#8c3218", "#c24325", "#dc5a34", "#e57550", "#ec9678", "#f4bda9", "#fbe7de"] },
+      "landing-ink": { "role": "neutral", "displayName": "Landing Ink (green-cast document ink, .landing scope only)", "canonical": "#16211c", "tonalRamp": ["#0b120f", "#16211c", "#232e29", "#3a4742", "#5f6c68", "#8a9591", "#b8c0bd", "#e6eae8"] },
+      "landing-doc-ground": { "role": "neutral", "displayName": "Landing Doc Ground (cool paper, .landing scope only)", "canonical": "#f3f5f4", "tonalRamp": ["#3a4742", "#5f6c68", "#7d8a86", "#a2aca8", "#c4ccc9", "#d8dedb", "#e9edeb", "#f3f5f4"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Hero headline only; often with a gradient-clipped keyword." },
+      "display": { "displayName": "Display", "purpose": "Page-level display headlines on Exam Blue surfaces. The old hero gradient-clipped keyword is retired." },
       "headline": { "displayName": "Headline", "purpose": "Page titles and section leads." },
       "title": { "displayName": "Title", "purpose": "Card titles (school names) and dialog headers." },
       "body": { "displayName": "Body", "purpose": "Descriptions, form values, helper text." },
-      "label": { "displayName": "Label", "purpose": "Uppercase, bold, wide-tracked meta tags (type, district, eyebrows)." }
+      "label": { "displayName": "Label", "purpose": "Uppercase, bold, wide-tracked meta tags (type, district, eyebrows)." },
+      "landing-display": { "displayName": "Landing Display (Archivo)", "purpose": "Poster headline and giant tabular proof figures on the landing only. Archivo loads globally via next/font but applies only within .landing." },
+      "landing-body": { "displayName": "Landing Body (Source Serif 4)", "purpose": "The .landing base reading face. Loads globally via next/font but applies only within .landing." },
+      "landing-micro": { "displayName": "Landing Micro-Label (Roboto Mono)", "purpose": "The landing's document meta-grammar: 10-11px uppercase mono, 0.14-0.18em tracking, ink-faint — masthead tagline, axis labels, figure captions, section codes, disclaimers, errors." }
     },
     "shadows": [
-      { "name": "resting", "value": "0 1px 2px 0 rgba(0,0,0,0.05)", "purpose": "Default flat rest on cards, bars, inputs." },
+      { "name": "resting", "value": "0 1px 2px 0 rgba(0,0,0,0.05)", "purpose": "Default flat rest on cards, bars, inputs (both worlds)." },
       { "name": "card-hover-lift", "value": "0 20px 25px -5px rgba(148,163,184,0.5), 0 8px 10px -6px rgba(148,163,184,0.5)", "purpose": "School cards on hover, paired with a -2px translate." },
-      { "name": "action-glow", "value": "0 4px 14px 0 rgba(37,99,235,0.2)", "purpose": "Primary buttons; deepens to 0.4 alpha on hover." },
-      { "name": "hero-float", "value": "0 25px 50px -12px rgba(8,47,73,0.45)", "purpose": "The hero search panel lifting off the dark hero." }
+      { "name": "action-glow", "value": "0 4px 14px 0 rgba(37,99,235,0.2)", "purpose": "Exam Blue primary buttons; deepens to 0.4 alpha on hover. Not used on the landing (landing buttons are shadowless teal fills)." }
     ],
     "motion": [
       { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for color/transform state transitions." },
-      { "name": "duration-standard", "value": "200ms", "purpose": "Hover/focus transitions on buttons, cards, inputs." }
+      { "name": "duration-standard", "value": "200ms", "purpose": "Hover/focus transitions on buttons, cards, inputs; also the landing axis-tick color/opacity transitions." },
+      { "name": "landing-ease-marker", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Landing percentile 'sen' marker left-position slide (300ms, expo-out); first appearance uses the marker-in 300ms opacity fade." }
     ],
     "breakpoints": [
       { "name": "sm", "value": "640px" },
@@ -42,7 +49,7 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The single main action per surface (Ara, Detaylı İncele).",
+      "description": "The single main action per Exam Blue surface (Ara, Detaylı İncele).",
       "html": "<button class=\"ds-btn-primary\">Detaylı İncele</button>",
       "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: #fff; font-weight: 600; font-size: 14px; padding: 12px 20px; border: none; border-radius: 12px; box-shadow: 0 4px 14px 0 rgba(37,99,235,0.2); cursor: pointer; transition: background 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s, box-shadow 0.2s; } .ds-btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 6px 20px 0 rgba(37,99,235,0.4); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(59,130,246,0.2); }"
     },
@@ -93,25 +100,63 @@
       "description": "Dark-chrome navigation link: muted slate that warms to white on a translucent hover fill.",
       "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#\">Okullar</a><a class=\"ds-nav-link\" href=\"#\">Alanlar</a><a class=\"ds-nav-cta\" href=\"#\">İletişim</a></nav>",
       "css": ".ds-nav { display: inline-flex; align-items: center; gap: 4px; background: #0a0f1c; padding: 12px 16px; border-radius: 12px; } .ds-nav-link { color: #cbd5e1; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 8px; text-decoration: none; transition: background 0.2s, color 0.2s; } .ds-nav-link:hover { background: rgba(255,255,255,0.05); color: #fff; } .ds-nav-cta { color: #fff; font-size: 14px; font-weight: 600; padding: 8px 20px; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: background 0.2s; } .ds-nav-cta:hover { background: rgba(255,255,255,0.15); }"
+    },
+    {
+      "name": "Landing Primary Button",
+      "kind": "button",
+      "refersTo": "button-landing-primary",
+      "description": "Landing-scoped only: petrol-teal action (Okulları gör), Archivo bold, teal focus ring, no shadow.",
+      "html": "<button class=\"ds-landing-btn\">Okulları gör<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"></path><path d=\"m12 5 7 7-7 7\"></path></svg></button>",
+      "css": ".ds-landing-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #0c4a45; color: #fff; font-family: Archivo, system-ui, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.025em; padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; transition: background-color 0.2s; } .ds-landing-btn:hover { background: #083a36; } .ds-landing-btn:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(12,74,69,0.16); } .ds-landing-btn svg { width: 16px; height: 16px; }"
+    },
+    {
+      "name": "Landing Percentile Input",
+      "kind": "input",
+      "refersTo": "input-landing",
+      "description": "Landing-scoped only: tabular decimal field on doc-ground fill; teal border + ring on focus. Comma decimals (Örn. 5,00).",
+      "html": "<input class=\"ds-landing-input\" type=\"text\" inputmode=\"decimal\" placeholder=\"Örn. 5,00\" />",
+      "css": ".ds-landing-input { width: 176px; background: #f3f5f4; color: #16211c; font-size: 16px; font-variant-numeric: tabular-nums; padding: 12px 16px; border: 1px solid #d8dedb; border-radius: 12px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; } .ds-landing-input::placeholder { color: #5f6c68; } .ds-landing-input:focus { border-color: #0c4a45; box-shadow: 0 0 0 4px rgba(12,74,69,0.16); }"
+    },
+    {
+      "name": "Landing Micro-Label",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Landing-scoped only: the document meta-grammar — 10-11px uppercase mono, wide-tracked, ink-faint (masthead tagline, axis labels, section codes).",
+      "html": "<span class=\"ds-landing-micro\">01 — birincil araç</span>",
+      "css": ".ds-landing-micro { font-family: 'Roboto Mono', monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; color: #5f6c68; }"
+    },
+    {
+      "name": "Landing Sen Marker",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Landing-scoped only: the vermilion user-position marker from the percentile axis — 2px line, rotated diamond cap, above-axis mono label with comma decimal.",
+      "html": "<div class=\"ds-landing-axis\"><span class=\"ds-landing-tick\" style=\"left:12%\"></span><span class=\"ds-landing-tick\" style=\"left:28%\"></span><span class=\"ds-landing-tick ds-landing-tick-dim\" style=\"left:44%\"></span><span class=\"ds-landing-tick\" style=\"left:63%\"></span><span class=\"ds-landing-tick\" style=\"left:81%\"></span><div class=\"ds-landing-marker\" style=\"left:44%\"><span class=\"ds-landing-marker-cap\"></span><span class=\"ds-landing-marker-label\">sen · %5,00</span></div><span class=\"ds-landing-baseline\"></span></div>",
+      "css": ".ds-landing-axis { position: relative; height: 96px; min-width: 260px; background: #fff; border: 1px solid #d8dedb; border-radius: 16px; padding: 0; overflow: visible; } .ds-landing-tick { position: absolute; top: 24px; bottom: 28px; width: 1px; background: #0c4a45; opacity: 0.6; transition: background-color 0.2s, opacity 0.2s; } .ds-landing-tick-dim { background: #5f6c68; opacity: 0.14; } .ds-landing-baseline { position: absolute; left: 12px; right: 12px; bottom: 28px; height: 1px; background: #d8dedb; } .ds-landing-marker { position: absolute; top: 24px; bottom: 34px; width: 2px; background: #dc5a34; transition: left 0.3s cubic-bezier(0.16,1,0.3,1); } .ds-landing-marker-cap { position: absolute; top: -4px; left: 50%; width: 10px; height: 10px; background: #dc5a34; transform: translateX(-50%) rotate(45deg); } .ds-landing-marker-label { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: 'Roboto Mono', monospace; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: #c24325; }"
     }
   ],
   "narrative": {
-    "northStar": "Güvenilir Rehberlik Masası (The Trusted Guidance Desk)",
-    "overview": "Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a deep-navy chrome-and-headline world (navbar #0a0f1c, hero #071426 with soft cyan/amber aurora glows and a faint grid) frames the product like a confident night sky you're navigating by, while the body is a bright, orderly workspace of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. The temperament is reassuring and calm: measured spacing, soft rounded surfaces, hairline borders, and shadows so light they read as breath rather than weight. This is an Operate system wearing a Persuade hero.",
+    "northStar": "Güvenilir Rehberlik Masası (The Trusted Guidance Desk) — with a landing-scoped sub-world: Yerleştirme Kılavuzu (The Placement Guide)",
+    "overview": "Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a deep-navy chrome world — the sticky navbar (#0a0f1c), the footer, and the dark page headers on interior surfaces — frames the product like a confident night sky you're navigating by, while the body is a bright, orderly workspace of near-white canvas, cool slate neutrals, and a single decisive blue. Scope note (2026-08): the landing route (/) no longer uses the old dark-navy #071426 hero with aurora glows; it runs its own light, landing-scoped document world — 'Yerleştirme Kılavuzu' — on a cool paper ground (#f3f5f4) with petrol teal (#0c4a45) as authority/action and vermilion (#dc5a34) as the single warm signal for the user's own position, set in Archivo + Source Serif 4 + mono micro-labels. Everything else stays Exam Blue.",
     "keyCharacteristics": [
-      "Dark, trustworthy chrome + hero over a bright, scannable data body.",
+      "Dark, trustworthy chrome (navbar, footer, interior page headers) over a bright, scannable data body.",
       "One decisive accent (Exam Blue) rationed against a broad cool-slate neutral field.",
       "Soft, resting surfaces — generous radii, hairline borders, whisper-light shadows.",
       "Semantic color (emerald/rose/amber) used only to carry meaning, never decoration.",
-      "Calm density: roomy on marketing surfaces, efficient but never cramped in tools."
+      "Calm density: roomy on marketing surfaces, efficient but never cramped in tools.",
+      "Landing-scoped document world (.landing only): paper ground, teal authority, one vermilion 'sen' signal, poster-scale tabular figures, mono micro-label meta-grammar."
     ],
     "rules": [
       { "name": "The One-Signal Rule", "body": "Exam Blue is the only color that invites action. It should cover well under ~10% of any body screen — its scarcity is what makes 'act here' legible. Never use blue as a decorative fill.", "section": "colors" },
       { "name": "The Meaning-Only Rule", "body": "Emerald, rose, and amber never appear for decoration — each is a claim (good / destructive / caution). If a color isn't carrying meaning, it's slate.", "section": "colors" },
-      { "name": "The Two-Worlds Rule", "body": "Cyan and the aurora glows live only in the dark chrome/hero. The light body is blue-and-slate; a cyan glow in a data card breaks the system.", "section": "colors" },
+      { "name": "The Two-Worlds Rule (amended 2026-08)", "body": "Cyan and glow treatments live only in the dark chrome world (navbar, footer, dark interior page headers). The light Exam Blue body is blue-and-slate. The old third member — the dark aurora hero — no longer exists: the landing is now its own light document world, and neither cyan, aurora glows, nor Exam Blue may appear inside it.", "section": "colors" },
       { "name": "The Heavy-Head Rule", "body": "Hierarchy is carried by weight, not size alone: headings are 700–800 with slightly negative tracking; body stays 400–500. Never set a heading below 700.", "section": "typography" },
       { "name": "The Uppercase-Label Rule", "body": "Category/meta text is uppercase, bold, wide-tracked, and tiny (≤11px). It is a texture, not a headline — never uppercase running copy.", "section": "typography" },
-      { "name": "The Flat-Rest Rule", "body": "Surfaces are flat at rest and defined by their hairline border. Shadow is a response to state (hover, focus, the hero's lifted search) — never ambient decoration on a static card.", "section": "elevation" }
+      { "name": "The Flat-Rest Rule", "body": "Surfaces are flat at rest and defined by their hairline border. Shadow is a response to state (hover, focus) — never ambient decoration on a static card.", "section": "elevation" },
+      { "name": "The Sen Rule (landing)", "body": "Vermilion marks exactly one thing: you. It never fills a button, tints a card, or decorates. If vermilion appears, it is either the user's position on the scale or an error the user must act on.", "section": "colors" },
+      { "name": "The One-Authority Rule (landing)", "body": "Teal is the only action color on the landing. Exam Blue never crosses into .landing; teal/vermilion never leave it.", "section": "colors" },
+      { "name": "The Tabular Rule (landing)", "body": "Every numeral that represents data gets font-variant-numeric: tabular-nums (the .tabular utility).", "section": "typography" },
+      { "name": "The Turkish-Comma Rule (landing)", "body": "Every percentile prints with a comma decimal (5,00, %1,23) via the shared fmt() pattern. Never a dot.", "section": "typography" },
+      { "name": "The Sort-Not-Filter Rule (landing)", "body": "The percentile input is a sort signal, never a threshold filter: submit routes to /okullar sorted by percentile. No school is ever hidden by the user's number.", "section": "components" }
     ],
     "dos": [
       "Do ration Exam Blue (#2563eb) to the single most important action per surface; keep it well under ~10% of a body screen.",
@@ -119,15 +164,19 @@
       "Do use the uppercase, bold, wide-tracked ≤11px label for category/meta text, and carry hierarchy with weight (700–800 heads).",
       "Do keep radii in the 12 / 16–24px family and never mix radii within one component.",
       "Do reserve emerald/rose/amber for genuine meaning (success / destructive / caution).",
-      "Do confine cyan and aurora glows to the dark chrome and hero only."
+      "Do confine cyan and glow treatments to the dark chrome world (navbar, footer, dark interior page headers) only.",
+      "Do carry all landing meta text in the mono micro-label voice (10–11px, uppercase, 0.14–0.18em tracking, ink-faint).",
+      "Do keep landing panels flat: Line hairline + shadow-sm, hover states only."
     ],
     "donts": [
-      "Don't let the Inter override stand — unify the body/UI font on Inter (remove or fix the body { font-family: Arial… } rule) so type is consistent with intent.",
       "Don't mix gray-* and slate-* neutrals; the system is slate — legacy gray-* classes (mobile sheets) are drift to migrate.",
-      "Don't introduce a second accent hue into the body; blue is the only action color.",
-      "Don't put gradient-clipped text or cyan glows on body/data surfaces — they are hero-only devices.",
+      "Don't introduce a second accent hue into the Exam Blue body; blue is the only action color there.",
+      "Don't put gradient-clipped text or cyan glows on body/data surfaces — they belong to the dark chrome world, and the old hero devices (aurora, gradient keyword) are retired entirely.",
+      "Don't cross the landing boundary in either direction: no Exam Blue/cyan inside .landing, no landing teal/vermilion/Archivo/Source Serif on Exam Blue surfaces.",
       "Don't add ambient drop-shadows to resting cards; depth is tonal + hairline first.",
-      "Don't set headings below 700 weight or uppercase running body copy."
+      "Don't set headings below 700 weight or uppercase running body copy.",
+      "Don't use vermilion for anything but the user's position or an actionable error on the landing.",
+      "Don't turn the landing percentile input into a filter, print a percentile with a dot decimal, or set data numerals without .tabular."
     ]
   }
 }
