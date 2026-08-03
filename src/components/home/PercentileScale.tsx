@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
@@ -11,84 +11,167 @@ type Props = {
 
 // Türkçe ondalık: belge tek ayraç kullanır (virgül).
 const fmt = (v: number) => v.toFixed(2).replace(".", ",");
+const round2 = (v: number) => Math.round(v * 100) / 100;
+const parseNum = (s: string): number | null => {
+  const t = s.trim().replace(",", ".");
+  if (t === "") return null;
+  const v = Number(t);
+  return Number.isFinite(v) ? v : null;
+};
+
+type Handle = "low" | "high";
 
 // Sahiplenilmiş görsel fikir: Mersin liselerinin yüzdelik dağılımı tek bir
-// ölçekte. Kullanıcı yüzdeliğini girer, eksene vermilyon işaret düşer; kesimi
-// >= kullanıcının değeri olan okullar (erişimdekiler) teal, daha rekabetçiler
-// soluk. LGS: düşük yüzdelik dilimi = daha rekabetçi (solda).
+// ölçekte. Kullanıcı iki tutamakla bir ARALIK seçer; aralıktaki okullar teal,
+// dışındakiler soluk. "Okulları gör" o aralığı gerçek filtre olarak uygular.
+// LGS: düşük yüzdelik dilimi = daha rekabetçi (solda).
 export function PercentileScale({ percentiles, latestYear }: Props) {
   const router = useRouter();
-  const [raw, setRaw] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const { min, max } = useMemo(() => {
     if (percentiles.length === 0) return { min: 0, max: 100 };
-    return {
-      min: percentiles[0],
-      max: percentiles[percentiles.length - 1],
-    };
+    return { min: percentiles[0], max: percentiles[percentiles.length - 1] };
   }, [percentiles]);
 
-  // Geçerli 0–100 değeri; aksi halde null. (Marker yalnızca geçerliyken düşer.)
-  const parsed = (() => {
-    if (raw.trim() === "") return null;
-    const v = Number(raw.trim().replace(",", "."));
-    if (!Number.isFinite(v) || v < 0 || v > 100) return null;
-    return v;
-  })();
+  const [low, setLow] = useState(min);
+  const [high, setHigh] = useState(max);
+  const [lowRaw, setLowRaw] = useState(fmt(min));
+  const [highRaw, setHighRaw] = useState(fmt(max));
+  const [dragging, setDragging] = useState<Handle | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const pctToLeft = (p: number) =>
-    max === min ? 50 : ((p - min) / (max - min)) * 100;
+  const trackRef = useRef<HTMLDivElement>(null);
 
-  const reachableCount =
-    parsed != null ? percentiles.filter((p) => p >= parsed).length : null;
+  const span = max - min;
+  const pctToLeft = (p: number) => (span === 0 ? 50 : ((p - min) / span) * 100);
+  const lowLeft = pctToLeft(low);
+  const highLeft = pctToLeft(high);
 
-  const markerLeft =
-    parsed != null ? Math.min(100, Math.max(0, pctToLeft(parsed))) : null;
+  const inRangeCount = percentiles.filter(
+    (p) => p >= low && p <= high,
+  ).length;
 
-  // İşaret etiketi eksenin ÜSTÜNDE durur (uç etiketleriyle asla çakışmaz);
-  // uçlara yaklaşınca panelden taşmasın diye hizası clamp'lenir.
-  const markerLabelAlign =
-    markerLeft == null
-      ? ""
-      : markerLeft < 8
-        ? "left-0"
-        : markerLeft > 92
-          ? "right-0"
-          : "left-1/2 -translate-x-1/2";
+  // Tam aralık seçiliyse bu bir filtre değildir.
+  const isFullRange = low <= min + 0.001 && high >= max - 0.001;
+
+  function commit(which: Handle, value: number) {
+    const v = round2(Math.min(max, Math.max(min, value)));
+    if (which === "low") {
+      const next = Math.min(v, high);
+      setLow(next);
+      setLowRaw(fmt(next));
+    } else {
+      const next = Math.max(v, low);
+      setHigh(next);
+      setHighRaw(fmt(next));
+    }
+    if (error) setError(null);
+  }
+
+  function valueFromClientX(clientX: number): number | null {
+    const el = trackRef.current;
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0) return null;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return min + ratio * span;
+  }
+
+  function handlePointerDown(which: Handle) {
+    return (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setDragging(which);
+    };
+  }
+
+  function handlePointerMove(which: Handle) {
+    return (e: React.PointerEvent<HTMLDivElement>) => {
+      if (dragging !== which) return;
+      const v = valueFromClientX(e.clientX);
+      if (v != null) commit(which, v);
+    };
+  }
+
+  function handlePointerUp() {
+    return (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+      setDragging(null);
+    };
+  }
+
+  // Klavye: ok tuşları ince, PageUp/Down kaba, Home/End uçlar.
+  function handleKeyDown(which: Handle) {
+    return (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const step = Math.max(0.01, round2(span / 100));
+      const current = which === "low" ? low : high;
+      let next: number | null = null;
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = current - step;
+      else if (e.key === "ArrowRight" || e.key === "ArrowUp") next = current + step;
+      else if (e.key === "PageDown") next = current - step * 10;
+      else if (e.key === "PageUp") next = current + step * 10;
+      else if (e.key === "Home") next = min;
+      else if (e.key === "End") next = max;
+      if (next != null) {
+        e.preventDefault();
+        commit(which, next);
+      }
+    };
+  }
+
+  function applyRaw(which: Handle, raw: string) {
+    const v = parseNum(raw);
+    if (v == null) return;
+    commit(which, v);
+  }
 
   function submit() {
-    if (raw.trim() !== "" && parsed == null) {
-      setError("Yüzdelik 0 ile 100 arasında bir sayı olmalı, örn. 5,00");
+    const lowVal = parseNum(lowRaw);
+    const highVal = parseNum(highRaw);
+    if (lowVal == null || highVal == null) {
+      setError("Aralık için iki sayı gir, örn. 1,00 ve 8,00");
+      return;
+    }
+    if (lowVal < 0 || lowVal > 100 || highVal < 0 || highVal > 100) {
+      setError("Yüzdelik değerleri 0 ile 100 arasında olmalı");
+      return;
+    }
+    if (lowVal > highVal) {
+      setError("Aralık başlangıcı bitişinden büyük olamaz");
       return;
     }
     setError(null);
+
     const params = new URLSearchParams();
-    if (parsed != null) {
-      params.set("yuzdelik", String(parsed));
-      params.set("siralama", "yuzdelik_asc");
+    if (!isFullRange) {
+      params.set("yuzdelik_min", String(round2(lowVal)));
+      params.set("yuzdelik_max", String(round2(highVal)));
     }
-    const qs = params.toString();
-    router.push(qs ? `/okullar?${qs}` : "/okullar");
+    params.set("siralama", "yuzdelik_asc");
+    router.push(`/okullar?${params.toString()}`);
   }
 
   const hasData = percentiles.length > 0;
+  // Tutamaklar birbirine yakınsa tek birleşik etiket (çakışma yapısal olarak önlenir).
+  const merged = highLeft - lowLeft < 16;
+  const trackTransition = dragging
+    ? ""
+    : "transition-[left,right,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
 
   return (
     <div className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-5 shadow-sm sm:p-7">
       {/* Başlık + canlı okuma */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
           {latestYear ?? ""} yüzdelik dilim ölçeği ·{" "}
           <span className="tabular">{percentiles.length}</span> okul
         </p>
         <p aria-live="polite" className="text-sm text-[var(--ink-soft)]">
-          {reachableCount != null && hasData && (
+          {hasData && (
             <>
               <span className="tabular font-display text-lg font-extrabold text-[var(--teal)]">
-                {reachableCount}
+                {inRangeCount}
               </span>{" "}
-              okul erişiminde
+              okul bu aralıkta
             </>
           )}
         </p>
@@ -96,21 +179,27 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
 
       {/* Eksen */}
       {hasData ? (
-        <div className="relative mb-3 h-28">
+        <div ref={trackRef} className="relative mb-3 h-28 touch-none">
+          {/* seçili bant */}
+          <div
+            className={`absolute top-0 h-20 bg-[var(--teal-tint)] ${trackTransition}`}
+            style={{ left: `${lowLeft}%`, width: `${highLeft - lowLeft}%` }}
+          />
+
           {/* dağılım tick'leri */}
           <div className="absolute inset-x-0 top-0 h-20">
             {percentiles.map((p, i) => {
-              const reachable = parsed == null || p >= parsed;
+              const inRange = p >= low && p <= high;
               return (
                 <span
                   key={i}
                   className="absolute top-0 h-full w-px transition-[background-color,opacity] duration-200"
                   style={{
                     left: `${pctToLeft(p)}%`,
-                    backgroundColor: reachable
+                    backgroundColor: inRange
                       ? "var(--teal)"
                       : "var(--ink-faint)",
-                    opacity: parsed == null ? 0.32 : reachable ? 0.6 : 0.14,
+                    opacity: inRange ? 0.75 : 0.14,
                   }}
                 />
               );
@@ -120,22 +209,76 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
           {/* taban çizgisi */}
           <div className="absolute inset-x-0 top-20 h-px bg-[var(--line)]" />
 
-          {/* kullanıcı işareti */}
-          {markerLeft != null && (
-            <div
-              className="marker-in absolute top-0 bottom-6 w-[2px] bg-[var(--vermilion)] transition-[left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-              style={{ left: `${markerLeft}%` }}
-            >
-              <span className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 bg-[var(--vermilion)]" />
-              <span
-                className={`tabular absolute -top-6 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${markerLabelAlign}`}
+          {/* tutamaklar */}
+          {(["low", "high"] as Handle[]).map((which) => {
+            const value = which === "low" ? low : high;
+            const leftPct = which === "low" ? lowLeft : highLeft;
+            return (
+              <div
+                key={which}
+                role="slider"
+                tabIndex={0}
+                aria-label={
+                  which === "low"
+                    ? "Aralık başlangıcı (en rekabetçi uç)"
+                    : "Aralık bitişi"
+                }
+                aria-valuemin={min}
+                aria-valuemax={max}
+                aria-valuenow={value}
+                aria-valuetext={`%${fmt(value)}`}
+                onPointerDown={handlePointerDown(which)}
+                onPointerMove={handlePointerMove(which)}
+                onPointerUp={handlePointerUp()}
+                onPointerCancel={handlePointerUp()}
+                onKeyDown={handleKeyDown(which)}
+                className={`absolute top-0 bottom-6 z-10 w-11 -translate-x-1/2 cursor-ew-resize touch-none focus-visible:outline-none ${trackTransition}`}
+                style={{ left: `${leftPct}%` }}
               >
-                sen · %{parsed != null ? fmt(parsed) : ""}
+                {/* görünür çizgi + tutamak */}
+                <span className="pointer-events-none absolute inset-y-0 left-1/2 w-[2px] -translate-x-1/2 bg-[var(--vermilion)]" />
+                <span className="pointer-events-none absolute top-[4.5rem] left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border border-[var(--doc-panel)] bg-[var(--vermilion)] shadow-sm" />
+              </div>
+            );
+          })}
+
+          {/* tutamak etiketleri — eksenin ÜSTÜNDE, uç etiketleriyle çakışmaz */}
+          {merged ? (
+            <span
+              className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
+              style={{
+                left: `${(lowLeft + highLeft) / 2}%`,
+                transform: "translateX(-50%)",
+              }}
+            >
+              %{fmt(low)} – %{fmt(high)}
+            </span>
+          ) : (
+            <>
+              <span
+                className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
+                style={{
+                  left: `${lowLeft}%`,
+                  transform:
+                    lowLeft < 8 ? "translateX(0)" : "translateX(-50%)",
+                }}
+              >
+                %{fmt(low)}
               </span>
-            </div>
+              <span
+                className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
+                style={{
+                  left: `${highLeft}%`,
+                  transform:
+                    highLeft > 92 ? "translateX(-100%)" : "translateX(-50%)",
+                }}
+              >
+                %{fmt(high)}
+              </span>
+            </>
           )}
 
-          {/* uç etiketleri — işaret etiketi eksenin üstünde olduğundan çakışmazlar */}
+          {/* uç etiketleri */}
           <div className="tabular absolute inset-x-0 top-[5.75rem] flex justify-between font-mono text-[10px] text-[var(--ink-faint)]">
             <span>%{fmt(min)} · en rekabetçi</span>
             <span>%{fmt(max)}</span>
@@ -147,36 +290,55 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
         </p>
       )}
 
-      {/* Giriş + eylem */}
+      {/* Aralık girişleri + eylem */}
       <div className="mt-6 flex flex-col gap-3 border-t border-[var(--line)] pt-5 sm:flex-row sm:items-center">
-        <label
-          htmlFor="yuzdelik-input"
-          className="text-sm font-medium text-[var(--ink-soft)]"
-        >
-          Yüzdeliğini gir
-        </label>
-        <div className="flex flex-1 flex-col gap-3 sm:flex-row">
-          <input
-            id="yuzdelik-input"
-            type="text"
-            inputMode="decimal"
-            placeholder="Örn. 5,00"
-            value={raw}
-            onChange={(e) => {
-              setRaw(e.target.value);
-              if (error) setError(null);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") submit();
-            }}
-            aria-invalid={error != null}
-            aria-describedby={error ? "yuzdelik-error" : undefined}
-            className="tabular w-full rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-4 py-3 text-base text-[var(--ink)] placeholder:text-[var(--ink-faint)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)] sm:w-44"
-          />
+        <span className="text-sm font-medium text-[var(--ink-soft)]">
+          Yüzdelik aralığı
+        </span>
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            <input
+              aria-label="Aralık başlangıcı"
+              type="text"
+              inputMode="decimal"
+              value={lowRaw}
+              onChange={(e) => {
+                setLowRaw(e.target.value);
+                if (error) setError(null);
+              }}
+              onBlur={(e) => applyRaw("low", e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  applyRaw("low", lowRaw);
+                  submit();
+                }
+              }}
+              className="tabular w-24 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
+            />
+            <span className="text-[var(--ink-faint)]">–</span>
+            <input
+              aria-label="Aralık bitişi"
+              type="text"
+              inputMode="decimal"
+              value={highRaw}
+              onChange={(e) => {
+                setHighRaw(e.target.value);
+                if (error) setError(null);
+              }}
+              onBlur={(e) => applyRaw("high", e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  applyRaw("high", highRaw);
+                  submit();
+                }
+              }}
+              className="tabular w-24 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
+            />
+          </div>
           <button
             type="button"
             onClick={submit}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] sm:ml-auto"
           >
             Okulları gör
             <ArrowRight className="h-4 w-4" />
@@ -184,16 +346,13 @@ export function PercentileScale({ percentiles, latestYear }: Props) {
         </div>
       </div>
       {error ? (
-        <p
-          id="yuzdelik-error"
-          className="mt-3 font-mono text-[11px] font-semibold text-[var(--vermilion-deep)]"
-        >
+        <p className="mt-3 font-mono text-[11px] font-semibold text-[var(--vermilion-deep)]">
           {error}
         </p>
       ) : (
         <p className="mt-3 font-mono text-[11px] text-[var(--ink-faint)]">
-          Eşik filtresi değil: okulları yüzdeliğe göre sıralarız, konumunu
-          ölçekte gösteririz.
+          Tutamakları sürükleyerek aralık seç; listede yalnızca bu aralıktaki
+          okullar gösterilir.
         </p>
       )}
     </div>

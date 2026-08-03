@@ -66,11 +66,19 @@ async function getLandingData(): Promise<LandingData> {
         .select("school_id, percentile")
         .eq("year", latestYear)
         .not("percentile", "is", null);
-      percentiles = (distRows ?? [])
-        .filter((r) => activeIds.has(r.school_id as number))
-        .map((r) => r.percentile as number)
-        .filter((p) => Number.isFinite(p))
-        .sort((a, b) => a - b);
+      // Okul başına TEK değer: son yılın en rekabetçi (en düşük) yüzdeliği.
+      // Bir okulun aynı yıl içinde meslek alanı başına birden çok kaydı
+      // olabilir; ölçek okulları çizer, kayıtları değil. /okullar filtresi
+      // birebir aynı tanımı kullanır (ölçekteki işaret = listedeki okul).
+      const lowestBySchool = new Map<number, number>();
+      for (const r of distRows ?? []) {
+        const id = r.school_id as number;
+        const p = r.percentile as number;
+        if (!activeIds.has(id) || !Number.isFinite(p)) continue;
+        const prev = lowestBySchool.get(id);
+        if (prev == null || p < prev) lowestBySchool.set(id, p);
+      }
+      percentiles = [...lowestBySchool.values()].sort((a, b) => a - b);
     }
 
     // Öne çıkan okul: son yılın en rekabetçi aktif okulu.

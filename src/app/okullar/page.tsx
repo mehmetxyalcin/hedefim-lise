@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
@@ -45,7 +46,8 @@ type Props = {
     sayfa?: string;
     yerlestirme?: string;
     siralama?: string;
-    yuzdelik?: string;
+    yuzdelik_min?: string;
+    yuzdelik_max?: string;
   }>;
 };
 
@@ -58,9 +60,17 @@ export default async function OkullarPage({ searchParams }: Props) {
   const alan = (params.alan ?? "").trim(); // vocational field ID
   const yerlestirme = params.yerlestirme ?? "";
   const siralama = params.siralama ?? "isim_asc";
-  const yuzdelikParam = (params.yuzdelik ?? "").trim();
-  const yuzdelikNum = yuzdelikParam ? Number(yuzdelikParam) : NaN;
-  const hasYuzdelikHint = yuzdelikParam !== "" && !Number.isNaN(yuzdelikNum);
+  // Yüzdelik aralığı: gerçek filtre (landing'deki ölçekten gelir).
+  const parseRangeParam = (raw: string | undefined): number | null => {
+    const t = (raw ?? "").trim();
+    if (t === "") return null;
+    const v = Number(t);
+    return Number.isFinite(v) && v >= 0 && v <= 100 ? v : null;
+  };
+  const yuzdelikMin = parseRangeParam(params.yuzdelik_min);
+  const yuzdelikMax = parseRangeParam(params.yuzdelik_max);
+  const hasYuzdelikRange =
+    yuzdelikMin != null && yuzdelikMax != null && yuzdelikMin <= yuzdelikMax;
   const limit = parseLimit(params.limit);
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
@@ -77,6 +87,49 @@ export default async function OkullarPage({ searchParams }: Props) {
       .select("school_id")
       .eq("vocational_field_id", Number(alan));
     schoolIdFilter = (svfData ?? []).map((r) => r.school_id as number);
+  }
+
+  // Step 1b: Yüzdelik aralığı filtresi. Landing ölçeğiyle AYNI tanım kullanılır:
+  // yalnızca en son yılın (school_scores'taki max year) yüzdelik dilimleri.
+  // Böylece ölçekte "77 okul" diyen tam aralık, listede de 77 okul döndürür.
+  if (hasYuzdelikRange) {
+    const { data: yearRows } = await supabase
+      .from("school_scores")
+      .select("year")
+      .order("year", { ascending: false })
+      .limit(1);
+    const scaleYear = (yearRows?.[0]?.year as number | undefined) ?? null;
+
+    const { data: scoreRows } = scaleYear
+      ? await supabase
+          .from("school_scores")
+          .select("school_id, percentile")
+          .eq("year", scaleYear)
+          .not("percentile", "is", null)
+      : { data: [] as { school_id: number; percentile: number }[] };
+
+    // Okul başına tek değer: son yılın en rekabetçi (en düşük) yüzdeliği —
+    // landing ölçeğindeki işaretle birebir aynı değer.
+    const lowestBySchool = new Map<number, number>();
+    for (const r of scoreRows ?? []) {
+      const id = r.school_id as number;
+      const p = r.percentile as number;
+      if (!Number.isFinite(p)) continue;
+      const prev = lowestBySchool.get(id);
+      if (prev == null || p < prev) lowestBySchool.set(id, p);
+    }
+
+    const inRange: number[] = [];
+    lowestBySchool.forEach((p, id) => {
+      if (p >= yuzdelikMin! && p <= yuzdelikMax!) inRange.push(id);
+    });
+
+    if (schoolIdFilter === null) {
+      schoolIdFilter = inRange;
+    } else {
+      const allowed = new Set(inRange);
+      schoolIdFilter = schoolIdFilter.filter((id) => allowed.has(id));
+    }
   }
 
   const SCHOOLS_SELECT =
@@ -216,7 +269,10 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (yerlestirme) paginationSearchParams.yerlestirme = yerlestirme;
   if (limit !== 20) paginationSearchParams.limit = String(limit);
   if (siralama !== "isim_asc") paginationSearchParams.siralama = siralama;
-  if (hasYuzdelikHint) paginationSearchParams.yuzdelik = yuzdelikParam;
+  if (hasYuzdelikRange) {
+    paginationSearchParams.yuzdelik_min = String(yuzdelikMin);
+    paginationSearchParams.yuzdelik_max = String(yuzdelikMax);
+  }
 
   const startItem = totalCount === 0 ? 0 : offset + 1;
   const endItem = Math.min(offset + limit, totalCount);
@@ -231,19 +287,27 @@ export default async function OkullarPage({ searchParams }: Props) {
           <p className="text-lg leading-relaxed text-slate-500">
             İlçe, okul türü ve meslek alanlarına göre filtrele, en uygun eşleşmeleri hızla bul.
           </p>
-          {hasYuzdelikHint && (
-            <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
-              Yüzdeliğin:{" "}
+          {hasYuzdelikRange && (
+            <p className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
+              Yüzdelik aralığı:{" "}
               <span className="tabular font-semibold">
-                %{yuzdelikNum.toFixed(2)}
-              </span>{" "}
-              · okullar yüzdeliğe göre sıralı
+                %{yuzdelikMin!.toFixed(2).replace(".", ",")} – %
+                {yuzdelikMax!.toFixed(2).replace(".", ",")}
+              </span>
+              <Link
+                href="/okullar"
+                className="font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-900"
+              >
+                temizle
+              </Link>
             </p>
           )}
         </div>
 
         <SchoolList
-          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}`}
+          key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}-${yuzdelikMin}-${yuzdelikMax}`}
+          yuzdelikMin={hasYuzdelikRange ? yuzdelikMin : null}
+          yuzdelikMax={hasYuzdelikRange ? yuzdelikMax : null}
           schools={schools}
           vocationalFields={vocationalFields}
           totalCount={totalCount}

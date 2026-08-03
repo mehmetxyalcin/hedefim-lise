@@ -47,6 +47,9 @@ type Props = {
   initialLimit?: number;
   initialPlacement?: string;
   initialSiralama?: string;
+  /** Landing ölçeğinden gelen yüzdelik aralığı — filtre değişimlerinde korunur. */
+  yuzdelikMin?: number | null;
+  yuzdelikMax?: number | null;
 };
 
 type DisplayScore = {
@@ -90,6 +93,8 @@ export function SchoolList({
   initialLimit = 20,
   initialPlacement = "",
   initialSiralama = "isim_asc",
+  yuzdelikMin = null,
+  yuzdelikMax = null,
 }: Props) {
   const router = useRouter();
 
@@ -104,6 +109,14 @@ export function SchoolList({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [fieldSearch, setFieldSearch] = useState("");
+
+  // Yüzdelik aralığı yan paneldeki filtre değişimlerinde düşmemeli.
+  function keepYuzdelik(params: URLSearchParams) {
+    if (yuzdelikMin != null && yuzdelikMax != null) {
+      params.set("yuzdelik_min", String(yuzdelikMin));
+      params.set("yuzdelik_max", String(yuzdelikMax));
+    }
+  }
 
   function buildSearchUrl(overrides: Record<string, string> = {}): string {
     const params = new URLSearchParams();
@@ -121,6 +134,7 @@ export function SchoolList({
     if (_placement) params.set("yerlestirme", _placement);
     if (_limit !== 20) params.set("limit", String(_limit));
     if (_siralama !== "isim_asc") params.set("siralama", _siralama);
+    keepYuzdelik(params);
     const qs = params.toString();
     return `/okullar${qs ? `?${qs}` : ""}`;
   }
@@ -139,6 +153,7 @@ export function SchoolList({
     if (initialPlacement) params.set("yerlestirme", initialPlacement);
     if (newLimit !== 20) params.set("limit", String(newLimit));
     if (siralama !== "isim_asc") params.set("siralama", siralama);
+    keepYuzdelik(params);
     const qs = params.toString();
     router.push(`/okullar${qs ? `?${qs}` : ""}`);
   }
@@ -153,6 +168,7 @@ export function SchoolList({
     if (initialPlacement) params.set("yerlestirme", initialPlacement);
     if (limit !== 20) params.set("limit", String(limit));
     if (value !== "isim_asc") params.set("siralama", value);
+    keepYuzdelik(params);
     params.set("sayfa", "1");
     const qs = params.toString();
     router.push(`/okullar${qs ? `?${qs}` : ""}`);
@@ -176,10 +192,12 @@ export function SchoolList({
     Number(Boolean(initialTur)) +
     Number(Boolean(initialAlan)) +
     Number(Boolean(initialPlacement)) +
-    Number(initialLimit !== 20);
+    Number(initialLimit !== 20) +
+    Number(yuzdelikMin != null && yuzdelikMax != null);
 
   const hasActiveFilters =
-    Boolean(search.trim() || ilce || tur || alan || placement || limit !== 20);
+    Boolean(search.trim() || ilce || tur || alan || placement || limit !== 20) ||
+    (yuzdelikMin != null && yuzdelikMax != null);
 
   const filteredSchools = useMemo(() => schools.filter(() => true), [schools]);
 

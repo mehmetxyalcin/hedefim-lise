@@ -295,7 +295,7 @@ Color is a **separation tool, not decoration**: neutrals and typography carry th
 - **Teal / Teal Deep / Teal Tint** (#0C4A45 / #083A36 / #E3ECE9): **authority + the primary action.** Button fills (hover → deep), reachable axis ticks, the highlighted keyword in the h1, focused input borders, link accents, tinted type badges. Focus rings use `--teal-ring` (rgba(12,74,69,0.16), ring-4).
 - **Vermilion / Vermilion Deep** (#DC5A34 / #C24325): **the single warm signal — the user's own position and act-here only.** The "sen" marker on the axis (line + diamond) is Vermilion; its label and inline validation errors are Vermilion Deep. `::selection` inside `.landing` is Vermilion Deep with white text (5.1:1).
 
-**The Sen Rule.** Vermilion marks exactly one thing: *you*. It never fills a button, tints a card, or decorates. If vermilion appears, it is either the user's position on the scale or an error the user must act on.
+**The Sen Rule.** Vermilion marks exactly one thing: *you*. It never fills a button, tints a card, or decorates. If vermilion appears, it is either the user's own selection on the scale (the range handles and their labels) or an error the user must act on.
 
 **The One-Authority Rule.** Teal is the only action color on the landing. Exam Blue never crosses into `.landing`; teal/vermilion never leave it.
 
@@ -323,12 +323,12 @@ Quiet and functional. Axis ticks transition `background-color`/`opacity` over 20
 
 `src/components/home/PercentileScale.tsx` — the owned visual idea: Mersin's high schools as a strip-plot on one axis, inside a Doc Panel card.
 
-- **Distribution:** one 1px full-height tick per active school's latest-year percentile (data-driven count, currently ~77), positioned across a min→max axis over a hairline baseline. **Low percentile = more competitive = the left end**; the end-labels read `%{min} · en rekabetçi` / `%{max}` in 10px mono.
-- **Resting state:** no input → all ticks teal at 0.32 opacity.
-- **With input:** ticks with percentile ≥ the user's value (reachable) go teal at 0.6; more-competitive ticks fade to Ink Faint at 0.14. A live "N okul erişiminde" readout updates (`aria-live="polite"`).
-- **The marker:** a 2px Vermilion line with a rotated-square diamond cap and an above-axis mono label `sen · %X,XX` in Vermilion Deep. The label sits *above* the axis so it never collides with the end-labels; its alignment snaps to `left-0` under 8% and `right-0` over 92% so it can't overflow the panel.
-- **Input contract:** free-text decimal accepting comma or dot; only values 0–100 are valid — invalid submits show an inline mono error in Vermilion Deep ("Yüzdelik 0 ile 100 arasında bir sayı olmalı, örn. 5,00"). The marker only drops for valid input.
-- **The Sort-Not-Filter Rule.** The percentile input is a *sort signal, never a threshold filter*: submit routes to `/okullar?yuzdelik=X&siralama=yuzdelik_asc`, and the helper text says so ("Eşik filtresi değil…"). No school is ever hidden by the user's number.
+- **Distribution:** one 1px full-height tick **per school** (not per score record) across a min→max axis over a hairline baseline. **Low percentile = more competitive = the left end**; the end-labels read `%{min} · en rekabetçi` / `%{max}` in 10px mono.
+- **The One-Tick-Per-School Rule.** A school can hold several latest-year percentile records (one per meslek alanı). The scale plots schools, so each school is reduced to a single value: **its lowest (most competitive) latest-year percentile**. The header states the honest count (`N okul`, currently 55 — not the record count).
+- **Range selection:** two Vermilion handles define a band. Ticks inside the band go teal at 0.75 over a `Teal Tint` band fill; outside ticks fade to Ink Faint at 0.14. A live "N okul bu aralıkta" readout updates (`aria-live="polite"`).
+- **The handles:** 2px Vermilion lines with rotated-square caps, each a `role="slider"` (aria-valuemin/max/now/text, arrow/PageUp/Home/End keys) inside a 44px pointer-capture grab zone with `touch-none`. Labels sit *above* the axis so they never collide with the end-labels; they merge into one `%X,XX – %Y,YY` label when the handles come within 16% of each other, and clamp at the 8%/92% edges. Position transitions are suppressed while dragging.
+- **Input contract:** two free-text decimal fields mirror the handles (comma or dot); values must be 0–100 and start ≤ end — invalid submits show an inline mono error in Vermilion Deep and do not navigate.
+- **The Scale-Is-The-Filter Rule.** The selected band is a *real filter*, and `/okullar` resolves it with the **same definition the scale draws** (lowest latest-year percentile per school), so a tick inside the band is exactly a school in the result: submit routes to `/okullar?yuzdelik_min=X&yuzdelik_max=Y&siralama=yuzdelik_asc`, and the full range returns exactly the scale's own count. A full-range selection sends no filter params. The range survives sidebar filter changes, sorting, and pagination, and shows as a clearable active-filter chip on `/okullar`.
 - **Empty data:** falls back to a one-line "Ölçek verisi şu anda yüklenemedi." and a plain route to `/okullar`; the Hero likewise drops its figure row when counts are null (graceful ISR/DB-failure degradation, `revalidate = 86400`).
 
 ### Do's and Don'ts (landing)
