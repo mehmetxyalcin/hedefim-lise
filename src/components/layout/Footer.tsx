@@ -67,15 +67,29 @@ export async function Footer() {
   );
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/5 bg-[#0a0f1c] pt-16">
+    <footer className="relative overflow-hidden border-t border-white/5 bg-[#0a0f1c] pt-14 pb-28">
       <div className="absolute top-0 left-1/2 h-px w-full -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
+      {/* Mersin silüeti — arka plan katmanı: footer yüksekliğine katkı vermez.
+          Ufuk parıltısı arkasında; opaklık metin okunurluğunu korur. */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0">
+        <div className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(120%_120%_at_50%_100%,rgba(37,99,235,0.16),rgba(37,99,235,0.04)_45%,transparent_75%)]" />
+        <Image
+          src="/mersin-silueti.png"
+          alt=""
+          width={1600}
+          height={290}
+          sizes="100vw"
+          className="relative block h-auto w-full select-none opacity-60"
+        />
+      </div>
+
       <div className="relative z-10 container mx-auto max-w-7xl px-6">
-        <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-12">
+        <div className="mb-10 grid grid-cols-1 gap-8 md:grid-cols-12">
 
           {/* Sütun 1: Logo + hakkında */}
           <div className="md:col-span-5">
-            <div className="mb-6 flex items-center space-x-3">
+            <div className="mb-5 flex items-center space-x-3">
               {siteSettings.logo_url ? (
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden">
                   <Image
@@ -102,7 +116,7 @@ export async function Footer() {
             </div>
 
             {footerSettings.about_text && (
-              <p className="mb-6 max-w-sm text-sm leading-relaxed text-slate-400">
+              <p className="mb-5 max-w-sm text-sm leading-relaxed text-slate-400">
                 {footerSettings.about_text}
               </p>
             )}
@@ -119,7 +133,7 @@ export async function Footer() {
           {/* Sütun 2: Proje paydaşları (footer_links section='paydaşlar') */}
           {partnerLinks.length > 0 && (
             <div className="md:col-span-3">
-              <h4 className="mb-6 font-semibold tracking-tight text-white">
+              <h4 className="mb-4 font-semibold tracking-tight text-white">
                 {footerSettings.partners_title ?? "Proje Paydaşları"}
               </h4>
               <ul className="space-y-3 text-sm text-slate-400">
@@ -165,10 +179,10 @@ export async function Footer() {
 
           {/* Sütun son: İletişim */}
           <div className="md:col-span-4">
-            <h4 className="mb-6 font-semibold tracking-tight text-white">
+            <h4 className="mb-4 font-semibold tracking-tight text-white">
               İletişim &amp; Destek
             </h4>
-            <ul className="space-y-4 text-sm text-slate-400">
+            <ul className="space-y-3 text-sm text-slate-400">
               {footerSettings.address && (
                 <li className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
@@ -197,12 +211,12 @@ export async function Footer() {
         </div>
 
         {/* Alt bar */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 md:flex-row">
-          <p className="text-xs text-slate-500">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-6 md:flex-row">
+          <p className="text-xs text-slate-400">
             {footerSettings.copyright_text}
           </p>
           {legalLinks.length > 0 && (
-            <div className="flex flex-wrap gap-6 text-xs text-slate-500">
+            <div className="flex flex-wrap gap-6 text-xs text-slate-400">
               {legalLinks.map((link) => (
                 <Link
                   key={link.id}
@@ -217,22 +231,6 @@ export async function Footer() {
         </div>
       </div>
 
-      {/* Mersin silüeti — footer'ın kapanış bandı. Ufuk parıltısı arkada. */}
-      <div className="relative mt-10 w-full">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(120%_120%_at_50%_100%,rgba(37,99,235,0.18),rgba(37,99,235,0.05)_45%,transparent_75%)]"
-        />
-        <Image
-          src="/mersin-silueti.png"
-          alt=""
-          aria-hidden
-          width={1600}
-          height={290}
-          sizes="100vw"
-          className="relative block h-auto w-full select-none"
-        />
-      </div>
     </footer>
   );
 }
