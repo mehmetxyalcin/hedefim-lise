@@ -116,7 +116,11 @@ export default async function Home() {
         latestYear={latestYear}
       />
       {featured && <FeaturedSchoolStrip school={featured} />}
-      <FeatureSection />
+      <FeatureSection
+        schoolCount={schoolCount}
+        districtCount={districtCount}
+        latestYear={latestYear}
+      />
     </>
   );
 }
