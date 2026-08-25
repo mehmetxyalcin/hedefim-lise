@@ -2,7 +2,8 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { FilterSelect } from "./FilterSelect";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 
@@ -460,14 +461,14 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
           </div>
 
           {/* Daraltıcılar + tek eylem. Boş seçenek "tümü" demek: geri alınabilir. */}
-          <Select
+          <FilterSelect
             label="İlçe"
             value={ilce}
             onChange={setIlce}
             allLabel="Tüm ilçeler"
             options={DISTRICTS}
           />
-          <Select
+          <FilterSelect
             label="Okul türü"
             value={tur}
             onChange={setTur}
@@ -494,44 +495,6 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
           isteğe bağlı daraltır.
         </p>
       )}
-    </div>
-  );
-}
-
-function Select({
-  label,
-  value,
-  onChange,
-  allLabel,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  allLabel: string;
-  options: readonly string[];
-}) {
-  return (
-    // min-w-0: <select>'in min-content genişliği en uzun option'a göre hesaplanır
-    // ("Özel Eğitim Meslek Lisesi (İşitme Engelliler)"); şeridi taşırmasın diye kırılır.
-    <div className="relative min-w-0 flex-1">
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full min-w-0 cursor-pointer appearance-none truncate rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] py-3 pr-10 pl-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
-      >
-        <option value="">{allLabel}</option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[var(--ink-faint)]"
-      />
     </div>
   );
 }

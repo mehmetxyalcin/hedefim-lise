@@ -55,6 +55,33 @@
   animation: marker-in 300ms ease-out;
 }
 
+/* Liste paneli: tek bir açılış anı. Yön, panelin hangi tarafa açıldığını izler. */
+@keyframes listbox-down {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes listbox-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.landing .listbox-down {
+  animation: listbox-down 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.landing .listbox-up {
+  animation: listbox-up 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing .marker-in,
+  .landing .listbox-down,
+  .landing .listbox-up {
+    animation: none;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
