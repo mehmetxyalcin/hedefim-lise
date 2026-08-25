@@ -25,6 +25,6 @@ related_targets: ["src/components/home/Hero.tsx","src/components/home/Percentile
 
 **Unresolved / backlog:**
 - Marker label anchor *snaps* between alignments at the 8%/92% thresholds instead of sliding continuously — acceptable, revisit if it reads as a jump.
-- Document masthead ("Hedefim Lise" + tagline) doubles the brand with the Navbar directly above it — tension noted, not yet resolved.
+- ~~Document masthead doubles the Navbar brand~~ — resolved 2026-08: the masthead row was deleted outright; the year it carried lives in the scale header.
 - Proof figures could push to `text-7xl`/`text-8xl` for truer poster scale.
 - Resting state (no input) could hint the marker affordance (e.g. ghost marker or nudge) — currently only the placeholder suggests it.

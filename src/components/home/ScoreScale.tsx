@@ -279,8 +279,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
       {/* Başlık + canlı okuma */}
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
-          {latestYear ?? ""} {cfg.axisLabel} ·{" "}
-          <span className="tabular">{values.length}</span> okul
+          {latestYear ?? ""} {cfg.axisLabel}
         </p>
         <p aria-live="polite" className="text-sm text-[var(--ink-soft)]">
           {hasData && (
@@ -411,7 +410,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
       )}
 
       {/* Arama şeridi: aralık → daraltıcılar → tek eylem */}
-      <div className="mt-6 border-t border-[var(--line)] pt-5">
+      <div className="mt-5 border-t border-[var(--line)] pt-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <span className="text-sm font-medium text-[var(--ink-soft)]">
             {cfg.inputLabel}

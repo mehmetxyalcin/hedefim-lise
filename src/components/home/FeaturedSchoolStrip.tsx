@@ -37,14 +37,14 @@ export function FeaturedSchoolStrip({ school }: { school: FeaturedSchool }) {
 
   return (
     <section className="border-t border-[var(--line)]">
-      <div className="container mx-auto max-w-6xl px-6 py-16">
-        <p className="mb-5 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
+      <div className="container mx-auto max-w-6xl px-6 pt-12 pb-14">
+        <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
           Ölçeğin en rekabetçi ucu
         </p>
 
-        <div className="flex flex-col gap-8 rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div className="flex flex-col gap-6 rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div className="min-w-0 flex-1">
-            <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-[var(--teal-tint)] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--teal-deep)]">
                 {school.type}
               </span>
@@ -85,16 +85,6 @@ export function FeaturedSchoolStrip({ school }: { school: FeaturedSchool }) {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </div>
-
-        <div className="mt-6">
-          <Link
-            href="/okullar"
-            className="inline-flex items-center gap-1.5 font-display text-sm font-bold tracking-wide text-[var(--teal)] transition-colors hover:text-[var(--teal-deep)]"
-          >
-            Tüm okullara göz at
-            <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
       </div>
     </section>

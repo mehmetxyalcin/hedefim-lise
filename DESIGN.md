@@ -303,7 +303,7 @@ Color is a **separation tool, not decoration**: neutrals and typography carry th
 
 - **Archivo** (`font-display`, `--font-archivo`): headlines and every large numeral — grotesk authority.
 - **Source Serif 4** (`font-reading`, `--font-source-serif`): the `.landing` base font — warm reading body.
-- **Roboto Mono** (`font-mono`): the document meta-grammar — micro-labels at 10–11px, uppercase, wide-tracked (0.14–0.18em), medium/bold, in Ink Faint. Used for the masthead tagline, "{year} verileri", axis end-labels, figure captions, section codes, source disclaimers, and inline errors.
+- **Roboto Mono** (`font-mono`): the document meta-grammar — micro-labels at 10–11px, uppercase, wide-tracked (0.14–0.18em), medium/bold, in Ink Faint. Used for the "{year} verileri", axis end-labels, figure captions, section codes, source disclaimers, and inline errors.
 - **Poster headline:** the h1 is Archivo 800 at `clamp(2.5rem, 7vw, 5.5rem)`, line-height 1.02, tracking -0.02em, with one teal keyword ("ölçekte").
 - **Proof figures:** giant tabular Archivo numerals (`text-5xl`/`text-6xl`, 800, leading-none) sitting on a hairline-topped baseline row, each captioned by a mono micro-label. Featured-school score runs `text-4xl` in teal.
 
@@ -313,7 +313,9 @@ Color is a **separation tool, not decoration**: neutrals and typography carry th
 
 ### Layout & structure
 
-A `max-w-6xl` centered column with `px-6` gutters on the Doc Ground. The page reads as one continuous document: a slim **masthead strip** (brand + mono tagline left, "{year} verileri" right) under a hairline, then headline → percentile scale panel → featured strip → bento → disclaimer footnote, each section separated by a full-width `border-t` hairline rather than background changes. The masthead's mono tagline is `hidden sm:inline` so the strip's two ends never interleave on narrow screens. Panels are `rounded-2xl`, Doc Panel fill, `Line` border, `shadow-sm`. The bento is asymmetric: one dominant 2×2 card (the tercih robotu) plus two supporting cards, each carrying a mono section code eyebrow ("01 — birincil araç", "02 — alan rehberi", "03 — proje okulları").
+A `max-w-6xl` centered column with `px-6` gutters on the Doc Ground. The page reads as one continuous document: headline → score-scale panel → featured strip → bento → disclaimer footnote, each act separated by a full-width `border-t` hairline rather than background changes. **There is no document masthead** — it repeated the Navbar's brand 80px below itself, and the data year it carried already lives in the scale header. Panels are `rounded-2xl`, Doc Panel fill, `Line` border, `shadow-sm`. The bento is asymmetric: one dominant 2×2 card (the tercih robotu) plus two supporting cards, each carrying a mono section code eyebrow ("01 — birincil araç", "02 — alan rehberi", "03 — proje okulları").
+
+**The cadence is deliberate, not uniform.** Vertical intervals run 48 · 20 · 32 · 56 ‖ 48 · 16 · 56 ‖ **80** · 16 · 48 · 40 · 64: tight inside a unit, a medium beat between units, and exactly **one 80px interval** on the whole page — above *Tercih sürecinizi kolaylaştıran araçlar* — because that is the only real act break. The featured strip is the scale's evidence, so it sits closer to the hero than the tool grid does. Equal padding on every section is the failure state this replaced.
 
 ### Motion (landing-scoped)
 

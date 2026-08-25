@@ -46,7 +46,7 @@ export function FeatureSection({
   const hasStats = schoolCount != null && districtCount != null;
 
   return (
-    <div className="border-t border-[var(--line)] py-20">
+    <div className="border-t border-[var(--line)] pt-20 pb-16">
       <div className="container mx-auto max-w-6xl px-6">
         <div className="mb-12 max-w-2xl">
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-[var(--ink)] md:text-4xl">
