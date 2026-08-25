@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getSchoolWithDetails } from "@/lib/supabase/schoolDetail";
+import { findSchoolSlugInHistory } from "@/lib/supabase/slugHistory";
 import { createClient } from "@/lib/supabase/server";
 import { SchoolDetail } from "@/components/school/SchoolDetail";
 import { getSiteUrlWithPath } from "@/lib/site";
@@ -62,7 +63,13 @@ export default async function OkulDetayPage({ params }: OkulDetayPageProps) {
   const { slug } = await params;
   const school = await getSchoolWithDetails(slug);
 
-  if (!school) notFound();
+  if (school) return <SchoolDetail school={school} />;
 
-  return <SchoolDetail school={school} />;
+  // Slug düzeltilmeden önce (migration 013) paylaşılmış veya dizine
+  // girmiş adresler burada yakalanır. permanentRedirect throw ettiği
+  // için try/catch dışında, aramadan sonra çağrılıyor.
+  const currentSlug = await findSchoolSlugInHistory(slug);
+  if (currentSlug) permanentRedirect(`/okullar/${currentSlug}`);
+
+  notFound();
 }

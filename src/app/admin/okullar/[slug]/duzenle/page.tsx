@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import { SchoolFormTabs } from "@/components/admin/SchoolFormTabs";
 import {
   updateSchool,
@@ -22,6 +23,7 @@ import {
   reorderSchoolProject,
 } from "@/app/admin/okullar/actions";
 import { requireAdmin } from "@/lib/admin-auth";
+import { findSchoolSlugInHistory } from "@/lib/supabase/slugHistory";
 import {
   mapSchool,
   mapVocationalField,
@@ -69,7 +71,14 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
     supabase.from("vocational_branches").select("*").order("name"),
   ]);
 
-  if (schoolError || !schoolData) return <h1>Okul bulunamadı.</h1>;
+  if (schoolError || !schoolData) {
+    // Yer imine alınmış eski düzenleme adresleri de yenisine taşınsın
+    // (migration 013).
+    const currentSlug = await findSchoolSlugInHistory(slug);
+    if (currentSlug) permanentRedirect(`/admin/okullar/${currentSlug}/duzenle`);
+
+    return <h1>Okul bulunamadı.</h1>;
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sd = schoolData as any;
