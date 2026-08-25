@@ -70,13 +70,6 @@ export async function Navbar() {
               İletişim
             </Link>
             <FavoritesNavIcon />
-            <div className="mx-2 h-5 w-px bg-white/10" />
-            <Link
-              href="/admin"
-              className="rounded-lg border border-white/5 bg-white/10 px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition-all hover:bg-white/15"
-            >
-              Giriş Yap
-            </Link>
           </div>
 
           <MobileMenu navItems={navItems} />

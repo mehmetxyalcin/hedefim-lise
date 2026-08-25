@@ -48,14 +48,6 @@ export function MobileMenu({ navItems }: Props) {
             <div className="px-4 py-1">
               <FavoritesNavIcon />
             </div>
-            <div className="my-2 h-px bg-white/10" />
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className="rounded-lg border border-white/5 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-white/15"
-            >
-              Giriş Yap
-            </Link>
           </div>
         </div>
       )}
