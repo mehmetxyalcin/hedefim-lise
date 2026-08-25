@@ -19,6 +19,9 @@ if (supabaseUrl) {
 }
 
 const nextConfig: NextConfig = {
+  // Aynı depoda ikinci bir sunucu (ör. üretim `next start` açıkken `next dev`)
+  // çalıştırılabilsin diye derleme dizini env ile ayrılabilir.
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   images: {
     remotePatterns,
     // Vercel görsel optimize kotası dolduğunda /_next/image 402 döndürerek
