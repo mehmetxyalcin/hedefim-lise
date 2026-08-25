@@ -23,15 +23,15 @@ export async function Navbar() {
           paddingRight: "max(1.5rem, env(safe-area-inset-right))",
         }}
       >
-        <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="group flex items-center space-x-3">
+        <div className="flex h-16 items-center justify-between">
+          <Link href="/" className="group flex shrink-0 items-center space-x-3">
             {settings.logo_url ? (
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden">
+              <div className="relative h-11 w-11 shrink-0 overflow-hidden">
                 <Image
                   src={settings.logo_url}
                   alt={settings.logo_alt}
                   fill
-                  sizes="56px"
+                  sizes="44px"
                   className="object-contain"
                   priority
                 />
@@ -51,29 +51,29 @@ export async function Navbar() {
             </div>
           </Link>
 
-          <div className="hidden items-center space-x-1 md:flex">
+          <div className="hidden items-center gap-1 xl:flex">
             {navItems.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
                 target={item.target}
                 rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
+                className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-slate-300 transition-all hover:bg-white/5 hover:text-white"
               >
                 {item.label}
               </Link>
             ))}
             <Link
               href="/iletisim"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white"
+              className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-slate-300 transition-all hover:bg-white/5 hover:text-white"
             >
               İletişim
             </Link>
             <FavoritesNavIcon />
-            <div className="mx-4 h-5 w-px bg-white/10" />
+            <div className="mx-2 h-5 w-px bg-white/10" />
             <Link
               href="/admin"
-              className="rounded-lg border border-white/5 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-white/15"
+              className="rounded-lg border border-white/5 bg-white/10 px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition-all hover:bg-white/15"
             >
               Giriş Yap
             </Link>

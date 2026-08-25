@@ -37,7 +37,7 @@ export function FeaturedSchoolStrip({ school }: { school: FeaturedSchool }) {
 
   return (
     <section className="border-t border-[var(--line)]">
-      <div className="container mx-auto max-w-6xl px-6 pt-12 pb-14">
+      <div className="container mx-auto max-w-6xl px-6 pt-10 pb-10">
         <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
           Ölçeğin en rekabetçi ucu
         </p>

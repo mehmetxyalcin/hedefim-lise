@@ -326,7 +326,7 @@ export function SchoolList({
   return (
     <>
       {/* ── Mobil sticky filtre çubuğu ─────────────────────────────────────── */}
-      <div className="sticky top-20 z-30 mb-4 border-b border-slate-200 bg-white px-0 py-3 lg:hidden">
+      <div className="sticky top-16 z-30 mb-4 border-b border-slate-200 bg-white px-0 py-3 lg:hidden">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsFilterOpen(true)}

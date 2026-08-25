@@ -238,12 +238,12 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
     : "transition-[left,right,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
 
   return (
-    <div className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-5 shadow-sm sm:p-7">
+    <div className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-5 shadow-sm sm:p-6">
       {/* Metrik seçimi — elindeki sayı hangisiyse */}
       <div
         role="tablist"
         aria-label="Ölçek metriği"
-        className="mb-6 inline-flex rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] p-1"
+        className="mb-5 inline-flex rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] p-1"
       >
         {(Object.keys(METRICS) as Metric[]).map((m) => {
           const selected = m === metric;
@@ -277,7 +277,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
       </div>
 
       {/* Başlık + canlı okuma */}
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
           {latestYear ?? ""} {cfg.axisLabel}
         </p>
@@ -295,7 +295,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
 
       {/* Eksen */}
       {hasData ? (
-        <div ref={trackRef} className="relative mb-3 h-28 touch-none">
+        <div ref={trackRef} className="relative mb-3 h-[6.5rem] touch-none">
           {/* seçili bant */}
           <div
             className={`absolute top-0 h-20 bg-[var(--teal-tint)] ${trackTransition}`}
@@ -346,7 +346,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
                 onPointerUp={handlePointerUp()}
                 onPointerCancel={handlePointerUp()}
                 onKeyDown={handleKeyDown(which)}
-                className={`absolute top-0 bottom-6 z-10 w-11 -translate-x-1/2 cursor-ew-resize touch-none focus-visible:outline-none ${trackTransition}`}
+                className={`absolute top-0 bottom-4 z-10 w-11 -translate-x-1/2 cursor-ew-resize touch-none focus-visible:outline-none ${trackTransition}`}
                 style={{ left: `${leftPct}%` }}
               >
                 {/* görünür çizgi + tutamak */}
@@ -359,7 +359,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
           {/* tutamak etiketleri — eksenin ÜSTÜNDE, uç etiketleriyle çakışmaz */}
           {merged ? (
             <span
-              className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
+              className={`tabular absolute -top-5 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
               style={{
                 left: `${(lowLeft + highLeft) / 2}%`,
                 transform: "translateX(-50%)",
@@ -370,7 +370,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
           ) : (
             <>
               <span
-                className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
+                className={`tabular absolute -top-5 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
                 style={{
                   left: `${lowLeft}%`,
                   transform: lowLeft < 8 ? "translateX(0)" : "translateX(-50%)",
@@ -379,7 +379,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
                 {cfg.unit(low)}
               </span>
               <span
-                className={`tabular absolute -top-6 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
+                className={`tabular absolute -top-5 z-20 whitespace-nowrap font-mono text-[11px] font-semibold text-[var(--vermilion-deep)] ${trackTransition}`}
                 style={{
                   left: `${highLeft}%`,
                   transform:
@@ -409,55 +409,57 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
         </p>
       )}
 
-      {/* Arama şeridi: aralık → daraltıcılar → tek eylem */}
-      <div className="mt-5 border-t border-[var(--line)] pt-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <span className="text-sm font-medium text-[var(--ink-soft)]">
-            {cfg.inputLabel}
-          </span>
-          <div className="flex items-center gap-2">
-            <input
-              aria-label={`${cfg.inputLabel} başlangıcı`}
-              type="text"
-              inputMode="decimal"
-              value={lowRaw}
-              onChange={(e) => {
-                setLowRaw(e.target.value);
-                if (error) setError(null);
-              }}
-              onBlur={(e) => applyRaw("low", e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  applyRaw("low", lowRaw);
-                  submit();
-                }
-              }}
-              className="tabular w-24 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
-            />
-            <span className="text-[var(--ink-faint)]">–</span>
-            <input
-              aria-label={`${cfg.inputLabel} bitişi`}
-              type="text"
-              inputMode="decimal"
-              value={highRaw}
-              onChange={(e) => {
-                setHighRaw(e.target.value);
-                if (error) setError(null);
-              }}
-              onBlur={(e) => applyRaw("high", e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  applyRaw("high", highRaw);
-                  submit();
-                }
-              }}
-              className="tabular w-24 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)]"
-            />
+      {/* Arama şeridi tek sıra: aralık → daraltıcılar → eylem. lg altında
+          aralık grubu tam satırı alır, daraltıcılar alta sarar. */}
+      <div className="mt-4 border-t border-[var(--line)] pt-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-col gap-2 sm:w-full sm:flex-row sm:items-center lg:w-auto lg:shrink-0">
+            <span className="text-sm font-medium whitespace-nowrap text-[var(--ink-soft)]">
+              {cfg.inputLabel}
+            </span>
+            {/* Dar ekranda iki kutu satırı paylaşır; sm'den itibaren sabit genişlik. */}
+            <div className="flex items-center gap-2">
+              <input
+                aria-label={`${cfg.inputLabel} başlangıcı`}
+                type="text"
+                inputMode="decimal"
+                value={lowRaw}
+                onChange={(e) => {
+                  setLowRaw(e.target.value);
+                  if (error) setError(null);
+                }}
+                onBlur={(e) => applyRaw("low", e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    applyRaw("low", lowRaw);
+                    submit();
+                  }
+                }}
+                className="tabular w-full min-w-0 flex-1 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)] sm:w-24 sm:flex-none"
+              />
+              <span className="text-[var(--ink-faint)]">–</span>
+              <input
+                aria-label={`${cfg.inputLabel} bitişi`}
+                type="text"
+                inputMode="decimal"
+                value={highRaw}
+                onChange={(e) => {
+                  setHighRaw(e.target.value);
+                  if (error) setError(null);
+                }}
+                onBlur={(e) => applyRaw("high", e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    applyRaw("high", highRaw);
+                    submit();
+                  }
+                }}
+                className="tabular w-full min-w-0 flex-1 rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-3 py-3 text-base text-[var(--ink)] outline-none focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal-ring)] sm:w-24 sm:flex-none"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Daraltıcılar + tek eylem. Boş seçenek "tümü" demek: geri alınabilir. */}
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Daraltıcılar + tek eylem. Boş seçenek "tümü" demek: geri alınabilir. */}
           <Select
             label="İlçe"
             value={ilce}

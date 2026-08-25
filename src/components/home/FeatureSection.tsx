@@ -46,9 +46,9 @@ export function FeatureSection({
   const hasStats = schoolCount != null && districtCount != null;
 
   return (
-    <div className="border-t border-[var(--line)] pt-20 pb-16">
+    <div className="border-t border-[var(--line)] pt-16 pb-16">
       <div className="container mx-auto max-w-6xl px-6">
-        <div className="mb-12 max-w-2xl">
+        <div className="mb-10 max-w-2xl">
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-[var(--ink)] md:text-4xl">
             Tercih sürecinizi kolaylaştıran araçlar
           </h2>
@@ -131,7 +131,7 @@ export function FeatureSection({
         </div>
 
         {/* Muafiyet notu — bölümün dipnotu; tıklanabilir kartın içine girmez. */}
-        <p className="mt-10 max-w-2xl font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">
+        <p className="mt-8 max-w-2xl font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">
           Bağımsız bir rehberdir; bilgiler yalnızca bilgilendirme amaçlıdır ve
           resmi MEB kaynaklarından teyit edilmelidir.
         </p>

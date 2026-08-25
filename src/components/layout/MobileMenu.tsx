@@ -18,13 +18,13 @@ export function MobileMenu({ navItems }: Props) {
       <button
         aria-label={isOpen ? "Menüyü kapat" : "Menüyü aç"}
         onClick={() => setIsOpen((prev) => !prev)}
-        className="rounded-lg p-2 text-slate-300 transition-all hover:bg-white/5 hover:text-white md:hidden"
+        className="rounded-lg p-2 text-slate-300 transition-all hover:bg-white/5 hover:text-white xl:hidden"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full z-40 border-b border-white/10 bg-[#0a0f1c]/95 px-6 py-4 backdrop-blur-lg md:hidden">
+        <div className="absolute left-0 right-0 top-full z-40 border-b border-white/10 bg-[#0a0f1c]/95 px-6 py-4 backdrop-blur-lg xl:hidden">
           <div className="flex flex-col gap-1">
             {navItems.map((item) => (
               <Link
