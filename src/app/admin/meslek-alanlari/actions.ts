@@ -34,6 +34,7 @@ export async function addVocationalField(name: string): Promise<void> {
     throw new Error(error.message);
   }
   revalidatePath("/admin/meslek-alanlari");
+  revalidatePath("/sitemap.xml");
 }
 
 export async function updateVocationalField(id: string, name: string): Promise<void> {
@@ -51,6 +52,7 @@ export async function updateVocationalField(id: string, name: string): Promise<v
     throw new Error(error.message);
   }
   revalidatePath("/admin/meslek-alanlari");
+  revalidatePath("/sitemap.xml");
 }
 
 export async function deleteVocationalField(id: string): Promise<void> {
@@ -77,6 +79,7 @@ export async function deleteVocationalField(id: string): Promise<void> {
 
   if (error) throw new Error(error.message);
   revalidatePath("/admin/meslek-alanlari");
+  revalidatePath("/sitemap.xml");
 }
 
 export async function addBranch(vocationalFieldId: string, name: string): Promise<void> {

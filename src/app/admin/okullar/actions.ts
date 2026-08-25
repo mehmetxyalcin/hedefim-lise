@@ -348,6 +348,7 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
+  revalidatePath("/sitemap.xml");
   redirectToAdminWithSuccess("Okul başarıyla eklendi.");
   return { success: true, message: "Okul başarıyla eklendi." };
 }
@@ -447,6 +448,7 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
+  revalidatePath("/sitemap.xml");
   revalidatePath(`/okullar/${payload.slug}`);
   revalidatePath(`/admin/okullar/${payload.slug}/duzenle`);
   return { success: true, message: "Temel bilgiler kaydedildi." };
@@ -503,6 +505,7 @@ export async function deleteSchool(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
+  revalidatePath("/sitemap.xml");
   revalidatePath(`/okullar/${school.slug}`);
   redirectToAdminWithSuccess("Okul başarıyla silindi.");
 }
@@ -543,6 +546,7 @@ export async function toggleSchoolStatus(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
+  revalidatePath("/sitemap.xml");
   revalidatePath(`/okullar/${school.slug}`);
   redirectToAdminWithSuccess(
     nextStatus ? "Okul aktif hale getirildi." : "Okul pasif hale getirildi.",
@@ -596,6 +600,7 @@ export async function bulkUpdateSchoolStatus(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/okullar");
   revalidatePath("/alanlar");
+  revalidatePath("/sitemap.xml");
   for (const school of schools ?? []) {
     revalidatePath(`/okullar/${school.slug}`);
   }
