@@ -1,73 +1,63 @@
 -- ─────────────────────────────────────────────────────────────────
--- profiles tablosunu herkese açık okumadan kapat
+-- profiles: herkese açık okuma + ayrıcalık yükseltme yolunu kapat
 --
--- BU MIGRATION ADVISOR UYARISINDAN DEĞİL, CANLI ORTAMDA YAPILAN
--- DOĞRULAMADAN ÇIKTI. Yayındaki projeye publishable (anon) anahtarla
--- yapılan istek tüm yönetici hesaplarını döndürüyor:
+-- BU MIGRATION ADVISOR UYARISINDAN DEĞİL, CANLI ORTAMDA MCP İLE YAPILAN
+-- DOĞRULAMADAN ÇIKTI. Advisor bunu yakalamıyor çünkü tabloda RLS açık ve
+-- politikalar mevcut; sorun politikaların İÇERİĞİ. Canlı durum (pg_policies,
+-- information_schema.column_privileges ile doğrulandı):
 --
---   GET /rest/v1/profiles?select=id,email,role  ->  200 OK
---   [{"email":"...","role":"admin"}, {"email":"...","role":"admin"}]
+--   profiles_select : FOR SELECT  TO public  USING (true)
+--   profiles_insert : FOR INSERT  TO public  WITH CHECK (auth.uid() = id)
+--   profiles_update : FOR UPDATE  TO public  USING (auth.uid() = id)  -- WITH CHECK YOK
+--   profiles_delete : FOR DELETE  TO public  USING (auth.uid() = id)
+--   ayrıca anon + authenticated rollerine role KOLONUNDA UPDATE yetkisi verilmiş
 --
--- Yani public.profiles üzerinde RLS ya kapalı ya da sınırsız bir okuma
--- politikası var. Repodaki hiçbir migration'da profiles için politika
--- tanımlı değil — tablo baştan beri korumasız.
+-- İKİ AYRI SORUN:
 --
--- NEDEN ÖNEMLİ: profiles tüm yetkilendirmenin kaynağı. 006 ve 003'teki
--- yazma politikaları role bilgisini buradan okuyor:
---   EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid()
---           AND role = 'admin')
--- Sızan veri parola değil ama yönetici e-postalarının tam listesi.
--- "Leaked password protection" da kapalı olduğu için bu liste doğrudan
--- hedefli parola denemesi için kullanılabilir hâle geliyor. İki bulgu
--- birleşince risk tek tek olduklarından yüksek.
+-- 1) BİLGİ SIZINTISI — profiles_select USING (true) + public rol, anon
+--    anahtarla tüm yönetici satırlarını döndürüyor (canlıda doğrulandı):
+--      GET /rest/v1/profiles?select=id,email,role -> 200
+--      [{"email":"...","role":"admin"}, {"email":"...","role":"admin"}]
 --
--- NEDEN BU POLİTİKA UYGULAMAYI BOZMAZ: koddaki üç profiles sorgusunun
--- üçü de yalnızca çağıranın KENDİ satırını okuyor (.eq("id", user.id)):
---   src/lib/admin-auth.ts:31
---   src/app/admin/login/page.tsx:44
+-- 2) AYRICALIK YÜKSELTME — profiles_update'te WITH CHECK yok ve role
+--    kolonunda UPDATE yetkisi var. Oturum açmış herhangi bir kullanıcı
+--    kendi satırında (auth.uid() = id) role='admin' yapabilir. USING
+--    satırı seçtikten sonra WITH CHECK olmadığı için yeni değer hiç
+--    denetlenmez. Bu, "UPDATE policy WITH CHECK ister" tuzağının tam örneği.
+--
+-- NEDEN ÖNEMLİ: profiles.role tüm yetkilendirmenin kaynağı — 006 ve
+-- 003'teki yazma politikaları admin'liği buradan okuyor. leaked-password
+-- koruması da kapalı olduğundan sızan yönetici e-postaları hedefli parola
+-- denemesiyle birleşiyor.
+--
+-- NEDEN UYGULAMAYI BOZMAZ: koddaki üç profiles sorgusunun üçü de yalnızca
+-- kendi satırını OKUYOR (.eq("id", user.id)):
+--   src/lib/admin-auth.ts:31  src/app/admin/login/page.tsx:44
 --   src/app/admin/login/actions.ts:83
--- Aşağıdaki self-select politikası bu üç sorgunun tamamını karşılar.
--- 006'daki EXISTS alt sorgusu da id = auth.uid() ile filtrelendiği için
--- politikadan geçer. Politika profiles'a kendisi bakmadığı için
--- sonsuz döngü (infinite recursion) riski yoktur.
---
--- Kayıt akışı etkilenmez: handle_new_user() SECURITY DEFINER olarak
--- postgres yetkisiyle çalışır ve RLS'i baypas eder.
---
--- Yazma politikası bilerek EKLENMEDİ. Rol değişikliği yalnızca
--- service_role / SQL editörü üzerinden yapılmalı; anon veya
--- authenticated rolüne profiles'ta yazma yetkisi verilmemeli.
+-- Aşağıdaki self-select politikası bunları karşılar. Kod profiles'a HİÇ
+-- yazmıyor; kayıt handle_new_user() (SECURITY DEFINER, postgres) ile RLS'i
+-- baypas ederek yazdığı için yazma politikalarını ve anon/authenticated
+-- yazma yetkilerini tamamen kaldırmak kayıt akışını etkilemez. Rol atama
+-- yalnızca SQL editörü / service_role üzerinden yapılır.
 -- ─────────────────────────────────────────────────────────────────
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Herkese açık okumayı kaldır (adı ne olursa olsun kalıntı politikalar)
-DROP POLICY IF EXISTS "public_read_profiles" ON public.profiles;
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
-DROP POLICY IF EXISTS "profiles_select_all" ON public.profiles;
+-- Mevcut aşırı geniş politikaları kaldır
+DROP POLICY IF EXISTS "profiles_select" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_insert" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_delete" ON public.profiles;
 
--- Yalnızca kendi satırını okuyabilsin
+-- Yalnızca kendi satırını, yalnızca oturum açmış kullanıcı okuyabilsin
 DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
 CREATE POLICY "profiles_select_own"
   ON public.profiles FOR SELECT
   TO authenticated
   USING ( (SELECT auth.uid()) = id );
 
--- ─────────────────────────────────────────────────────────────────
--- UYGULAMADAN ÖNCE ÇALIŞTIR: mevcut politikaları gör.
--- Yukarıdaki DROP'lar isim tahminine dayanıyor. Dashboard üzerinden
--- oluşturulmuş, farklı isimli izin verici bir SELECT politikası varsa
--- bu dosya onu kaldırmaz ve tablo açık kalmaya devam eder.
---
---   SELECT policyname, cmd, roles, qual
---   FROM pg_policies
---   WHERE schemaname = 'public' AND tablename = 'profiles';
---
---   SELECT relrowsecurity FROM pg_class
---   WHERE oid = 'public.profiles'::regclass;
---
--- Listede beklenmeyen bir politika çıkarsa adını yukarıdaki DROP
--- bloğuna ekle. Uyguladıktan sonra doğrula (200 yerine [] dönmeli):
---   curl "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/profiles?select=id,email" \
---        -H "apikey: <publishable-key>"
--- ─────────────────────────────────────────────────────────────────
+-- Savunma katmanı: anon/authenticated rollerine profiles'ta yazma yetkisi
+-- verilmesin (role kolonundaki UPDATE yetkisi de böylece kalkar). Kayıt
+-- trigger'ı postgres yetkisiyle çalıştığı için bundan etkilenmez.
+REVOKE INSERT, UPDATE, DELETE ON public.profiles FROM anon;
+REVOKE INSERT, UPDATE, DELETE ON public.profiles FROM authenticated;
