@@ -34,7 +34,12 @@ export async function requireAdmin() {
     .maybeSingle();
 
   if (profileError || !profile || profile.role !== "admin") {
-    return { supabase, user, profile: null as null };
+    // Her çağıran (Server Action ve API route dahil) burada durur.
+    // Yalnız oturum sahibi olmak yönetim işlemleri için yeterli değildir.
+    const message = profileError
+      ? "Yönetici yetkiniz doğrulanamadı. Lütfen tekrar giriş yapın."
+      : "Bu hesabın yönetici yetkisi bulunmuyor.";
+    redirect(`/admin/login?error=${encodeURIComponent(message)}`);
   }
 
   return { supabase, user, profile };

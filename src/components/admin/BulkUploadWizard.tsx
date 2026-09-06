@@ -2,6 +2,8 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
+import { excludeInvalidSchools, parseImportNumber } from "@/lib/import-validation";
 import {
   AlertCircle,
   ArrowLeft,
@@ -95,11 +97,7 @@ type ExtractedRow = {
 };
 
 function parseQuota(value: unknown): number | null | undefined {
-  const s = String(value ?? "").trim();
-  if (!s) return undefined;
-  const num = parseInt(s, 10);
-  if (isNaN(num) || num < 0 || !Number.isInteger(num)) return null;
-  return num;
+  return parseImportNumber(value, 100000, true);
 }
 
 function parseBoardingType(
@@ -218,7 +216,7 @@ type VocationalValidatedRow = {
   vocational_field: string;
   branch: string;
   field_id: number | null;
-  branch_id: number | null;
+  branch_id: string | null;
   errors: string[];
 };
 
@@ -252,20 +250,12 @@ type ScoreParsedRow = {
   errors: string[];
 };
 
-function parseScore(value: unknown): number | null | undefined {
-  const s = String(value ?? "").trim().replace(",", ".");
-  if (!s) return undefined;
-  const num = parseFloat(s);
-  if (isNaN(num) || num < 0) return null;
-  return num;
+function parseScore(value: unknown, maximum: number): number | null | undefined {
+  return parseImportNumber(value, maximum);
 }
 
 function parsePercentile(value: unknown): number | null | undefined {
-  const s = String(value ?? "").trim().replace(",", ".");
-  if (!s) return undefined;
-  const num = parseFloat(s);
-  if (isNaN(num) || num < 0 || num > 100) return null;
-  return num;
+  return parseImportNumber(value, 100);
 }
 
 // ─── Facility mode types & helpers ──────────────────────────────
@@ -419,6 +409,8 @@ function BasicUploadWizard() {
   const [skipErrors, setSkipErrors] = useState(false);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadInFlight = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -433,6 +425,7 @@ function BasicUploadWizard() {
       return;
     }
     setParseError(null);
+    setUploadError(null);
 
     try {
       const XLSX = await import("xlsx");
@@ -486,9 +479,12 @@ function BasicUploadWizard() {
   }
 
   function handleUpload() {
-    const rowsToUpload: UploadSchoolRow[] = parsedRows
-      .filter((r) => r.status !== "error")
+    if (uploadInFlight.current) return;
+    uploadInFlight.current = true;
+    setUploadError(null);
+    const rowsToUpload: UploadSchoolRow[] = excludeInvalidSchools(parsedRows, (r) => r.status === "error")
       .map((r) => ({
+        source_row: r.rowIndex,
         institution_code: r.institution_code,
         name: r.name,
         district: r.district,
@@ -515,9 +511,16 @@ function BasicUploadWizard() {
       }));
 
     startTransition(async () => {
-      const result = await bulkUploadSchools(rowsToUpload);
-      setUploadResult(result);
-      setStep(3);
+      try {
+        const result = await bulkUploadSchools(rowsToUpload);
+        setUploadResult(result);
+        setStep(3);
+      } catch (error) {
+        unstable_rethrow(error);
+        setUploadError("Yükleme sonucu alınamadı. Bağlantınızı ve oturumunuzu kontrol edin. Yeniden yüklemeden önce okul listesinden hangi kayıtların işlendiğini doğrulayın.");
+      } finally {
+        uploadInFlight.current = false;
+      }
     });
   }
 
@@ -529,11 +532,16 @@ function BasicUploadWizard() {
   };
   const hasErrors = stats.error > 0;
   const canUpload = !hasErrors || skipErrors;
-  const uploadableCount = parsedRows.filter((r) => r.status !== "error").length;
+  const uploadableCount = excludeInvalidSchools(parsedRows, (r) => r.status === "error").length;
 
   return (
     <div className="space-y-6">
       <StepIndicator step={step} />
+      {uploadError && (
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          {uploadError}
+        </div>
+      )}
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
@@ -737,7 +745,7 @@ function BasicUploadWizard() {
                   onChange={(e) => setSkipErrors(e.target.checked)}
                   className="h-4 w-4"
                 />
-                Hatalı satırları atla ve devam et ({uploadableCount} satır yüklenecek)
+                Hatalı okulları atla ve devam et ({uploadableCount} satır yüklenecek)
               </label>
             </div>
           )}
@@ -831,6 +839,7 @@ function BasicUploadWizard() {
                 setUploadResult(null);
                 setSkipErrors(false);
                 setParseError(null);
+                setUploadError(null);
               }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
@@ -851,6 +860,8 @@ function VocationalUploadWizard() {
   const [skipErrors, setSkipErrors] = useState(false);
   const [uploadResult, setUploadResult] = useState<VocationalUploadResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadInFlight = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -858,7 +869,7 @@ function VocationalUploadWizard() {
   const errorGroupCount = schoolGroups.filter((g) => g.hasErrors).length;
   const validGroupCount = schoolGroups.filter((g) => g.found && !g.hasErrors).length;
   const totalRows = schoolGroups.reduce((sum, g) => sum + g.rows.length, 0);
-  const uploadableGroups = schoolGroups.filter((g) => g.found && (!g.hasErrors || skipErrors));
+  const uploadableGroups = schoolGroups.filter((g) => g.found && !g.hasErrors);
   const uploadableCount = uploadableGroups.length;
 
   async function handleFile(file: File) {
@@ -871,6 +882,7 @@ function VocationalUploadWizard() {
       return;
     }
     setParseError(null);
+    setUploadError(null);
 
     try {
       const XLSX = await import("xlsx");
@@ -950,7 +962,7 @@ function VocationalUploadWizard() {
         if (!raw.vocational_field) errors.push("Meslek Alanı zorunludur");
 
         let field_id: number | null = null;
-        let branch_id: number | null = null;
+        let branch_id: string | null = null;
 
         if (raw.vocational_field) {
           const field = fieldMap.get(normalizeStr(raw.vocational_field));
@@ -1000,6 +1012,9 @@ function VocationalUploadWizard() {
   }
 
   function handleUpload() {
+    if (uploadInFlight.current) return;
+    uploadInFlight.current = true;
+    setUploadError(null);
     const rowsToUpload: VocationalRow[] = [];
     for (const group of uploadableGroups) {
       for (const row of group.rows) {
@@ -1013,15 +1028,27 @@ function VocationalUploadWizard() {
     }
 
     startTransition(async () => {
-      const result = await bulkUploadVocational(rowsToUpload);
-      setUploadResult(result);
-      setStep(3);
+      try {
+        const result = await bulkUploadVocational(rowsToUpload);
+        setUploadResult(result);
+        setStep(3);
+      } catch (error) {
+        unstable_rethrow(error);
+        setUploadError("Yükleme sonucu alınamadı. Bağlantınızı ve oturumunuzu kontrol edin. Yeniden yüklemeden önce okul listesinden hangi kayıtların işlendiğini doğrulayın.");
+      } finally {
+        uploadInFlight.current = false;
+      }
     });
   }
 
   return (
     <div className="space-y-6">
       <StepIndicator step={step} />
+      {uploadError && (
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          {uploadError}
+        </div>
+      )}
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
@@ -1242,6 +1269,7 @@ function VocationalUploadWizard() {
                 setUploadResult(null);
                 setSkipErrors(false);
                 setParseError(null);
+                setUploadError(null);
               }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
@@ -1261,11 +1289,14 @@ function ScoreUploadWizard() {
   const [parsedRows, setParsedRows] = useState<ScoreParsedRow[]>([]);
   const [uploadResult, setUploadResult] = useState<ScoreUploadResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadInFlight = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validRows = parsedRows.filter((r) => r.found && r.errors.length === 0);
+  const validRows = excludeInvalidSchools(parsedRows, (r) => !r.found || r.errors.length > 0);
+  const validSchoolCount = new Set(validRows.map((r) => r.institution_code)).size;
   const errorRows = parsedRows.filter((r) => !r.found || r.errors.length > 0);
 
   async function handleFile(file: File) {
@@ -1278,6 +1309,7 @@ function ScoreUploadWizard() {
       return;
     }
     setParseError(null);
+    setUploadError(null);
 
     try {
       const XLSX = await import("xlsx");
@@ -1335,14 +1367,14 @@ function ScoreUploadWizard() {
           }
         }
 
-        const obp_2025 = parseScore(row["OBP 2025"]);
-        const lgs_2025 = parseScore(row["LGS 2025"]);
+        const obp_2025 = parseScore(row["OBP 2025"], 100);
+        const lgs_2025 = parseScore(row["LGS 2025"], 500);
         const percentile_2025 = parsePercentile(row["Yüzdelik 2025"]);
-        const obp_2024 = parseScore(row["OBP 2024"]);
-        const lgs_2024 = parseScore(row["LGS 2024"]);
+        const obp_2024 = parseScore(row["OBP 2024"], 100);
+        const lgs_2024 = parseScore(row["LGS 2024"], 500);
         const percentile_2024 = parsePercentile(row["Yüzdelik 2024"]);
-        const obp_2023 = parseScore(row["OBP 2023"]);
-        const lgs_2023 = parseScore(row["LGS 2023"]);
+        const obp_2023 = parseScore(row["OBP 2023"], 100);
+        const lgs_2023 = parseScore(row["LGS 2023"], 500);
         const percentile_2023 = parsePercentile(row["Yüzdelik 2023"]);
 
         const errors: string[] = [];
@@ -1411,8 +1443,11 @@ function ScoreUploadWizard() {
   }
 
   function handleUpload() {
+    if (uploadInFlight.current) return;
+    uploadInFlight.current = true;
+    setUploadError(null);
     const rowsToUpload: ScoreRow[] = validRows.map((row) => {
-      const r: ScoreRow = { institution_code: row.institution_code };
+      const r: ScoreRow = { institution_code: row.institution_code, source_row: row.rowIndex };
       if (row.vocational_field_name) r.vocational_field = row.vocational_field_name;
       if (typeof row.obp_2025 === "number") r.obp_2025 = row.obp_2025;
       if (typeof row.lgs_2025 === "number") r.lgs_2025 = row.lgs_2025;
@@ -1427,9 +1462,16 @@ function ScoreUploadWizard() {
     });
 
     startTransition(async () => {
-      const result = await bulkUploadScores(rowsToUpload);
-      setUploadResult(result);
-      setStep(3);
+      try {
+        const result = await bulkUploadScores(rowsToUpload);
+        setUploadResult(result);
+        setStep(3);
+      } catch (error) {
+        unstable_rethrow(error);
+        setUploadError("Yükleme sonucu alınamadı. Bağlantınızı ve oturumunuzu kontrol edin. Yeniden yüklemeden önce okul listesinden hangi kayıtların işlendiğini doğrulayın.");
+      } finally {
+        uploadInFlight.current = false;
+      }
     });
   }
 
@@ -1442,6 +1484,11 @@ function ScoreUploadWizard() {
   return (
     <div className="space-y-6">
       <StepIndicator step={step} />
+      {uploadError && (
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          {uploadError}
+        </div>
+      )}
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
@@ -1479,7 +1526,7 @@ function ScoreUploadWizard() {
 
           <div className="mb-4 flex flex-wrap gap-2">
             <Pill label="Toplam" count={parsedRows.length} color="slate" />
-            <Pill label="Güncellenecek" count={validRows.length} color="yellow" />
+            <Pill label="Güncellenecek okul" count={validSchoolCount} color="yellow" />
             {errorRows.length > 0 && <Pill label="Hatalı" count={errorRows.length} color="red" />}
           </div>
 
@@ -1573,7 +1620,7 @@ function ScoreUploadWizard() {
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Yükle ({validRows.length} okul)
+              Yükle ({validSchoolCount} okul)
             </button>
           </div>
         </div>
@@ -1629,6 +1676,7 @@ function ScoreUploadWizard() {
                 setParsedRows([]);
                 setUploadResult(null);
                 setParseError(null);
+                setUploadError(null);
               }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
@@ -1648,13 +1696,15 @@ function FacilityUploadWizard() {
   const [groups, setGroups] = useState<FacilityParsedGroup[]>([]);
   const [uploadResult, setUploadResult] = useState<FacilityUploadResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadInFlight = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const errorGroups = groups.filter((g) => !g.found || g.errors.length > 0);
-  const validGroups = groups.filter((g) => g.found && g.errors.length === 0);
-  const totalUnmatched = validGroups.reduce((s, g) => s + g.unmatched.length, 0);
+  const validGroups = excludeInvalidSchools(groups, (g) => !g.found || g.errors.length > 0);
+  const totalUnmatched = groups.reduce((s, g) => s + g.unmatched.length, 0);
 
   async function handleFile(file: File) {
     if (!file.name.match(/\.(xlsx|csv)$/i)) {
@@ -1666,6 +1716,7 @@ function FacilityUploadWizard() {
       return;
     }
     setParseError(null);
+    setUploadError(null);
 
     try {
       const XLSX = await import("xlsx");
@@ -1729,6 +1780,8 @@ function FacilityUploadWizard() {
           }
         }
 
+        if (unmatched.length > 0) errors.push("Eşleşmeyen tesisler var; bu okulun mevcut tesisleri korunacak.");
+        if (all_names.length === 0) errors.push("Tesis listesi boş; mevcut tesisler korunacak.");
         return {
           institution_code,
           school_name: school?.name ?? "",
@@ -1748,21 +1801,36 @@ function FacilityUploadWizard() {
   }
 
   function handleUpload() {
+    if (uploadInFlight.current) return;
+    uploadInFlight.current = true;
+    setUploadError(null);
     const rowsToUpload: ParsedFacilityRow[] = validGroups.map((g) => ({
       institution_code: g.institution_code,
       facility_names: g.all_names,
     }));
 
     startTransition(async () => {
-      const result = await bulkUploadFacilities(rowsToUpload);
-      setUploadResult(result);
-      setStep(3);
+      try {
+        const result = await bulkUploadFacilities(rowsToUpload);
+        setUploadResult(result);
+        setStep(3);
+      } catch (error) {
+        unstable_rethrow(error);
+        setUploadError("Yükleme sonucu alınamadı. Bağlantınızı ve oturumunuzu kontrol edin. Yeniden yüklemeden önce okul listesinden hangi kayıtların işlendiğini doğrulayın.");
+      } finally {
+        uploadInFlight.current = false;
+      }
     });
   }
 
   return (
     <div className="space-y-6">
       <StepIndicator step={step} />
+      {uploadError && (
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          {uploadError}
+        </div>
+      )}
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
@@ -1874,7 +1942,7 @@ function FacilityUploadWizard() {
                         >
                           <span className="text-xs font-bold text-amber-500">⚠</span>
                           <span className="text-amber-700">{name}</span>
-                          <span className="text-xs text-amber-400">(sistemde bulunamadı, atlanacak)</span>
+                          <span className="text-xs text-amber-400">(bulunamadı; bu okul yüklenmeyecek)</span>
                         </div>
                       ))}
                     </div>
@@ -1997,6 +2065,7 @@ function FacilityUploadWizard() {
                 setGroups([]);
                 setUploadResult(null);
                 setParseError(null);
+                setUploadError(null);
               }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >

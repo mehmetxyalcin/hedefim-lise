@@ -1,8 +1,10 @@
 "use server";
 
 import { requireAdmin } from "@/lib/admin-auth";
+import { runSchoolImport } from "@/lib/admin-import";
 
 export type UploadSchoolRow = {
+  source_row?: number;
   institution_code: string;
   name: string;
   district: string;
@@ -43,172 +45,12 @@ export async function checkInstitutionCodes(codes: string[]): Promise<string[]> 
     .filter((c): c is string => Boolean(c));
 }
 
-function slugifyBase(name: string): string {
-  return name
-    .trim()
-    .toLocaleLowerCase("tr-TR")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ş/g, "s")
-    .replace(/ı/g, "i")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
-
-function generateUniqueSlug(name: string, institutionCode: string): string {
-  const base = slugifyBase(name) || slugifyBase(institutionCode);
-  const code = slugifyBase(institutionCode) || institutionCode.replace(/[^a-z0-9]/gi, "").toLowerCase();
-  return `${base}-${code}`;
-}
-
 export async function bulkUploadSchools(
   rows: UploadSchoolRow[],
 ): Promise<UploadResult> {
   const { supabase } = await requireAdmin();
-
-  if (rows.length > 500) {
-    throw new Error("Maksimum 500 satır yüklenebilir.");
-  }
-
-  const result: UploadResult = { added: 0, updated: 0, errors: [] };
-
-  const codes = rows.map((r) => r.institution_code).filter(Boolean);
-
-  const { data: existingData } = await supabase
-    .from("schools")
-    .select("id, institution_code")
-    .in("institution_code", codes);
-
-  const existingMap = new Map<string, number>(
-    (existingData ?? []).map((r) => [r.institution_code as string, r.id as number]),
-  );
-
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const rowNum = i + 2;
-
-    try {
-      const existingId = existingMap.get(row.institution_code);
-
-      let schoolId: number = existingId ?? 0;
-
-      if (existingId) {
-        // Boş hücreler mevcut veriyi korur (conditional spread → sadece dolu
-        // alanlar payload'a girer).
-        const schoolUpdate: Record<string, unknown> = {
-          ...(row.name?.trim() && { name: row.name.trim() }),
-          ...(row.district?.trim() && { district: row.district.trim() }),
-          ...(row.school_type?.trim() && { type: row.school_type.trim() }),
-          ...(row.phone?.trim() && { phone: row.phone.trim() }),
-          ...(row.website?.trim() && { website: row.website.trim() }),
-          ...(row.address?.trim() && { address: row.address.trim() }),
-          ...(row.education_type != null && { education_type: row.education_type }),
-          ...(row.boarding_type != null && { boarding_type: row.boarding_type }),
-          ...(row.description?.trim() && { description: row.description.trim() }),
-        };
-
-        // Sadece kontenjan dolu, okul alanları boşsa boş update göndermeyiz;
-        // aksi halde kontenjan kaydı da engellenebilirdi.
-        if (Object.keys(schoolUpdate).length > 0) {
-          const { error } = await supabase
-            .from("schools")
-            .update(schoolUpdate)
-            .eq("id", existingId);
-
-          if (error) throw new Error(error.message);
-        }
-        result.updated++;
-      } else {
-        if (!row.name?.trim() || !row.district?.trim() || !row.school_type?.trim()) {
-          throw new Error("Yeni okul için Okul Adı, İlçe ve Okul Türü zorunludur.");
-        }
-
-        const slug = generateUniqueSlug(row.name, row.institution_code);
-
-        const { data: inserted, error } = await supabase
-          .from("schools")
-          .insert({
-            name: row.name,
-            slug,
-            type: row.school_type,
-            district: row.district,
-            institution_code: row.institution_code,
-            phone: row.phone ?? null,
-            website: row.website ?? null,
-            address: row.address ?? null,
-            education_type: row.education_type ?? "normal",
-            boarding_type: row.boarding_type ?? "yok",
-            percentile: "0",
-            logo: row.name.slice(0, 2).toUpperCase(),
-            color: "bg-gradient-to-br from-slate-700 to-slate-900",
-            description: row.description?.trim() ?? "",
-            features: [],
-            projects: [],
-            languages: [],
-            images: [],
-            is_active: false,
-          })
-          .select("id")
-          .single();
-
-        if (error) throw new Error(error.message);
-        schoolId = (inserted as { id: number }).id;
-        result.added++;
-      }
-
-      if (row.sinavli_2026 !== undefined || row.sinavsiz_2026 !== undefined) {
-        const { error: q26err } = await supabase.from("school_quotas").upsert(
-          {
-            school_id: schoolId,
-            year: 2026,
-            ...(row.sinavli_2026 !== undefined && { sinavli_count: row.sinavli_2026 }),
-            ...(row.sinavsiz_2026 !== undefined && { sinavsiz_count: row.sinavsiz_2026 }),
-          },
-          { onConflict: "school_id,year" },
-        );
-        if (q26err) throw new Error(q26err.message);
-      }
-
-      if (row.sinavli_2025 !== undefined || row.sinavsiz_2025 !== undefined) {
-        const { error: q25err } = await supabase.from("school_quotas").upsert(
-          {
-            school_id: schoolId,
-            year: 2025,
-            ...(row.sinavli_2025 !== undefined && { sinavli_count: row.sinavli_2025 }),
-            ...(row.sinavsiz_2025 !== undefined && { sinavsiz_count: row.sinavsiz_2025 }),
-          },
-          { onConflict: "school_id,year" },
-        );
-        if (q25err) throw new Error(q25err.message);
-      }
-
-      if (row.sinavli_2024 !== undefined || row.sinavsiz_2024 !== undefined) {
-        const { error: q24err } = await supabase.from("school_quotas").upsert(
-          {
-            school_id: schoolId,
-            year: 2024,
-            ...(row.sinavli_2024 !== undefined && { sinavli_count: row.sinavli_2024 }),
-            ...(row.sinavsiz_2024 !== undefined && { sinavsiz_count: row.sinavsiz_2024 }),
-          },
-          { onConflict: "school_id,year" },
-        );
-        if (q24err) throw new Error(q24err.message);
-      }
-    } catch (err) {
-      result.errors.push({
-        row: rowNum,
-        institution_code: row.institution_code,
-        reason: err instanceof Error ? err.message : "Bilinmeyen hata",
-      });
-    }
-  }
-
-  return result;
+  const result = await runSchoolImport(supabase, "basic", rows);
+  return { added: result.added, updated: result.updated, errors: result.errors };
 }
 
 // ─── Vocational bulk upload ──────────────────────────────────────
@@ -239,26 +81,28 @@ export async function fetchSchoolsByInstitutionCodes(
 
 export async function fetchVocationalData(): Promise<{
   fields: { id: number; title: string }[];
-  branches: { id: number; name: string; vocational_field_id: number }[];
+  branches: { id: string; name: string; vocational_field_id: number }[];
 }> {
   const { supabase } = await requireAdmin();
   try {
-    const [{ data: fields }, { data: branches }] = await Promise.all([
+    const [{ data: fields, error: fieldsError }, { data: branches, error: branchesError }] = await Promise.all([
       supabase.from("vocational_fields").select("id, title"),
       supabase.from("vocational_branches").select("id, name, vocational_field_id"),
     ]);
+    if (fieldsError || branchesError) throw new Error("Meslek alanları yüklenemedi. Lütfen yeniden deneyin.");
     return {
       fields: (fields ?? []) as { id: number; title: string }[],
-      branches: (branches ?? []) as { id: number; name: string; vocational_field_id: number }[],
+      branches: (branches ?? []) as { id: string; name: string; vocational_field_id: number }[],
     };
   } catch {
-    return { fields: [], branches: [] };
+    throw new Error("Meslek alanları yüklenemedi. Lütfen yeniden deneyin.");
   }
 }
 
 // ─── Score bulk upload ───────────────────────────────────────────
 
 export type ScoreRow = {
+  source_row?: number;
   institution_code: string;
   vocational_field?: string;
   obp_2025?: number;
@@ -277,115 +121,10 @@ export type ScoreUploadResult = {
   errors: { institution_code: string; reason: string }[];
 };
 
-function normalizeScoreField(s: string): string {
-  return s.trim().toLocaleLowerCase("tr-TR");
-}
-
 export async function bulkUploadScores(rows: ScoreRow[]): Promise<ScoreUploadResult> {
   const { supabase } = await requireAdmin();
-
-  if (rows.length > 500) {
-    throw new Error("Maksimum 500 satır yüklenebilir.");
-  }
-
-  // Tüm meslek alanlarını çek ve normalize Map oluştur
-  const { data: allVocFields } = await supabase
-    .from("vocational_fields")
-    .select("id, title");
-  const vocFieldMap = new Map(
-    ((allVocFields ?? []) as { id: number; title: string }[]).map((f) => [
-      normalizeScoreField(f.title),
-      f,
-    ]),
-  );
-
-  const result: ScoreUploadResult = { updated: 0, errors: [] };
-
-  for (const row of rows) {
-    try {
-      const { data: school } = await supabase
-        .from("schools")
-        .select("id")
-        .eq("institution_code", row.institution_code)
-        .maybeSingle();
-
-      if (!school) {
-        result.errors.push({ institution_code: row.institution_code, reason: "Okul bulunamadı" });
-        continue;
-      }
-
-      const schoolId = (school as { id: number }).id;
-
-      // Meslek alanını çöz
-      let vocFieldId: number | null = null;
-      if (row.vocational_field?.trim()) {
-        const found = vocFieldMap.get(normalizeScoreField(row.vocational_field));
-        if (!found) {
-          result.errors.push({
-            institution_code: row.institution_code,
-            reason: `Meslek alanı bulunamadı: "${row.vocational_field}"`,
-          });
-          continue;
-        }
-        vocFieldId = found.id;
-      }
-
-      const years = [2025, 2024, 2023] as const;
-
-      for (const year of years) {
-        const obp = row[`obp_${year}` as keyof ScoreRow] as number | undefined;
-        const lgs = row[`lgs_${year}` as keyof ScoreRow] as number | undefined;
-        const percentile = row[`percentile_${year}` as keyof ScoreRow] as number | undefined;
-
-        if (obp === undefined && lgs === undefined && percentile === undefined) continue;
-
-        // Mevcut kaydı bul (NULL-safe: IS NULL veya = value)
-        let existingQuery = supabase
-          .from("school_scores")
-          .select("id, obp_score, lgs_score, percentile")
-          .eq("school_id", schoolId)
-          .eq("year", year);
-
-        if (vocFieldId !== null) {
-          existingQuery = existingQuery.eq("vocational_field_id", vocFieldId);
-        } else {
-          existingQuery = existingQuery.is("vocational_field_id", null);
-        }
-
-        const { data: existing } = await existingQuery.maybeSingle();
-        const rec = existing as {
-          id: string;
-          obp_score: number | null;
-          lgs_score: number | null;
-          percentile: number | null;
-        } | null;
-
-        const payload = {
-          school_id: schoolId,
-          year,
-          vocational_field_id: vocFieldId,
-          obp_score: obp ?? rec?.obp_score ?? null,
-          lgs_score: lgs ?? rec?.lgs_score ?? null,
-          percentile: percentile ?? rec?.percentile ?? null,
-        };
-
-        if (rec) {
-          await supabase.from("school_scores").update(payload).eq("id", rec.id);
-        } else {
-          await supabase.from("school_scores").insert(payload);
-        }
-      }
-
-      result.updated++;
-    } catch (err) {
-      result.errors.push({
-        institution_code: row.institution_code,
-        reason: err instanceof Error ? err.message : "Bilinmeyen hata",
-      });
-    }
-  }
-
-  return result;
+  const result = await runSchoolImport(supabase, "scores", rows);
+  return { updated: result.updated, errors: result.errors };
 }
 
 // ─── Facility bulk upload ────────────────────────────────────────
@@ -408,172 +147,18 @@ export async function fetchAllFacilities(): Promise<{ id: string; name: string }
   return (data ?? []) as { id: string; name: string }[];
 }
 
-function normalizeFac(s: string): string {
-  return s.trim().toLocaleLowerCase("tr-TR");
-}
-
 export async function bulkUploadFacilities(
   rows: ParsedFacilityRow[],
 ): Promise<FacilityUploadResult> {
   const { supabase } = await requireAdmin();
-
-  if (rows.length > 500) {
-    throw new Error("Maksimum 500 satır yüklenebilir.");
-  }
-
-  const { data: allFacilities } = await supabase.from("facilities").select("id, name");
-  const facilityMap = new Map(
-    ((allFacilities ?? []) as { id: string; name: string }[]).map((f) => [normalizeFac(f.name), f]),
-  );
-
-  const result: FacilityUploadResult = { updated: 0, notFound: [], errors: [] };
-
-  for (const row of rows) {
-    const { data: school } = await supabase
-      .from("schools")
-      .select("id, name")
-      .eq("institution_code", row.institution_code)
-      .maybeSingle();
-
-    if (!school) {
-      result.errors.push({ institution_code: row.institution_code, reason: "Okul bulunamadı" });
-      continue;
-    }
-
-    const schoolId = (school as { id: number; name: string }).id;
-    const schoolName = (school as { id: number; name: string }).name;
-
-    const facilityIds: string[] = [];
-    for (const name of row.facility_names) {
-      const facility = facilityMap.get(normalizeFac(name));
-      if (facility) {
-        facilityIds.push(facility.id);
-      } else {
-        result.notFound.push({ facility_name: name, institution_code: row.institution_code, school_name: schoolName });
-      }
-    }
-
-    // Boş veya tamamen eşleşmeyen liste → mevcut tesisleri KORU (silme).
-    // Sadece çözülmüş tesis varsa "değiştir" (sil + ekle) uygulanır.
-    if (facilityIds.length === 0) {
-      continue;
-    }
-
-    await supabase.from("school_facilities").delete().eq("school_id", schoolId);
-    await supabase
-      .from("school_facilities")
-      .insert(facilityIds.map((facilityId) => ({ school_id: schoolId, facility_id: facilityId })));
-
-    result.updated++;
-  }
-
-  return result;
-}
-
-function normalizeVoc(s: string): string {
-  return s.trim().toLocaleLowerCase("tr-TR");
+  const result = await runSchoolImport(supabase, "facilities", rows);
+  return { updated: result.updated, errors: result.errors, notFound: [] };
 }
 
 export async function bulkUploadVocational(
   rows: VocationalRow[],
 ): Promise<VocationalUploadResult> {
   const { supabase } = await requireAdmin();
-
-  if (rows.length > 2000) {
-    throw new Error("Maksimum 2000 satır yüklenebilir.");
-  }
-
-  const [{ data: allFields }, { data: allBranches }] = await Promise.all([
-    supabase.from("vocational_fields").select("id, title"),
-    supabase.from("vocational_branches").select("id, name, vocational_field_id"),
-  ]);
-
-  type VocField = { id: number; title: string };
-  type VocBranch = { id: number; name: string; vocational_field_id: number };
-
-  const fieldMap = new Map<string, VocField>(
-    ((allFields ?? []) as VocField[]).map((f) => [normalizeVoc(f.title), f]),
-  );
-  const branchMap = new Map<string, VocBranch>(
-    ((allBranches ?? []) as VocBranch[]).map((b) => [
-      `${b.vocational_field_id}:${normalizeVoc(b.name)}`,
-      b,
-    ]),
-  );
-
-  const grouped = new Map<string, VocationalRow[]>();
-  for (const row of rows) {
-    const list = grouped.get(row.institution_code) ?? [];
-    list.push(row);
-    grouped.set(row.institution_code, list);
-  }
-
-  const result: VocationalUploadResult = { updated: 0, errors: [] };
-
-  for (const [institutionCode, schoolRows] of grouped) {
-    const { data: school } = await supabase
-      .from("schools")
-      .select("id")
-      .eq("institution_code", institutionCode)
-      .maybeSingle();
-
-    if (!school) {
-      result.errors.push({
-        institution_code: institutionCode,
-        reason: "Bu kurum koduna ait okul bulunamadı",
-      });
-      continue;
-    }
-
-    const schoolId = (school as { id: number }).id;
-
-    // Önce satırlardaki geçerli (çözülebilen) alan ve dalları topla.
-    const fieldIds = new Set<number>();
-    const branchIds = new Set<number>();
-    for (const row of schoolRows) {
-      const field = fieldMap.get(normalizeVoc(row.vocational_field));
-      if (!field) continue;
-      fieldIds.add(field.id);
-
-      if (row.branch?.trim()) {
-        const branch = branchMap.get(`${field.id}:${normalizeVoc(row.branch)}`);
-        if (branch) branchIds.add(branch.id);
-      }
-    }
-
-    // Hiç geçerli alan çözülemediyse mevcut meslek alanlarını KORU (silme).
-    if (fieldIds.size === 0) {
-      result.errors.push({
-        institution_code: institutionCode,
-        reason: "Geçerli meslek alanı bulunamadı; mevcut kayıtlar korundu.",
-      });
-      continue;
-    }
-
-    // Geçerli veri var → dökümante edilen "değiştir" davranışı (sil + ekle).
-    await supabase.from("school_vocational_branches").delete().eq("school_id", schoolId);
-    await supabase.from("school_vocational_fields").delete().eq("school_id", schoolId);
-
-    const { error: fieldErr } = await supabase
-      .from("school_vocational_fields")
-      .insert([...fieldIds].map((id) => ({ school_id: schoolId, vocational_field_id: id })));
-    if (fieldErr) {
-      result.errors.push({ institution_code: institutionCode, reason: fieldErr.message });
-      continue;
-    }
-
-    if (branchIds.size > 0) {
-      const { error: branchErr } = await supabase
-        .from("school_vocational_branches")
-        .insert([...branchIds].map((id) => ({ school_id: schoolId, branch_id: id })));
-      if (branchErr) {
-        result.errors.push({ institution_code: institutionCode, reason: branchErr.message });
-        continue;
-      }
-    }
-
-    result.updated++;
-  }
-
-  return result;
+  const result = await runSchoolImport(supabase, "vocational", rows);
+  return { updated: result.updated, errors: result.errors };
 }

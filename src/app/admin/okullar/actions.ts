@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
+import { parseImportNumber } from "@/lib/import-validation";
 
 export type ActionResult = { success: boolean; message: string };
 
@@ -194,65 +195,11 @@ async function syncSchoolVocationalFields(
   schoolId: number,
   vocationalFieldIds: number[],
 ) {
-  const normalizedFieldIds = [...new Set(vocationalFieldIds)];
-  const { data: existingRelations, error: existingRelationsError } = await supabase
-    .from("school_vocational_fields")
-    .select("vocational_field_id")
-    .eq("school_id", schoolId);
-
-  if (existingRelationsError) {
-    throw new Error(existingRelationsError.message);
-  }
-
-  if (normalizedFieldIds.length > 0) {
-    const { data: validFields, error: validFieldsError } = await supabase
-      .from("vocational_fields")
-      .select("id")
-      .in("id", normalizedFieldIds);
-
-    if (validFieldsError) {
-      throw new Error(validFieldsError.message);
-    }
-
-    if ((validFields ?? []).length !== normalizedFieldIds.length) {
-      throw new Error("Seçilen meslek alanlarindan biri geçersiz.");
-    }
-  }
-
-  const { error: deleteError } = await supabase
-    .from("school_vocational_fields")
-    .delete()
-    .eq("school_id", schoolId);
-
-  if (deleteError) {
-    throw new Error(deleteError.message);
-  }
-
-  if (normalizedFieldIds.length === 0) {
-    return;
-  }
-
-  const relations = normalizedFieldIds.map((vocationalFieldId) => ({
-    school_id: schoolId,
-    vocational_field_id: vocationalFieldId,
-  }));
-
-  const { error: insertError } = await supabase
-    .from("school_vocational_fields")
-    .insert(relations);
-
-  if (insertError) {
-    const previousRelations = (existingRelations ?? []).map((relation) => ({
-      school_id: schoolId,
-      vocational_field_id: relation.vocational_field_id,
-    }));
-
-    if (previousRelations.length > 0) {
-      await supabase.from("school_vocational_fields").insert(previousRelations);
-    }
-
-    throw new Error(insertError.message);
-  }
+  const { error } = await supabase.rpc("admin_replace_school_relations", {
+    p_school_id: schoolId,
+    p_field_ids: [...new Set(vocationalFieldIds)],
+  });
+  if (error) throw new Error(error.message);
 }
 
 export async function createSchool(_prevState: unknown, formData: FormData): Promise<ActionResult> {
@@ -477,28 +424,11 @@ export async function deleteSchool(formData: FormData) {
     redirect(`/admin?error=${encodeURIComponent("Okul bulunamadı.")}`);
   }
 
-  const { error: relationError } = await supabase
-    .from("school_vocational_fields")
-    .delete()
-    .eq("school_id", id);
-
-  if (relationError) {
-    redirect(`/admin?error=${encodeURIComponent(relationError.message)}`);
-  }
-
-  const { error: deleteError } = await supabase.from("schools").delete().eq("id", id);
-
+  // One DELETE statement: FK cascades are atomic. If the database cannot
+  // delete a relation, the school and all existing relations remain intact.
+  const { error: deleteError } = await supabase.from("schools")
+    .delete().eq("id", id).select("id").single();
   if (deleteError) {
-    const previousRelations =
-      school.school_vocational_fields?.map((relation) => ({
-        school_id: id,
-        vocational_field_id: relation.vocational_field_id,
-      })) ?? [];
-
-    if (previousRelations.length > 0) {
-      await supabase.from("school_vocational_fields").insert(previousRelations);
-    }
-
     redirect(`/admin?error=${encodeURIComponent(deleteError.message)}`);
   }
 
@@ -537,7 +467,7 @@ export async function toggleSchoolStatus(formData: FormData) {
   const { error } = await supabase
     .from("schools")
     .update({ is_active: nextStatus })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) {
     redirect(`/admin?error=${encodeURIComponent(error.message)}`);
@@ -654,7 +584,7 @@ export async function updateSchoolContact(_prevState: unknown, formData: FormDat
       transportation_info: toNullableString(formData.get("transportation_info")),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) return { success: false, message: error.message };
 
@@ -681,7 +611,7 @@ export async function updateSchoolOtherInfo(_prevState: unknown, formData: FormD
       other_info: toNullableString(formData.get("other_info")),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) return { success: false, message: error.message };
 
@@ -701,16 +631,16 @@ export async function upsertSchoolScore(formData: FormData) {
 
   const schoolId = Number(formData.get("school_id"));
   const year = Number(formData.get("year"));
-  if (!schoolId || !year) redirect("/admin");
+  if (!Number.isInteger(schoolId) || schoolId <= 0 || !Number.isInteger(year) || year < 2000 || year > 2100) redirect("/admin");
 
   const id = String(formData.get("id") ?? "").trim() || null;
   const rawFieldId = String(formData.get("vocational_field_id") ?? "").trim();
   const vocationalFieldId = rawFieldId ? Number(rawFieldId) : null;
 
   const toOptionalNumeric = (key: string) => {
-    const raw = String(formData.get(key) ?? "").trim().replace(",", ".");
-    const n = parseFloat(raw);
-    return isNaN(n) ? null : n;
+    const value = parseImportNumber(formData.get(key), key === "lgs_score" ? 500 : 100);
+    if (value === null) redirect(`/admin?error=${encodeURIComponent("OBP ve yüzdelik 0–100, LGS 0–500 arasında olmalıdır.")}`);
+    return value ?? null;
   };
 
   const payload = {
@@ -724,7 +654,7 @@ export async function upsertSchoolScore(formData: FormData) {
 
   let error;
   if (id) {
-    ({ error } = await supabase.from("school_scores").update(payload).eq("id", id));
+    ({ error } = await supabase.from("school_scores").update(payload).eq("id", id).eq("school_id", schoolId).select("id").single());
   } else {
     ({ error } = await supabase.from("school_scores").insert(payload));
   }
@@ -743,7 +673,7 @@ export async function deleteSchoolScore(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
 
-  const { error } = await supabase.from("school_scores").delete().eq("id", id);
+  const { error } = await supabase.from("school_scores").delete().eq("id", id).eq("school_id", schoolId).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
@@ -761,11 +691,12 @@ export async function upsertSchoolQuota(formData: FormData) {
 
   const schoolId = Number(formData.get("school_id"));
   const year = Number(formData.get("year"));
-  if (!schoolId || !year) redirect("/admin");
+  if (!Number.isInteger(schoolId) || schoolId <= 0 || !Number.isInteger(year) || year < 2000 || year > 2100) redirect("/admin");
 
   const toOptionalInt = (key: string) => {
-    const n = parseInt(String(formData.get(key) ?? ""), 10);
-    return isNaN(n) ? null : n;
+    const value = parseImportNumber(formData.get(key), 100000, true);
+    if (value === null) redirect(`/admin?error=${encodeURIComponent("Kontenjan negatif olmayan bir tam sayı olmalıdır.")}`);
+    return value ?? null;
   };
 
   const { error } = await supabase.from("school_quotas").upsert(
@@ -792,7 +723,7 @@ export async function deleteSchoolQuota(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
 
-  const { error } = await supabase.from("school_quotas").delete().eq("id", id);
+  const { error } = await supabase.from("school_quotas").delete().eq("id", id).eq("school_id", schoolId).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
@@ -813,13 +744,11 @@ export async function syncSchoolFacilities(formData: FormData) {
 
   const facilityIds = formData.getAll("facility_ids").map(String).filter(Boolean);
 
-  await supabase.from("school_facilities").delete().eq("school_id", schoolId);
-
-  if (facilityIds.length > 0) {
-    const rows = facilityIds.map((fid) => ({ school_id: schoolId, facility_id: fid }));
-    const { error } = await supabase.from("school_facilities").insert(rows);
-    if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
-  }
+  const { error } = await supabase.rpc("admin_replace_school_relations", {
+    p_school_id: schoolId,
+    p_facility_ids: [...new Set(facilityIds)],
+  });
+  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
   revalidatePath(`/okullar/${slug}`);
@@ -853,30 +782,12 @@ export async function syncSchoolVocationalFull(formData: FormData) {
   const fieldIds = toNumberArray(formData.getAll("vocational_field_ids"));
   const branchIds = formData.getAll("branch_ids").map(String).filter(Boolean);
 
-  // Mevcut meslek alanı ilişkilerini güncelle.
-  // syncSchoolVocationalFields hata durumunda throw eder; yakalamazsak
-  // server action 500 verir. Gerçek hata mesajını redirect ile gösteriyoruz.
-  try {
-    await syncSchoolVocationalFields(supabase, schoolId, fieldIds);
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Meslek alanları kaydedilemedi.";
-    redirect(`/admin?error=${encodeURIComponent(message)}`);
-  }
-
-  // Dal junction'ını güncelle
-  const { error: branchDeleteError } = await supabase
-    .from("school_vocational_branches")
-    .delete()
-    .eq("school_id", schoolId);
-  if (branchDeleteError) {
-    redirect(`/admin?error=${encodeURIComponent(branchDeleteError.message)}`);
-  }
-  if (branchIds.length > 0) {
-    const rows = branchIds.map((bid) => ({ school_id: schoolId, branch_id: bid }));
-    const { error } = await supabase.from("school_vocational_branches").insert(rows);
-    if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
-  }
+  const { error } = await supabase.rpc("admin_replace_school_relations", {
+    p_school_id: schoolId,
+    p_field_ids: fieldIds,
+    p_branch_ids: [...new Set(branchIds)],
+  });
+  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
   revalidatePath(`/okullar/${slug}`);
@@ -952,7 +863,7 @@ export async function updateSchoolScholarship(formData: FormData) {
       description: toNullableString(formData.get("description")),
       amount_info: toNullableString(formData.get("amount_info")),
     })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
@@ -968,7 +879,7 @@ export async function deleteSchoolScholarship(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
 
-  const { error } = await supabase.from("school_scholarships").delete().eq("id", id);
+  const { error } = await supabase.from("school_scholarships").delete().eq("id", id).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
@@ -1101,7 +1012,7 @@ export async function updateSchoolProject(formData: FormData) {
   };
   if (imageUrl) updateData.image_url = imageUrl;
 
-  const { error } = await supabase.from("school_projects").update(updateData).eq("id", id);
+  const { error } = await supabase.from("school_projects").update(updateData).eq("id", id).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   revalidatePath(`/okullar/${slug}`);
@@ -1115,7 +1026,7 @@ export async function deleteSchoolProject(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
 
-  const { error } = await supabase.from("school_projects").delete().eq("id", id);
+  const { error } = await supabase.from("school_projects").delete().eq("id", id).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);

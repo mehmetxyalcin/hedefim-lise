@@ -92,9 +92,9 @@ export async function GET(_req: NextRequest) {
     "OBP 2023", "LGS 2023", "Yüzdelik 2023",
   ];
   const scoreExamples = [
-    ["733521", "",                          350.50, 280.25, 65.00, 320.00, 260.00, 70.00, 300.00, 240.00, 72.00],
-    ["745231", "Tesisat Teknolojisi",       450.50, 380.25, 15.00, 420.00, 360.00, 18.50, 400.00, 340.00, 22.00],
-    ["745231", "Elektrik-Elektronik",       420.00, 360.00, 22.00, 400.00, 340.00, 25.00, 380.00, 320.00, 28.00],
+    ["733521", "",                          85.50, 280.25, 65.00, 82.00, 260.00, 70.00, 80.00, 240.00, 72.00],
+    ["745231", "Tesisat Teknolojisi",       95.50, 380.25, 15.00, 92.00, 360.00, 18.50, 90.00, 340.00, 22.00],
+    ["745231", "Elektrik-Elektronik",       92.00, 360.00, 22.00, 90.00, 340.00, 25.00, 88.00, 320.00, 28.00],
   ];
   const scoreNotes = [
     ["NOT: Kurum Kodu zorunludur, diğer alanlar opsiyoneldir"],
@@ -102,7 +102,7 @@ export async function GET(_req: NextRequest) {
     ["NOT: Meslek Alanı doluysa o alana özel puan kaydedilir (aynı okul için birden fazla satır olabilir)"],
     ["NOT: Sadece dolu alanlar güncellenir; boş bırakılanlar mevcut değeri korur"],
     ["NOT: Ondalık sayılar için nokta (.) kullanın"],
-    ["NOT: Yüzdelik dilim 0-100 arasında olmalıdır"],
+    ["NOT: OBP ve yüzdelik 0-100, LGS 0-500 arasında olmalıdır"],
   ];
   const wsScore = XLSX.utils.aoa_to_sheet([scoreHeaders, ...scoreExamples, [], ...scoreNotes]);
   wsScore["!cols"] = [
@@ -122,7 +122,7 @@ export async function GET(_req: NextRequest) {
   ];
   const facilityNotes = [
     ["NOT: Tesisler virgülle ayrılmış tek satırda yazılır"],
-    ["NOT: Tesis adları sistemdeki adlarla eşleşmelidir"],
+    ["NOT: Bir tesis eşleşmezse o okulun yüklemesi yapılmaz; mevcut tesisler korunur"],
     ["NOT: Mevcut tesisler silinip yenileri eklenir"],
     ["NOT: Büyük/küçük harf fark etmez"],
   ];

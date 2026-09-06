@@ -12,7 +12,7 @@ export async function markMessageStatus(
   const { error } = await supabase
     .from("contact_messages")
     .update({ status })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) throw new Error(error.message);
 
