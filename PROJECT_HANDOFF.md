@@ -235,3 +235,11 @@ Okul listesi sayfalı kompakt aday sorgusuyla tüm adayları değerlendirip yaln
 Ana sayfa ölçeği tüm puan kayıtlarını çizer; aralık/ilçe/tür sayacı benzersiz okul sayar. Tam aralık seçimi de URL'ye taşınır; puanı olmayan okullar yanlışlıkla arama sonucuna eklenmez. LGS için ayrı sıralama seçenekleri eklendi.
 
 Doğrulama: 25 test başarılı (8 yeni puan testi), değişen dosyalarda ESLint temiz, üretim derlemesi başarılı. Gerçek verilerle yerel /okullar önizlemesi ve masaüstü/mobil görünüm kontrol edildi. %15–25 sorgusunda 2025 yılı için 6 okul ve sıralı değerler görüldü; OBP sıralaması ayrıca gözlendi. Veritabanı değişikliği/migration yok. Bu ikinci aşama henüz commit veya canlı dağıtım yapılmadan yerel çalışma ağacındadır. Önizleme: localhost:3105.
+
+## 16. Program puanları canlıda — 7 Eylül 2026
+
+**Güncel karar: Kullanıcı bu düzenlemeyi beğenmedi ve geri alınmasını istedi. Alan/program puanı çözümü ertelendi; aşağıdaki yayın kaydı tarihseldir. Uygulama dosyaları 48991f0 sürümündeki durumuna döndürüldü. Kayıt güvenliği ve canlı veritabanındaki RPC düzeltmeleri korunuyor. Bu soruna kullanıcı yeniden başlamayı istediğinde başka bir yaklaşım geliştirilecek.**
+
+Önceki yerel durum notunun ardından `6a4cebba8b9dbc6fc594eea5216df5b37050b455` GitHub main dalına gönderildi. Hostinger paneli bu sürüm için **Tamamlandı**, **2026-09-07 09:49**, **1m 42s**, Node **22.x** gösterdi. Yayın öncesi 25 test ve değişen dosyaların ESLint kontrolü tekrar geçti.
+
+Canlı `/okullar?yuzdelik_min=15&yuzdelik_max=25&siralama=yuzdelik_asc` ekranında 2025 yılı, 6 okul, artan yüzdelikler (15,04; 15,90; 16,38; 16,39; 20,93; 21,81), ayrı LGS değerleri ve “Sıralamada bu kayıt esas alındı” açıklamaları doğrulandı. Çok alanlı kayıt eşleşmesinin kapsamlı doğrulaması birim testlerinde; bu canlı örnekte puanlar alan belirtilmemiş okul geneli kayıtlarıdır. Yeni veritabanı değişikliği yok. Bu yayın sonrası devir notu yerelde tutulmuştur; uygulama kodu GitHub ve canlıda aynı sürümdedir.

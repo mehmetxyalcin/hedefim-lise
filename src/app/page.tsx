@@ -1,4 +1,3 @@
-import type { ScorePoint } from "@/lib/program-scores";
 import type { Metadata } from "next";
 import { FeatureSection } from "@/components/home/FeatureSection";
 import {
@@ -31,8 +30,8 @@ type LandingData = {
   districtCount: number | null;
   latestYear: number | null;
   featured: FeaturedSchool | null;
-  percentiles: ScorePoint[];
-  obpScores: ScorePoint[];
+  percentiles: number[];
+  obpScores: number[];
 };
 
 async function getLandingData(): Promise<LandingData> {
@@ -42,7 +41,7 @@ async function getLandingData(): Promise<LandingData> {
     // Aktif okullar: toplam sayı + distinct ilçe (ikisi de veriden)
     const { data: activeRows } = await supabase
       .from("schools")
-      .select("id, district, type")
+      .select("id, district")
       .eq("is_active", true);
     const active = activeRows ?? [];
     const schoolCount = active.length > 0 ? active.length : null;
@@ -60,27 +59,43 @@ async function getLandingData(): Promise<LandingData> {
       .limit(1);
     const latestYear = (yearRows?.[0]?.year as number | undefined) ?? null;
 
-    // Every program contributes a point; the client counts distinct schools.
-    const percentiles: ScorePoint[] = [];
-    const obpScores: ScorePoint[] = [];
-    const activeMap = new Map(active.map(r => [r.id, r]));
+    // Ölçek dağılımları: son yıldaki aktif okulların değerleri.
+    // İKİ metrik ayrı ayrı çizilir çünkü okulların çoğu yalnızca birine sahip:
+    // merkezi yerleştirme yüzdelik dilimi, yerel yerleştirme OBP puanı üretir.
+    //
+    // Her iki dağılımda da okul başına TEK değer alınır: okulun EN REKABETÇİ
+    // değeri. Bir okulun aynı yıl içinde meslek alanı başına birden çok kaydı
+    // olabilir; ölçek okulları çizer, kayıtları değil. Rekabetçilik yönü
+    // metriğe göre terstir — yüzdelikte düşük, OBP'de yüksek daha rekabetçi.
+    // /okullar filtresi birebir aynı tanımı kullanır (işaret = listedeki okul).
+    let percentiles: number[] = [];
+    let obpScores: number[] = [];
     if (latestYear != null) {
-      for (let from = 0; ; from += 500) {
-        const { data: distRows, error } = await supabase.from("school_scores")
-          .select("id, school_id, percentile, obp_score").eq("year", latestYear)
-          .order("id").range(from, from + 499);
-        if (error) throw error;
-        for (const r of distRows ?? []) {
-          const school = activeMap.get(r.school_id);
-          if (!school) continue;
-          const point = {schoolId: r.school_id, district: school.district, schoolType: school.type};
-          if (r.percentile != null && Number.isFinite(r.percentile) && r.percentile >= 0 && r.percentile <= 100) percentiles.push({...point, value: r.percentile});
-          if (r.obp_score != null && Number.isFinite(r.obp_score) && r.obp_score >= 0 && r.obp_score <= 100) obpScores.push({...point, value: r.obp_score});
+      const { data: distRows } = await supabase
+        .from("school_scores")
+        .select("school_id, percentile, obp_score")
+        .eq("year", latestYear);
+
+      const lowestPercentile = new Map<number, number>();
+      const highestObp = new Map<number, number>();
+      for (const r of distRows ?? []) {
+        const id = r.school_id as number;
+        if (!activeIds.has(id)) continue;
+
+        const p = r.percentile as number | null;
+        if (p != null && Number.isFinite(p)) {
+          const prev = lowestPercentile.get(id);
+          if (prev == null || p < prev) lowestPercentile.set(id, p);
         }
-        if (!distRows || distRows.length < 500) break;
+
+        const o = r.obp_score as number | null;
+        if (o != null && Number.isFinite(o)) {
+          const prev = highestObp.get(id);
+          if (prev == null || o > prev) highestObp.set(id, o);
+        }
       }
-      percentiles.sort((a,b) => a.value-b.value);
-      obpScores.sort((a,b) => a.value-b.value);
+      percentiles = [...lowestPercentile.values()].sort((a, b) => a - b);
+      obpScores = [...highestObp.values()].sort((a, b) => a - b);
     }
 
     // Öne çıkan okul: son yılın en rekabetçi aktif okulu.

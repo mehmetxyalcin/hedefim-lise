@@ -1,10 +1,9 @@
-import type { ScorePoint } from "@/lib/program-scores";
 import { ScoreScale } from "./ScoreScale";
 
 type HeroProps = {
   latestYear?: number | null;
-  percentiles?: ScorePoint[];
-  obpScores?: ScorePoint[];
+  percentiles?: number[];
+  obpScores?: number[];
 };
 
 // Yön #3 — Yerleştirme Kılavuzu. Afiş ölçeğinde başlık +
