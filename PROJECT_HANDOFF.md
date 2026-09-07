@@ -216,3 +216,22 @@ Ayrıntılı kanıt, dosya checksum'ı ve uygulanma yöntemi `docs/admin-save-ve
 ## 14. Yayın yöntemi — kullanıcı doğrulaması
 
 6 Eylül 2026: Kullanıcı güncel sitenin GitHub üzerinden Hostinger tarafından otomatik çekildiğini doğruladı. Yayın hedefi `origin/main`, canlı adres `https://hedefimlise.com`. Kayıt güvenliği değişiklikleri için ana dala gönderim onaylandı. Dağıtım sonucu ayrıca doğrulanmalıdır.
+
+## Canlı yayın doğrulaması — 6 Eylül 2026
+
+- GitHub `main`: `48991f07cfc18efa96d937e30a3dc48c18eb4678` gönderildi.
+- Hostinger paneli bu commit için **Tamamlandı**, dağıtım zamanı **2026-09-06 16:14**, süre **1m 32s**, Node **22.x** gösterdi.
+- Kullanıcının gerçek yönetici oturumuyla okul listesi ve toplu yükleme ekranı açıldı.
+- CSV önizleme testi: 767380 kurum koduna bilinmeyen tesis verildi. Ekran “bu okul yüklenmeyecek”, “mevcut tesisleri korunacak”, “Güncellenecek okul: 0” gösterdi; “Yükle (0 okul)” devre dışıydı. Kalıcı yazma yapılmadı.
+- Veritabanı kayıt/rollback kontrolleri önceki SQL testleriyle; oturumlu tarayıcı doğrulaması ise erişim ve geçersiz dosyanın önizlemede engellenmesiyle sınırlı. Tarayıcıdan başarılı kalıcı kayıt senaryosu denenmedi.
+- Bu doğrulama notu yayın sonrası yerel olarak eklendi; uygulama sürümü 48991f0'dır. Önceki “henüz commit/deploy edilmedi” ifadeleri tarihsel durumdur.
+
+## 15. Program bazlı puanlar — yerel uygulama
+
+Kullanıcı okul tek kart kalırken alan/program puanlarının ayrı eşleşmesini onayladı. `src/lib/program-scores.ts` filtreleme ve sıralamanın ortak sözleşmesi oldu. Veri kümesindeki en son yıl kullanılır; eski yıla fallback yok. Alan filtresi seçiliyse yalnız o alanın puanı kullanılır; alan belirtilmeyen kayıt alanlara kopyalanmaz. Aynı anda OBP ve yüzdelik aralığı verilirse aynı kayıt ikisini de sağlamalıdır. Sıralama yalnız eşleşen kayıtlar arasından yönüne göre değer seçer; eksik metrik en sona gider, eşitlik okul adı/ID ile çözülür.
+
+Okul listesi sayfalı kompakt aday sorgusuyla tüm adayları değerlendirip yalnız görünen sayfanın ayrıntılarını getirir. Geçersiz yüksek sayfa numarası veriye erişmeden önce sınırlandırılır. Kartlarda yıl, alan adı, ayrı OBP/LGS/yüzdelik değerleri ve sıralamada kullanılan kayıt gösterilir. Üçten fazla eşleşme ve diğer kayıtlar açılır bölümde. Puan tablosunda alan belirtilmeyen kayıtlar “Okul geneli (alan belirtilmemiş)” olarak kalır; ayrı yerleştirme programı oldukları varsayılmaz.
+
+Ana sayfa ölçeği tüm puan kayıtlarını çizer; aralık/ilçe/tür sayacı benzersiz okul sayar. Tam aralık seçimi de URL'ye taşınır; puanı olmayan okullar yanlışlıkla arama sonucuna eklenmez. LGS için ayrı sıralama seçenekleri eklendi.
+
+Doğrulama: 25 test başarılı (8 yeni puan testi), değişen dosyalarda ESLint temiz, üretim derlemesi başarılı. Gerçek verilerle yerel /okullar önizlemesi ve masaüstü/mobil görünüm kontrol edildi. %15–25 sorgusunda 2025 yılı için 6 okul ve sıralı değerler görüldü; OBP sıralaması ayrıca gözlendi. Veritabanı değişikliği/migration yok. Bu ikinci aşama henüz commit veya canlı dağıtım yapılmadan yerel çalışma ağacındadır. Önizleme: localhost:3105.

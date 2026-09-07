@@ -36,3 +36,12 @@ Tek okul formunda tesis ve meslek alanı/dal değiştirme işlemleri birlikte ge
 - Canlıda `supabase_migrations.schema_migrations` tablosu bulunmuyor. Bu uygulama CLI `db query` ile yapıldı; migration geçmişi oluşturulmadı. İleride geçmişi eşleştirmeden toplu `db push` yapma.
 - Önce/sonra güvenlik danışmanı aynı tek uyarıyı verdi: sızdırılmış parola koruması kapalı. Yeni veritabanı güvenlik bulgusu raporlanmadı; Auth ayarı değiştirilmedi.
 - **Uygulama kodu henüz dağıtılmadı ve commit edilmedi.** Kalan adım, değişen uygulama sürümünü yayımlamak ve oturumlu yönetim ekranında uçtan uca doğrulamaktır.
+
+## Canlı yayın doğrulaması — 6 Eylül 2026
+
+- GitHub `main`: `48991f07cfc18efa96d937e30a3dc48c18eb4678` gönderildi.
+- Hostinger paneli bu commit için **Tamamlandı**, dağıtım zamanı **2026-09-06 16:14**, süre **1m 32s**, Node **22.x** gösterdi.
+- Kullanıcının gerçek yönetici oturumuyla okul listesi ve toplu yükleme ekranı açıldı.
+- CSV önizleme testi: 767380 kurum koduna bilinmeyen tesis verildi. Ekran “bu okul yüklenmeyecek”, “mevcut tesisleri korunacak”, “Güncellenecek okul: 0” gösterdi; “Yükle (0 okul)” devre dışıydı. Kalıcı yazma yapılmadı.
+- Veritabanı kayıt/rollback kontrolleri önceki SQL testleriyle; oturumlu tarayıcı doğrulaması ise erişim ve geçersiz dosyanın önizlemede engellenmesiyle sınırlı. Tarayıcıdan başarılı kalıcı kayıt senaryosu denenmedi.
+- Bu doğrulama notu yayın sonrası yerel olarak eklendi; uygulama sürümü 48991f0'dır. Önceki “henüz commit/deploy edilmedi” ifadeleri tarihsel durumdur.

@@ -4,6 +4,7 @@ import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
 import { SchoolList } from "@/components/schools/SchoolList";
+import { matchingPrograms, rankingValue, type ScoreCriteria } from "@/lib/program-scores";
 import { Pagination } from "@/components/schools/Pagination";
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ function parseLimit(raw: string | undefined): ValidLimit {
   return (VALID_LIMITS as readonly number[]).includes(n) ? (n as ValidLimit) : 20;
 }
 
-const SCORE_SORTS = ["yuzdelik_asc", "yuzdelik_desc", "obp_desc", "obp_asc"] as const;
+const SCORE_SORTS = ["yuzdelik_asc", "yuzdelik_desc", "obp_desc", "obp_asc", "lgs_asc", "lgs_desc"] as const;
 type ScoreSort = (typeof SCORE_SORTS)[number];
 
 function isScoreSort(s: string): s is ScoreSort {
@@ -79,230 +80,67 @@ export default async function OkullarPage({ searchParams }: Props) {
   const obpMax = parseRangeParam(params.obp_max);
   const hasObpRange = obpMin != null && obpMax != null && obpMin <= obpMax;
   const limit = parseLimit(params.limit);
-  const sayfa = Math.max(Number(params.sayfa) || 1, 1);
-  const offset = (sayfa - 1) * limit;
+  const sayfa = Math.max(Math.floor(Number(params.sayfa)) || 1, 1);
 
   const supabase = await createClient();
 
-  // Step 1: When a vocational field is selected, resolve which school IDs have it.
-  // This runs before the main query so count and offset are computed against the
-  // correct subset (a join select would inflate the row count per school).
-  let schoolIdFilter: number[] | null = null;
-  if (alan) {
-    const { data: svfData } = await supabase
-      .from("school_vocational_fields")
-      .select("school_id")
-      .eq("vocational_field_id", Number(alan));
-    schoolIdFilter = (svfData ?? []).map((r) => r.school_id as number);
+  const { data: yearRows, error: yearError } = await supabase.from("school_scores")
+    .select("year").order("year", { ascending: false }).limit(1);
+  const scoreYear = yearRows?.[0]?.year ?? null;
+  const criteria: ScoreCriteria = {
+    year: scoreYear,
+    fieldId: alan ? Number(alan) : null,
+    percentile: hasYuzdelikRange ? [yuzdelikMin!, yuzdelikMax!] : null,
+    obp: hasObpRange ? [obpMin!, obpMax!] : null,
+    sort: siralama,
+  };
+  const { data: fieldRows, error: fieldsError } = await supabase.from("vocational_fields").select("*").order("title");
+  if (yearError || fieldsError) return <h1>Veriler yüklenemedi. Lütfen tekrar deneyin.</h1>;
+  const vocationalFields = (fieldRows ?? []).map(mapVocationalField);
+
+  // Fetch compact candidates in pages so the API row cap cannot truncate ranking.
+  const candidates: Pick<ReturnType<typeof mapSchool>, "id" | "name" | "scores" | "vocationalFields">[] = [];
+  for (let from = 0; ; from += 500) {
+    let query = supabase.from("schools")
+      .select("id, name, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id), school_vocational_fields(vocational_field_id)")
+      .eq("is_active", true).order("id");
+    if (ara) query = query.regexIMatch("name", buildTurkishNameRegex(ara));
+    if (ilce) query = query.eq("district", ilce);
+    if (tur) query = query.eq("type", tur);
+    if (yerlestirme) query = query.eq("placement_type", yerlestirme);
+    const {data, error} = await query.range(from, from + 499);
+    if (error) return <h1>Veriler yüklenemedi. Lütfen tekrar deneyin.</h1>;
+    for (const row of data ?? []) {
+      // Map only after the complete school is fetched; compact candidates need
+      // just identity, score rows and field membership for filtering/ranking.
+      const candidate = { id: row.id, name: row.name, scores: row.school_scores,
+        vocationalFields: row.school_vocational_fields.map(r => r.vocational_field_id) };
+      if (alan && !candidate.vocationalFields.includes(Number(alan))) continue;
+      if ((hasYuzdelikRange || hasObpRange) && !matchingPrograms(candidate.scores, criteria).length) continue;
+      candidates.push(candidate);
+    }
+    if (!data || data.length < 500) break;
   }
-
-  // Step 1b: Puan aralığı filtreleri. Landing ölçeğiyle AYNI tanım kullanılır:
-  // yalnızca en son yılın (school_scores'taki max year) değerleri ve okul
-  // başına TEK değer — okulun EN REKABETÇİ değeri. Yön metriğe göre terstir:
-  // yüzdelikte en düşük, OBP'de en yüksek. Böylece ölçekte "N okul" diyen tam
-  // aralık, listede de tam olarak N okul döndürür.
-  if (hasYuzdelikRange || hasObpRange) {
-    const { data: yearRows } = await supabase
-      .from("school_scores")
-      .select("year")
-      .order("year", { ascending: false })
-      .limit(1);
-    const scaleYear = (yearRows?.[0]?.year as number | undefined) ?? null;
-
-    type ScoreRow = {
-      school_id: number;
-      percentile: number | null;
-      obp_score: number | null;
-    };
-    const { data: rawScoreRows } = scaleYear
-      ? await supabase
-          .from("school_scores")
-          .select("school_id, percentile, obp_score")
-          .eq("year", scaleYear)
-      : { data: null };
-    const scoreRows = (rawScoreRows ?? []) as ScoreRow[];
-
-    // Bir metriğin aralığını, okul başına en rekabetçi değere göre çözer.
-    const idsInRange = (
-      read: (r: ScoreRow) => number | null,
-      moreCompetitive: (candidate: number, current: number) => boolean,
-      lo: number,
-      hi: number,
-    ): number[] => {
-      const bestBySchool = new Map<number, number>();
-      for (const r of scoreRows) {
-        const v = read(r);
-        if (v == null || !Number.isFinite(v)) continue;
-        const id = r.school_id;
-        const prev = bestBySchool.get(id);
-        if (prev == null || moreCompetitive(v, prev)) bestBySchool.set(id, v);
-      }
-      const out: number[] = [];
-      bestBySchool.forEach((v, id) => {
-        if (v >= lo && v <= hi) out.push(id);
-      });
-      return out;
-    };
-
-    const narrow = (ids: number[]) => {
-      if (schoolIdFilter === null) {
-        schoolIdFilter = ids;
-      } else {
-        const allowed = new Set(ids);
-        schoolIdFilter = schoolIdFilter.filter((id) => allowed.has(id));
-      }
-    };
-
-    if (hasYuzdelikRange) {
-      narrow(
-        idsInRange(
-          (r) => r.percentile,
-          (c, cur) => c < cur, // düşük yüzdelik = daha rekabetçi
-          yuzdelikMin!,
-          yuzdelikMax!,
-        ),
-      );
+  candidates.sort((a,b) => {
+    if (isScoreSort(siralama)) {
+      const av = rankingValue(a.scores ?? [], criteria), bv = rankingValue(b.scores ?? [], criteria);
+      if (av === null && bv !== null) return 1;
+      if (bv === null && av !== null) return -1;
+      if (av !== null && bv !== null && av !== bv) return siralama.endsWith("_desc") ? bv-av : av-bv;
     }
-    if (hasObpRange) {
-      narrow(
-        idsInRange(
-          (r) => r.obp_score,
-          (c, cur) => c > cur, // yüksek OBP = daha rekabetçi
-          obpMin!,
-          obpMax!,
-        ),
-      );
-    }
-  }
-
-  const SCHOOLS_SELECT =
-    "*, school_scores(id, school_id, year, obp_score, lgs_score, percentile), school_vocational_fields(vocational_field_id)";
-
-  // Helper: apply shared filters to any supabase query
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function applyFilters<T extends ReturnType<typeof supabase.from>>(q: any): any {
-    if (ara) q = q.regexIMatch("name", buildTurkishNameRegex(ara));
-    if (ilce) q = q.eq("district", ilce);
-    if (tur) q = q.eq("type", tur);
-    if (yerlestirme) q = q.eq("placement_type", yerlestirme);
-    if (schoolIdFilter !== null) {
-      q = q.in("id", schoolIdFilter!.length > 0 ? schoolIdFilter : [-1]);
-    }
-    return q;
-  }
-
-  const fieldsPromise = supabase.from("vocational_fields").select("*").order("title");
-
-  let schools: ReturnType<typeof mapSchool>[];
-  let totalCount: number;
-  let fieldsResult: Awaited<typeof fieldsPromise>;
-
-  if (!isScoreSort(siralama)) {
-    // ── İsim sıralaması (default): sunucu tarafında sayfalama ──
-    let schoolsQuery = supabase
-      .from("schools")
-      .select(SCHOOLS_SELECT, { count: "exact" })
-      .eq("is_active", true)
-      .order("name");
-    schoolsQuery = applyFilters(schoolsQuery);
-
-    const [schoolsResult, fr] = await Promise.all([
-      schoolsQuery.range(offset, offset + limit - 1),
-      fieldsPromise,
-    ]);
-    fieldsResult = fr;
-
-    if (schoolsResult.error || fieldsResult.error) {
-      return <h1>Veriler yüklenemedi.</h1>;
-    }
-
-    totalCount = schoolsResult.count ?? 0;
-    schools = (schoolsResult.data ?? []).map(mapSchool);
-  } else {
-    // ── Puan sıralaması: önce tüm ID'leri sırala, sonra sayfayı çek ──
-
-    // Step A: Tüm filtreli okul ID'leri
-    let idQuery = supabase.from("schools").select("id").eq("is_active", true);
-    idQuery = applyFilters(idQuery);
-
-    const [idResult, fr] = await Promise.all([idQuery, fieldsPromise]);
-    fieldsResult = fr;
-
-    if (idResult.error || fieldsResult.error) {
-      return <h1>Veriler yüklenemedi.</h1>;
-    }
-
-    const allIds = (idResult.data ?? []).map((r) => r.id as number);
-
-    // Step B: Puan verileri (en son yıl, okul başına tek skor)
-    const { data: scoreData } = allIds.length > 0
-      ? await supabase
-          .from("school_scores")
-          .select("school_id, percentile, obp_score, year")
-          .in("school_id", allIds)
-      : { data: [] as { school_id: number; percentile: number | null; obp_score: number | null; year: number }[] };
-
-    type ScoreEntry = { percentile: number | null; obp_score: number | null };
-    const scoreMap = new Map<number, ScoreEntry>();
-    for (const s of scoreData ?? []) {
-      const id = s.school_id as number;
-      const existing = scoreMap.get(id);
-      // En son yıla ait skoru tut
-      if (!existing || (s.year as number) > ((scoreMap as Map<number, ScoreEntry & { year: number }>).get(id)?.year ?? 0)) {
-        (scoreMap as Map<number, ScoreEntry & { year: number }>).set(id, {
-          percentile: s.percentile,
-          obp_score: s.obp_score,
-          year: s.year as number,
-        });
-      }
-    }
-
-    // Step C: ID'leri sırala
-    const HIGH = 99999;
-    const sortedIds = [...allIds].sort((a, b) => {
-      const aS = scoreMap.get(a);
-      const bS = scoreMap.get(b);
-      if (siralama === "yuzdelik_asc")
-        return (aS?.percentile ?? HIGH) - (bS?.percentile ?? HIGH);
-      if (siralama === "yuzdelik_desc")
-        return (bS?.percentile ?? -1) - (aS?.percentile ?? -1);
-      if (siralama === "obp_desc")
-        return (bS?.obp_score ?? -1) - (aS?.obp_score ?? -1);
-      // obp_asc
-      return (aS?.obp_score ?? HIGH) - (bS?.obp_score ?? HIGH);
-    });
-
-    totalCount = sortedIds.length;
-    const pageIds = sortedIds.slice(offset, offset + limit);
-
-    // Step D: Sayfanın okul detaylarını çek
-    const { data: schoolsData, error: schoolsErr } =
-      pageIds.length > 0
-        ? await supabase
-            .from("schools")
-            .select(SCHOOLS_SELECT)
-            .eq("is_active", true)
-            .in("id", pageIds)
-        : { data: [], error: null };
-
-    if (schoolsErr) {
-      return <h1>Veriler yüklenemedi.</h1>;
-    }
-
-    // Sıralamayı koru
-    const schoolMap = new Map(
-      (schoolsData ?? []).map((s) => [s.id as number, s]),
-    );
-    const orderedData = pageIds
-      .map((id) => schoolMap.get(id))
-      .filter(Boolean) as typeof schoolsData;
-
-    schools = (orderedData ?? []).map(mapSchool);
-  }
-
-  const vocationalFields = (fieldsResult.data ?? []).map(mapVocationalField);
+    return a.name.localeCompare(b.name, "tr") || a.id-b.id;
+  });
+  const totalCount = candidates.length;
   const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
   const currentPage = Math.min(sayfa, totalPages);
+  const offset = (currentPage - 1) * limit;
+  const pageIds = candidates.slice(offset, offset + limit).map(s => s.id);
+  const {data: schoolRows, error: schoolError} = pageIds.length ? await supabase.from("schools")
+    .select("*, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id), school_vocational_fields(vocational_field_id)")
+    .eq("is_active", true).in("id", pageIds) : {data: [], error: null};
+  if (schoolError) return <h1>Veriler yüklenemedi. Lütfen tekrar deneyin.</h1>;
+  const mapped = new Map((schoolRows ?? []).map(row => [row.id, mapSchool(row)]));
+  const schools = pageIds.flatMap(id => mapped.has(id) ? [mapped.get(id)!] : []);
 
   const paginationSearchParams: Record<string, string> = {};
   if (ara) paginationSearchParams.ara = ara;
@@ -383,6 +221,7 @@ export default async function OkullarPage({ searchParams }: Props) {
           yuzdelikMax={hasYuzdelikRange ? yuzdelikMax : null}
           obpMin={hasObpRange ? obpMin : null}
           obpMax={hasObpRange ? obpMax : null}
+          scoreYear={scoreYear}
           schools={schools}
           vocationalFields={vocationalFields}
           totalCount={totalCount}

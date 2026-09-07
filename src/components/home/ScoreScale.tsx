@@ -1,4 +1,6 @@
 "use client";
+import { countMatchingSchools, type ScorePoint } from "@/lib/program-scores";
+
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,8 +10,8 @@ import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 
 type Props = {
-  percentiles: number[]; // sıralı (artan), merkezi yerleştirmeli okulların yüzdelik dilimleri
-  obpScores: number[]; // sıralı (artan), yerel yerleştirmeli okulların OBP puanları
+  percentiles: ScorePoint[]; // sorted program points; schools are deduplicated when counting
+  obpScores: ScorePoint[]; // sorted OBP program points
   latestYear: number | null;
 };
 
@@ -82,10 +84,10 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
   const router = useRouter();
 
   const bounds = useMemo(() => {
-    const of = (vals: number[]) =>
+    const of = (vals: ScorePoint[]) =>
       vals.length === 0
         ? { min: 0, max: 100 }
-        : { min: vals[0], max: vals[vals.length - 1] };
+        : { min: Math.floor(vals[0].value * 100) / 100, max: Math.ceil(vals[vals.length - 1].value * 100) / 100 };
     return { yuzdelik: of(percentiles), obp: of(obpScores) };
   }, [percentiles, obpScores]);
 
@@ -106,7 +108,8 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const cfg = METRICS[metric];
-  const values = metric === "yuzdelik" ? percentiles : obpScores;
+  const points = metric === "yuzdelik" ? percentiles : obpScores;
+  const values = points.filter(p => (!ilce || p.district === ilce) && (!tur || p.schoolType === tur)).map(p => p.value);
   const { min, max } = bounds[metric];
 
   const span = max - min;
@@ -114,10 +117,9 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
   const lowLeft = pctToLeft(low);
   const highLeft = pctToLeft(high);
 
-  const inRangeCount = values.filter((p) => p >= low && p <= high).length;
+  const inRangeCount = countMatchingSchools(points, low, high, ilce, tur);
 
-  // Tam aralık seçiliyse bu bir filtre değildir.
-  const isFullRange = low <= min + 0.001 && high >= max - 0.001;
+
 
   // Metrik değişince aralık yeni ölçeğin uçlarına sıfırlanır: eski metriğin
   // sayıları yeni eksende anlamsızdır (%0,94 ile 0,94 OBP aynı şey değil).
@@ -221,10 +223,8 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
     setError(null);
 
     const params = new URLSearchParams();
-    if (!isFullRange) {
-      params.set(cfg.minParam, String(round2(lowVal)));
-      params.set(cfg.maxParam, String(round2(highVal)));
-    }
+    params.set(cfg.minParam, String(round2(lowVal)));
+    params.set(cfg.maxParam, String(round2(highVal)));
     if (ilce) params.set("ilce", ilce);
     if (tur) params.set("tur", tur);
     params.set("siralama", cfg.sort);
@@ -249,7 +249,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
         {(Object.keys(METRICS) as Metric[]).map((m) => {
           const selected = m === metric;
           const count =
-            m === "yuzdelik" ? percentiles.length : obpScores.length;
+            countMatchingSchools(m === "yuzdelik" ? percentiles : obpScores, 0, 100);
           return (
             <button
               key={m}
@@ -491,7 +491,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
         </p>
       ) : (
         <p className="mt-3 font-mono text-[11px] text-[var(--ink-faint)]">
-          {cfg.scope} Tutamakları sürükleyerek aralık seç; ilçe ve okul türü
+          {cfg.scope} Çizgiler puan kayıtlarını gösterir; her okul bir kez sayılır. Tutamakları sürükleyerek aralık seç; ilçe ve okul türü
           isteğe bağlı daraltır.
         </p>
       )}

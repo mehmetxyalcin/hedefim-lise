@@ -22,6 +22,7 @@ import { SCHOOL_TYPES } from "@/data/schoolTypes";
 import type { School, SchoolScoreRaw } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
 import { BottomSheet } from "@/components/ui/BottomSheet";
+import { matchingPrograms, scoreMetric, validScore, type ScoreCriteria } from "@/lib/program-scores";
 import { Badge } from "@/components/ui/Badge";
 
 const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
@@ -34,6 +35,7 @@ const PLACEMENT_OPTIONS = [
 
 type Props = {
   schools: School[];
+  scoreYear: number | null;
   vocationalFields: VocationalField[];
   totalCount: number;
   startItem: number;
@@ -54,22 +56,43 @@ type Props = {
   obpMax?: number | null;
 };
 
-type DisplayScore = {
-  value: string;
-  label: string;
-  year: number;
-};
-
-function getDisplayScore(scores: SchoolScoreRaw[] | undefined): DisplayScore | null {
-  if (!scores || scores.length === 0) return null;
-  const latest = [...scores].sort((a, b) => b.year - a.year)[0];
-  if (latest.percentile != null) {
-    return { value: `%${latest.percentile.toFixed(2)}`, label: "Yüzdelik Dilim", year: latest.year };
-  }
-  if (latest.obp_score != null) {
-    return { value: latest.obp_score.toFixed(2), label: "OBP Puanı", year: latest.year };
-  }
-  return null;
+function ProgramScores({ school, fields, criteria }: { school: School; fields: VocationalField[]; criteria: ScoreCriteria }) {
+  const scores = school.scores ?? [];
+  const matched = matchingPrograms(scores, criteria);
+  const ids = new Set(matched.map(s => s.id));
+  const others = scores.filter(s => s.year === criteria.year && !ids.has(s.id));
+  const title = (s: SchoolScoreRaw) => s.vocational_field_id == null ? "Okul geneli (alan belirtilmemiş)" :
+    fields.find(f => f.id === s.vocational_field_id)?.title ?? "Adı bulunamayan alan";
+  const fmt = (v: number) => v.toLocaleString("tr-TR", {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  const rows = (values: SchoolScoreRaw[], showRank = false) => values.map((s, index) => (
+    <li key={s.id} className="py-3">
+      <p className="text-sm font-semibold text-slate-800">{title(s)}</p>
+      <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+        {validScore(s.percentile) && <span>Yüzdelik: %{fmt(s.percentile)}</span>}
+        {validScore(s.obp_score) && <span>OBP: {fmt(s.obp_score)}</span>}
+        {validScore(s.lgs_score, 500) && <span>LGS: {fmt(s.lgs_score)}</span>}
+        {!validScore(s.percentile) && !validScore(s.obp_score) && !validScore(s.lgs_score,500) && <span>Puan verisi yok</span>}
+      </p>
+      {showRank && index === 0 && scoreMetric(criteria.sort) && validScore(s[scoreMetric(criteria.sort)!], scoreMetric(criteria.sort) === "lgs_score" ? 500 : 100) &&
+        <p className="mt-1 text-xs text-blue-700">Sıralamada bu kayıt esas alındı.</p>}
+    </li>
+  ));
+  return <div className="mb-4 border-t border-slate-100 pt-3">
+    <p className="text-sm font-medium text-slate-700">{criteria.year ? `${criteria.year} puanları` : "Puan verisi bulunmuyor"}</p>
+    {matched.length > 0 ? <>
+      <ul className="divide-y divide-slate-100">{rows(matched.slice(0, 3), true)}</ul>
+      {matched.length > 3 && <details className="mt-2 text-sm text-slate-600">
+        <summary className="cursor-pointer py-2 font-medium">Diğer eşleşen kayıtlar ({matched.length - 3})</summary>
+        <ul className="divide-y divide-slate-100">{rows(matched.slice(3))}</ul>
+      </details>}
+    </> :
+      <p className="mt-2 text-sm text-slate-500">{criteria.fieldId ? "Seçilen alan için bu yılın puanı yok." : "Bu yılın puanı yok."} Önceki yıllar okul detayında.</p>}
+    {others.length > 0 && <details className="mt-2 text-sm text-slate-600">
+      <summary className="cursor-pointer py-2 font-medium">Diğer puan kayıtları ({others.length})</summary>
+      <p className="text-xs">Bu kayıtlar mevcut filtrelere göre sıralamada kullanılmaz.</p>
+      <ul className="divide-y divide-slate-100">{rows(others)}</ul>
+    </details>}
+  </div>;
 }
 
 const SORT_OPTIONS = [
@@ -78,10 +101,13 @@ const SORT_OPTIONS = [
   { value: "yuzdelik_desc", label: "Yüzdelik: Yüksekten Düşüğe" },
   { value: "obp_desc", label: "OBP: Yüksekten Düşüğe" },
   { value: "obp_asc", label: "OBP: Düşükten Yükseğe" },
+  { value: "lgs_desc", label: "LGS: Yüksekten Düşüğe" },
+  { value: "lgs_asc", label: "LGS: Düşükten Yükseğe" },
 ] as const;
 
 export function SchoolList({
   schools,
+  scoreYear,
   vocationalFields,
   totalCount,
   startItem,
@@ -101,6 +127,10 @@ export function SchoolList({
   obpMax = null,
 }: Props) {
   const router = useRouter();
+  const criteria: ScoreCriteria = { year: scoreYear, fieldId: initialAlan ? Number(initialAlan) : null,
+    percentile: yuzdelikMin != null && yuzdelikMax != null ? [yuzdelikMin, yuzdelikMax] : null,
+    obp: obpMin != null && obpMax != null ? [obpMin, obpMax] : null, sort: initialSiralama };
+
 
   const [search, setSearch] = useState(initialSearch);
   const [ilce, setIlce] = useState(initialIlce);
@@ -443,11 +473,14 @@ export function SchoolList({
             </div>
           </div>
 
+          <p className="mb-4 text-sm leading-relaxed text-slate-600">
+            {scoreYear ? `${scoreYear} verileri kullanılıyor.` : "Puan verisi bulunmuyor."} Her okul bir kez listelenir; puan filtreleri aynı alanın kaydına uygulanır. Puanı olmayan okullar puan sıralamasında sonda yer alır.
+          </p>
           <div className="grid gap-5">
             {filteredSchools.map((school) => (
               <div
                 key={school.id}
-                className="group relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 sm:flex-row sm:p-6"
+                className="group relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 sm:p-6"
               >
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -470,7 +503,7 @@ export function SchoolList({
                   </div>
 
                   <Link href={`/okullar/${school.slug}`}>
-                    <h3 className="mb-2 line-clamp-1 text-xl font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 group-hover:text-blue-600 sm:text-2xl">
+                    <h3 className="mb-2 line-clamp-2 text-xl font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 group-hover:text-blue-600 sm:text-2xl">
                       {school.name}
                     </h3>
                   </Link>
@@ -479,6 +512,7 @@ export function SchoolList({
                     {school.description}
                   </p>
 
+                  <ProgramScores school={school} fields={vocationalFields} criteria={criteria} />
                   <div className="mt-auto flex flex-wrap gap-2">
                     {school.features.slice(0, 3).map((feature) => (
                       <span key={feature} className="flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1.5 text-[11px] font-semibold text-slate-600">
@@ -489,26 +523,10 @@ export function SchoolList({
                   </div>
                 </div>
 
-                <div className="relative flex shrink-0 flex-col justify-between border-t border-slate-100 pt-5 sm:w-48 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
-                  {(() => {
-                    const score = getDisplayScore(school.scores);
-                    return (
-                      <div className="relative mb-4 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/40">
-                        {score ? (
-                          <>
-                            <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">{score.label}</span>
-                            <span className="text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{score.value}</span>
-                            <span className="mt-1 text-[10px] text-slate-400">{score.year}</span>
-                          </>
-                        ) : (
-                          <span className="text-xs text-slate-400">Veri yok</span>
-                        )}
-                      </div>
-                    );
-                  })()}
+                <div className="flex justify-end border-t border-slate-100 pt-4">
                   <Link
                     href={`/okullar/${school.slug}`}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-blue-600/40"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 sm:w-auto text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-blue-600/40"
                   >
                     Detaylı İncele
                     <ArrowRight className="h-4 w-4" />
