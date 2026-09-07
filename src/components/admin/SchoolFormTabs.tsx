@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { startTransition, useActionState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
@@ -198,7 +198,12 @@ export function SchoolFormTabs({
 
       {/* Ana form (Tab 1, 2, 8 için) */}
       {isMainSaveTab && (
-        <form action={mainSaveAction()} data-admin-school-form="true" className="space-y-6">
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          const dispatch = mainSaveAction();
+          startTransition(() => dispatch(data));
+        }} action={mainSaveAction()} data-admin-school-form="true" className="space-y-6">
           <UnsavedChangesWarning />
           {school && <input type="hidden" name="id" value={school.id} />}
           {school && <input type="hidden" name="school_id" value={school.id} />}

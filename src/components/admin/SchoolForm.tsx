@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import type { ActionResult } from "@/app/admin/okullar/actions";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
@@ -68,7 +68,11 @@ export function SchoolForm({
     : "Kaydettiğinizde yeni okul admin listesine eklenir.";
 
   return (
-    <form action={dispatch} className="space-y-6" data-admin-school-form="true">
+    <form onSubmit={(event) => {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      startTransition(() => dispatch(data));
+    }} action={dispatch} className="space-y-6" data-admin-school-form="true">
       <UnsavedChangesWarning />
       {result && (
         <p role={result.success ? "status" : "alert"} className={`rounded-xl px-4 py-3 text-sm font-medium ${result.success ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>
