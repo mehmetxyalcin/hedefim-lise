@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { validateAdminValues, managementRules } from "@/lib/admin-form-validation";
 import { requireAdmin } from "@/lib/admin-auth";
 
 function slugify(s: string): string {
@@ -22,8 +23,10 @@ function slugify(s: string): string {
 
 export async function addVocationalField(name: string): Promise<void> {
   const { supabase } = await requireAdmin();
+  const validationError = validateAdminValues({ name }, { name: managementRules.field.name });
+  if (validationError) throw new Error(validationError);
   const trimmed = name.trim();
-  if (!trimmed) throw new Error("Meslek alanı adı zorunludur.");
+  if (!slugify(trimmed)) throw new Error("Meslek alanı adı harf veya rakam içermelidir.");
 
   const { error } = await supabase
     .from("vocational_fields")
@@ -39,8 +42,10 @@ export async function addVocationalField(name: string): Promise<void> {
 
 export async function updateVocationalField(id: string, name: string): Promise<void> {
   const { supabase } = await requireAdmin();
+  const validationError = validateAdminValues({ id, name }, managementRules.field);
+  if (validationError) throw new Error(validationError);
   const trimmed = name.trim();
-  if (!trimmed) throw new Error("Meslek alanı adı zorunludur.");
+  if (!slugify(trimmed)) throw new Error("Meslek alanı adı harf veya rakam içermelidir.");
 
   const { error } = await supabase
     .from("vocational_fields")
@@ -57,6 +62,8 @@ export async function updateVocationalField(id: string, name: string): Promise<v
 
 export async function deleteVocationalField(id: string): Promise<void> {
   const { supabase } = await requireAdmin();
+  const validationError = validateAdminValues({ id }, { id: managementRules.field.id });
+  if (validationError) throw new Error(validationError);
 
   // Existing FK cascades commit or fail together with the parent deletion.
   const { error } = await supabase.from("vocational_fields").delete().eq("id", id).select("id").single();
@@ -68,6 +75,8 @@ export async function deleteVocationalField(id: string): Promise<void> {
 
 export async function addBranch(vocationalFieldId: string, name: string): Promise<void> {
   const { supabase } = await requireAdmin();
+  const validationError = validateAdminValues({ vocationalFieldId, name }, managementRules.newBranch);
+  if (validationError) throw new Error(validationError);
   const trimmed = name.trim();
   if (!trimmed) throw new Error("Dal adı zorunludur.");
 
@@ -84,6 +93,8 @@ export async function addBranch(vocationalFieldId: string, name: string): Promis
 
 export async function updateBranch(id: string, name: string): Promise<void> {
   const { supabase } = await requireAdmin();
+  const validationError = validateAdminValues({ id, name }, managementRules.branch);
+  if (validationError) throw new Error(validationError);
   const trimmed = name.trim();
   if (!trimmed) throw new Error("Dal adı zorunludur.");
 
@@ -101,6 +112,8 @@ export async function updateBranch(id: string, name: string): Promise<void> {
 
 export async function deleteBranch(id: string): Promise<void> {
   const { supabase } = await requireAdmin();
+  const validationError = validateAdminValues({ id }, { id: managementRules.branch.id });
+  if (validationError) throw new Error(validationError);
 
   const { error } = await supabase.from("vocational_branches").delete().eq("id", id).select("id").single();
 

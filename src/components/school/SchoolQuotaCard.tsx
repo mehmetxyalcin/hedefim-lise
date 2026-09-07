@@ -13,12 +13,11 @@ type SchoolQuota = {
 type Props = { quotas: SchoolQuota[] };
 
 export function SchoolQuotaCard({ quotas }: Props) {
-  if (!quotas || quotas.length === 0) return null;
-
-  const sorted = [...quotas].sort((a, b) => b.year - a.year);
-
-  const [activeYear, setActiveYear] = useState(sorted[0].year);
-  const active = sorted.find((q) => q.year === activeYear)!;
+  const [selectedYear, setActiveYear] = useState<number | null>(null);
+  const sorted = [...(quotas ?? [])].sort((a, b) => b.year - a.year);
+  const active = sorted.find((q) => q.year === selectedYear) ?? sorted[0];
+  if (!active) return null;
+  const activeYear = active.year;
 
   return (
     <SectionCard icon={Users} title="Kontenjan Bilgileri">
@@ -28,6 +27,7 @@ export function SchoolQuotaCard({ quotas }: Props) {
           <button
             key={q.year}
             type="button"
+            aria-pressed={activeYear === q.year}
             onClick={() => setActiveYear(q.year)}
             className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-all duration-150 ${
               activeYear === q.year

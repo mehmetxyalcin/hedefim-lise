@@ -1,3 +1,7 @@
+"use client";
+
+import { useActionState } from "react";
+import type { ActionResult } from "@/app/admin/okullar/actions";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { SubmitButton } from "@/components/ui/SubmitButton";
@@ -9,8 +13,7 @@ import type { VocationalField } from "@/types/vocationalField";
 import type { ReactNode } from "react";
 
 type SchoolFormProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  action: (formData: FormData) => any;
+  action: (formData: FormData) => Promise<ActionResult>;
   cancelHref?: string;
   publicHref?: string;
   school?: School;
@@ -55,14 +58,23 @@ export function SchoolForm({
   submitLabel,
   vocationalFields,
 }: SchoolFormProps) {
+  const [result, dispatch] = useActionState(
+    (_previous: ActionResult | null, data: FormData) => action(data),
+    null,
+  );
   const actionTitle = school ? "Değişiklikleri kaydet" : "Okulu kaydet";
   const actionDescription = school
     ? "Kaydettiğinizde admin listesi ve public okul sayfaları yeniden doğrulanır."
     : "Kaydettiğinizde yeni okul admin listesine eklenir.";
 
   return (
-    <form action={action} className="space-y-6" data-admin-school-form="true">
+    <form action={dispatch} className="space-y-6" data-admin-school-form="true">
       <UnsavedChangesWarning />
+      {result && (
+        <p role={result.success ? "status" : "alert"} className={`rounded-xl px-4 py-3 text-sm font-medium ${result.success ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"}`}>
+          {result.message}
+        </p>
+      )}
       {school && <input type="hidden" name="id" value={school.id} />}
 
       <FormSection

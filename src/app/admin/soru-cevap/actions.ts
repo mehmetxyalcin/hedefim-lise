@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { validateAdminForm, contentFormRules } from "@/lib/admin-form-validation";
 import { requireAdmin } from "@/lib/admin-auth";
 
 const REDIRECT_PATH = "/admin/soru-cevap";
@@ -35,6 +36,9 @@ export async function createFaq(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.createFaq);
+  if (validationError) redirect(`${REDIRECT_PATH}?error=${encodeURIComponent(validationError)}`);
+
   const question = requiredText(formData, "question", "Soru");
   const answer = requiredText(formData, "answer", "Yanıt");
   const category = requiredText(formData, "category", "Kategori");
@@ -65,6 +69,9 @@ export async function updateFaq(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.updateFaq);
+  if (validationError) redirect(`${REDIRECT_PATH}?error=${encodeURIComponent(validationError)}`);
+
   const id = requiredText(formData, "id", "Kayıt");
   const question = requiredText(formData, "question", "Soru");
   const answer = requiredText(formData, "answer", "Yanıt");
@@ -84,7 +91,7 @@ export async function updateFaq(formData: FormData) {
       source_page: sourcePage,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${REDIRECT_PATH}?error=${encodeURIComponent(error.message)}`);
@@ -100,8 +107,11 @@ export async function deleteFaq(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.deleteFaq);
+  if (validationError) redirect(`${REDIRECT_PATH}?error=${encodeURIComponent(validationError)}`);
+
   const id = requiredText(formData, "id", "Kayıt");
-  const { error } = await supabase.from("faqs").delete().eq("id", id);
+  const { error } = await supabase.from("faqs").delete().eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${REDIRECT_PATH}?error=${encodeURIComponent(error.message)}`);

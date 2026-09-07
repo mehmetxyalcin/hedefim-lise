@@ -243,3 +243,15 @@ Doğrulama: 25 test başarılı (8 yeni puan testi), değişen dosyalarda ESLint
 Önceki yerel durum notunun ardından `6a4cebba8b9dbc6fc594eea5216df5b37050b455` GitHub main dalına gönderildi. Hostinger paneli bu sürüm için **Tamamlandı**, **2026-09-07 09:49**, **1m 42s**, Node **22.x** gösterdi. Yayın öncesi 25 test ve değişen dosyaların ESLint kontrolü tekrar geçti.
 
 Canlı `/okullar?yuzdelik_min=15&yuzdelik_max=25&siralama=yuzdelik_asc` ekranında 2025 yılı, 6 okul, artan yüzdelikler (15,04; 15,90; 16,38; 16,39; 20,93; 21,81), ayrı LGS değerleri ve “Sıralamada bu kayıt esas alındı” açıklamaları doğrulandı. Çok alanlı kayıt eşleşmesinin kapsamlı doğrulaması birim testlerinde; bu canlı örnekte puanlar alan belirtilmemiş okul geneli kayıtlarıdır. Yeni veritabanı değişikliği yok. Bu yayın sonrası devir notu yerelde tutulmuştur; uygulama kodu GitHub ve canlıda aynı sürümdedir.
+
+## 17. Kontenjan bileşeni ve yönetim form kontrolleri — 8 Eylül 2026
+
+Kullanıcı sıradaki iki işi sormadan tamamlayıp yayımlamamızı istedi. Çok alanlı puan/sıralama çözümü ertelenmiş olarak kalır; geri alma sürümü edf748a korunarak aşağıdaki iki iş uygulanmıştır.
+
+- SchoolQuotaCard hook'u her render'da çağrılır; boş veri null döner. Seçili yıl artık yoksa mevcut en yeni yıl gösterilir. Görünüm korunur; yıl düğmelerine aria-pressed eklendi.
+- admin-form-validation.ts ortak sunucu kontrolleri: zorunlu metinler, metin uzunlukları, okul türü/ilçe/yerleştirme/pansiyon seçenekleri, kimlik ve çoklu seçimler, saatler, telefon/e-posta, güvenli bağlantılar, dosya türü/boyutu ve puan/kontenjan aralıkları. Geçersiz çoklu seçimler sessizce atılmaz. Boş alan/dal seçimi hâlâ bilinçli temizleme sağlar.
+- Okul, burs/proje, tesis/alan/dal, SSS, site/menü/footer/sosyal bağlantı ve mesaj durumu action'ları yetki kontrolünün ardından yazma başlamadan doğrulanır. Puan alanının seçili okula bağlı olduğu doğrulanır. Tamamen boş puan/kontenjan yerine açıklayıcı hata; sıfır geçerlidir.
+- Burs/proje güncelleme ve silme school_id ile de sınırlandırılır. SSS/menü/link güncelleme-silmede hiç kayıt etkilenmemesi başarı sayılmaz. Eski SchoolForm dönen action mesajını artık gösterir; bu, eski/yeni ekranların tüm kayıt davranışlarını birleştirme çalışması değildir.
+- 30 test geçti: gerçek React DOM ile boş→dolu→yıl değiştirme→seçili yılı kaldırma→boş veri, sunucu action'larında hatalı girişte sıfır yazma, geçerli girişler, alan-okul ilişkisi ve başarısız kayıt senaryoları. jsdom 26.1.0 yalnız geliştirme/test bağımlılığı olarak sabitlendi.
+- TypeScript, değişen dosyaların ESLint kontrolü ve üretim derlemesi başarılı. Veritabanı şema/migration değişikliği yok. Testlerde kalıcı canlı okul oluşturulmadı/değiştirilmedi.
+- Kalan işler: eski/yeni yönetim yollarının tüm kayıt kapsamını uyumlama ve proje genelindeki önceki lint borcu. Bu çalışmada sıralama işlemlerinin çoklu yazma atomikliği veya yüklenen dosyaların yaşam döngüsü yeniden tasarlanmadı.

@@ -209,12 +209,12 @@ export function SchoolFormTabs({
 
           {/* Başarı / Hata mesajı */}
           {activeState()?.success === true && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
               ✓ {activeState()!.message}
             </div>
           )}
           {activeState()?.success === false && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+            <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
               ✗ {activeState()!.message}
             </div>
           )}
@@ -317,7 +317,7 @@ export function SchoolFormTabs({
             Bu sekme yalnızca okul kaydedildikten sonra kullanılabilir.
           </p>
           <p className="mt-1 text-xs text-amber-600">
-            Önce "Temel Bilgiler" sekmesinden okulu kaydedin.
+            Önce &quot;Temel Bilgiler&quot; sekmesinden okulu kaydedin.
           </p>
         </div>
       )}

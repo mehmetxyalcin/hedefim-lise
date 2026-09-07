@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { validateAdminForm, contentFormRules } from "@/lib/admin-form-validation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { SITE_SETTINGS_ID, FOOTER_SETTINGS_ID } from "@/lib/site-settings";
 
@@ -77,6 +78,9 @@ export async function updateSiteSettings(formData: FormData) {
   const { supabase, user, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.updateSiteSettings);
+  if (validationError) redirect(`/admin/site-settings?error=${encodeURIComponent(validationError)}`);
+
   const redirectPath = "/admin/site-settings";
   const site_title = getRequired(formData, "site_title", "Site başlığı", redirectPath);
   const logo_alt = getRequired(formData, "logo_alt", "Logo alt metni", redirectPath);
@@ -128,6 +132,9 @@ export async function createNavigationItem(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.createNavigationItem);
+  if (validationError) redirect(`/admin/site-settings/navigation?error=${encodeURIComponent(validationError)}`);
+
   const label = getRequired(formData, "label", "Etiket", NAV_REDIRECT);
   const href = getRequired(formData, "href", "Bağlantı", NAV_REDIRECT);
   const target = String(formData.get("target") ?? "_self");
@@ -176,6 +183,9 @@ export async function updateNavigationItem(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.updateNavigationItem);
+  if (validationError) redirect(`/admin/site-settings/navigation?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "").trim();
   if (!id) redirect(`${NAV_REDIRECT}?error=${encodeURIComponent("Geçersiz kayıt.")}`);
 
@@ -201,7 +211,7 @@ export async function updateNavigationItem(formData: FormData) {
   const { error } = await supabase
     .from("navigation_items")
     .update({ label, href, target, is_visible, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${NAV_REDIRECT}?error=${encodeURIComponent(error.message)}`);
@@ -217,13 +227,16 @@ export async function deleteNavigationItem(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.deleteNavigationItem);
+  if (validationError) redirect(`/admin/site-settings/navigation?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "").trim();
   if (!id) redirect(`${NAV_REDIRECT}?error=${encodeURIComponent("Geçersiz kayıt.")}`);
 
   const { error } = await supabase
     .from("navigation_items")
     .delete()
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${NAV_REDIRECT}?error=${encodeURIComponent(error.message)}`);
@@ -238,6 +251,9 @@ export async function deleteNavigationItem(formData: FormData) {
 export async function moveNavigationItem(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, contentFormRules.moveNavigationItem);
+  if (validationError) redirect(`/admin/site-settings/navigation?error=${encodeURIComponent(validationError)}`);
 
   const id = String(formData.get("id") ?? "").trim();
   const direction = String(formData.get("direction") ?? "");
@@ -287,6 +303,9 @@ export async function toggleNavigationItemVisibility(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.toggleNavigationItemVisibility);
+  if (validationError) redirect(`/admin/site-settings/navigation?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "").trim();
   const is_visible = formData.get("is_visible") === "true";
 
@@ -295,7 +314,7 @@ export async function toggleNavigationItemVisibility(formData: FormData) {
   const { error } = await supabase
     .from("navigation_items")
     .update({ is_visible, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${NAV_REDIRECT}?error=${encodeURIComponent(error.message)}`);
@@ -316,6 +335,9 @@ const FOOTER_REDIRECT = "/admin/site-settings/footer";
 export async function updateFooterSettings(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, contentFormRules.updateFooterSettings);
+  if (validationError) redirect(`/admin/site-settings/footer?error=${encodeURIComponent(validationError)}`);
 
   const copyright_text = getRequired(
     formData,
@@ -350,6 +372,9 @@ export async function updateFooterSectionTitle(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.updateFooterSectionTitle);
+  if (validationError) redirect(`/admin/site-settings/footer?error=${encodeURIComponent(validationError)}`);
+
   const partners_title = getRequired(
     formData,
     "partners_title",
@@ -380,6 +405,9 @@ export async function updateFooterSectionTitle(formData: FormData) {
 export async function createFooterLink(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, contentFormRules.createFooterLink);
+  if (validationError) redirect(`/admin/site-settings/footer?error=${encodeURIComponent(validationError)}`);
 
   const sectionTitle = getRequired(
     formData,
@@ -441,10 +469,13 @@ export async function deleteFooterLink(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.deleteFooterLink);
+  if (validationError) redirect(`/admin/site-settings/footer?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "").trim();
   if (!id) redirect(FOOTER_REDIRECT);
 
-  const { error } = await supabase.from("footer_links").delete().eq("id", id);
+  const { error } = await supabase.from("footer_links").delete().eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${FOOTER_REDIRECT}?error=${encodeURIComponent(error.message)}`);
@@ -459,6 +490,9 @@ export async function deleteFooterLink(formData: FormData) {
 export async function createSocialLink(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, contentFormRules.createSocialLink);
+  if (validationError) redirect(`/admin/site-settings/footer?error=${encodeURIComponent(validationError)}`);
 
   const platform = getRequired(formData, "platform", "Platform", FOOTER_REDIRECT);
   const url = getRequired(formData, "url", "URL", FOOTER_REDIRECT);
@@ -491,13 +525,16 @@ export async function deleteSocialLink(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, contentFormRules.deleteSocialLink);
+  if (validationError) redirect(`/admin/site-settings/footer?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "").trim();
   if (!id) redirect(FOOTER_REDIRECT);
 
   const { error } = await supabase
     .from("footer_social_links")
     .delete()
-    .eq("id", id);
+    .eq("id", id).select("id").single();
 
   if (error) {
     redirect(`${FOOTER_REDIRECT}?error=${encodeURIComponent(error.message)}`);

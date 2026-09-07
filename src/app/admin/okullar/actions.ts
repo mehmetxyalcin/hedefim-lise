@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { validateAdminForm, schoolFormRules } from "@/lib/admin-form-validation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { parseImportNumber } from "@/lib/import-validation";
 
@@ -52,26 +53,6 @@ function normalizeSlug(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
-}
-
-function normalizePercentile(value: string, redirectPath: string) {
-  const normalized = value.trim().replace(",", ".");
-
-  if (!/^(?:100(?:\.0{1,2})?|\d{1,2}(?:\.\d{1,2})?)$/.test(normalized)) {
-    redirect(
-      `${redirectPath}?error=${encodeURIComponent("Yüzdelik 0-100 arasında sayısal bir değer olmalıdır.")}`,
-    );
-  }
-
-  const numericValue = Number(normalized);
-
-  if (Number.isNaN(numericValue) || numericValue < 0 || numericValue > 100) {
-    redirect(
-      `${redirectPath}?error=${encodeURIComponent("Yüzdelik 0 ile 100 arasında olmalıdır.")}`,
-    );
-  }
-
-  return normalized;
 }
 
 function getNormalizedSlug(formData: FormData, redirectPath: string) {
@@ -209,6 +190,9 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
     redirect("/admin");
   }
 
+  const validationError = validateAdminForm(formData, schoolFormRules.createSchool);
+  if (validationError) return { success: false, message: validationError };
+
   const redirectPath = "/admin/schools/new";
   const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
   const slug = getNormalizedSlug(formData, redirectPath);
@@ -306,6 +290,9 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
   if (!profile) {
     redirect("/admin");
   }
+
+  const validationError = validateAdminForm(formData, schoolFormRules.updateSchool);
+  if (validationError) return { success: false, message: validationError };
 
   const id = Number(formData.get("id"));
   const redirectPath = `/admin/schools/${id}/edit`;
@@ -408,6 +395,9 @@ export async function deleteSchool(formData: FormData) {
     redirect("/admin");
   }
 
+  const validationError = validateAdminForm(formData, schoolFormRules.deleteSchool);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const id = Number(formData.get("id"));
 
   if (!Number.isInteger(id) || id <= 0) {
@@ -446,6 +436,9 @@ export async function toggleSchoolStatus(formData: FormData) {
   if (!profile) {
     redirect("/admin");
   }
+
+  const validationError = validateAdminForm(formData, schoolFormRules.toggleSchoolStatus);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const id = Number(formData.get("id"));
   const nextStatus = formData.get("is_active") === "true";
@@ -489,6 +482,9 @@ export async function bulkUpdateSchoolStatus(formData: FormData) {
   if (!profile) {
     redirect("/admin");
   }
+
+  const validationError = validateAdminForm(formData, schoolFormRules.bulkUpdateSchoolStatus);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const ids = toNumberArray(formData.getAll("ids"));
   const nextStatus = formData.get("is_active") === "true";
@@ -572,6 +568,9 @@ export async function updateSchoolContact(_prevState: unknown, formData: FormDat
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.updateSchoolContact);
+  if (validationError) return { success: false, message: validationError };
+
   const id = Number(formData.get("school_id"));
   if (!Number.isInteger(id) || id <= 0) return { success: false, message: "Geçersiz okul kaydı." };
 
@@ -602,6 +601,9 @@ export async function updateSchoolOtherInfo(_prevState: unknown, formData: FormD
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.updateSchoolOtherInfo);
+  if (validationError) return { success: false, message: validationError };
+
   const id = Number(formData.get("school_id"));
   if (!Number.isInteger(id) || id <= 0) return { success: false, message: "Geçersiz okul kaydı." };
 
@@ -629,6 +631,9 @@ export async function upsertSchoolScore(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.upsertSchoolScore);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const schoolId = Number(formData.get("school_id"));
   const year = Number(formData.get("year"));
   if (!Number.isInteger(schoolId) || schoolId <= 0 || !Number.isInteger(year) || year < 2000 || year > 2100) redirect("/admin");
@@ -652,6 +657,16 @@ export async function upsertSchoolScore(formData: FormData) {
     percentile: toOptionalNumeric("percentile"),
   };
 
+  if (payload.obp_score === null && payload.lgs_score === null && payload.percentile === null) {
+    redirect(`/admin?error=${encodeURIComponent("En az bir puan girin. Kaydı kaldırmak için silme işlemini kullanın.")}`);
+  }
+  if (vocationalFieldId !== null) {
+    const { data: field, error: fieldError } = await supabase.from("school_vocational_fields")
+      .select("vocational_field_id").eq("school_id", schoolId)
+      .eq("vocational_field_id", vocationalFieldId).maybeSingle();
+    if (fieldError || !field) redirect(`/admin?error=${encodeURIComponent("Seçilen meslek alanı bu okula bağlı değil veya doğrulanamadı. Meslek alanlarını kontrol edin.")}`);
+  }
+
   let error;
   if (id) {
     ({ error } = await supabase.from("school_scores").update(payload).eq("id", id).eq("school_id", schoolId).select("id").single());
@@ -669,6 +684,9 @@ export async function upsertSchoolScore(formData: FormData) {
 export async function deleteSchoolScore(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.deleteSchoolScore);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
@@ -689,6 +707,9 @@ export async function upsertSchoolQuota(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.upsertSchoolQuota);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const schoolId = Number(formData.get("school_id"));
   const year = Number(formData.get("year"));
   if (!Number.isInteger(schoolId) || schoolId <= 0 || !Number.isInteger(year) || year < 2000 || year > 2100) redirect("/admin");
@@ -699,12 +720,17 @@ export async function upsertSchoolQuota(formData: FormData) {
     return value ?? null;
   };
 
+  const sinavliCount = toOptionalInt("sinavli_count");
+  const sinavsizCount = toOptionalInt("sinavsiz_count");
+  if (sinavliCount === null && sinavsizCount === null) {
+    redirect(`/admin?error=${encodeURIComponent("En az bir kontenjan girin. Kaydı kaldırmak için silme işlemini kullanın.")}`);
+  }
   const { error } = await supabase.from("school_quotas").upsert(
     {
       school_id: schoolId,
       year,
-      sinavli_count: toOptionalInt("sinavli_count"),
-      sinavsiz_count: toOptionalInt("sinavsiz_count"),
+      sinavli_count: sinavliCount,
+      sinavsiz_count: sinavsizCount,
     },
     { onConflict: "school_id,year" },
   );
@@ -719,6 +745,9 @@ export async function upsertSchoolQuota(formData: FormData) {
 export async function deleteSchoolQuota(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.deleteSchoolQuota);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
@@ -738,6 +767,9 @@ export async function deleteSchoolQuota(formData: FormData) {
 export async function syncSchoolFacilities(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.syncSchoolFacilities);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const schoolId = Number(formData.get("school_id"));
   if (!schoolId) redirect("/admin");
@@ -759,6 +791,9 @@ export async function addSchoolFacility(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.addSchoolFacility);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const name = toNullableString(formData.get("name"));
   if (!name) redirect("/admin");
 
@@ -775,6 +810,9 @@ export async function addSchoolFacility(formData: FormData) {
 export async function syncSchoolVocationalFull(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.syncSchoolVocationalFull);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const schoolId = Number(formData.get("school_id"));
   if (!schoolId) redirect("/admin");
@@ -798,6 +836,9 @@ export async function addVocationalBranch(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.addVocationalBranch);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const fieldId = Number(formData.get("vocational_field_id"));
   const name = toNullableString(formData.get("name"));
   if (!fieldId || !name) redirect("/admin");
@@ -817,6 +858,9 @@ export async function addVocationalBranch(formData: FormData) {
 export async function addSchoolScholarship(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.addSchoolScholarship);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const schoolId = Number(formData.get("school_id"));
   const title = toNullableString(formData.get("title"));
@@ -851,6 +895,9 @@ export async function updateSchoolScholarship(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.updateSchoolScholarship);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
   const title = toNullableString(formData.get("title"));
@@ -863,7 +910,7 @@ export async function updateSchoolScholarship(formData: FormData) {
       description: toNullableString(formData.get("description")),
       amount_info: toNullableString(formData.get("amount_info")),
     })
-    .eq("id", id).select("id").single();
+    .eq("id", id).eq("school_id", schoolId).select("id").single();
 
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
@@ -876,10 +923,13 @@ export async function deleteSchoolScholarship(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.deleteSchoolScholarship);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
 
-  const { error } = await supabase.from("school_scholarships").delete().eq("id", id).select("id").single();
+  const { error } = await supabase.from("school_scholarships").delete().eq("id", id).eq("school_id", schoolId).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
@@ -890,6 +940,9 @@ export async function deleteSchoolScholarship(formData: FormData) {
 export async function reorderSchoolScholarship(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.reorderSchoolScholarship);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
@@ -949,6 +1002,9 @@ export async function addSchoolProject(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.addSchoolProject);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const schoolId = Number(formData.get("school_id"));
   const title = toNullableString(formData.get("title"));
   if (!schoolId || !title) redirect("/admin");
@@ -990,6 +1046,9 @@ export async function updateSchoolProject(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.updateSchoolProject);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
   const title = toNullableString(formData.get("title"));
@@ -1012,7 +1071,7 @@ export async function updateSchoolProject(formData: FormData) {
   };
   if (imageUrl) updateData.image_url = imageUrl;
 
-  const { error } = await supabase.from("school_projects").update(updateData).eq("id", id).select("id").single();
+  const { error } = await supabase.from("school_projects").update(updateData).eq("id", id).eq("school_id", schoolId).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   revalidatePath(`/okullar/${slug}`);
@@ -1023,10 +1082,13 @@ export async function deleteSchoolProject(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
 
+  const validationError = validateAdminForm(formData, schoolFormRules.deleteSchoolProject);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
 
-  const { error } = await supabase.from("school_projects").delete().eq("id", id).select("id").single();
+  const { error } = await supabase.from("school_projects").delete().eq("id", id).eq("school_id", schoolId).select("id").single();
   if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
 
   const slug = await getSchoolSlug(supabase, schoolId);
@@ -1037,6 +1099,9 @@ export async function deleteSchoolProject(formData: FormData) {
 export async function reorderSchoolProject(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
   if (!profile) redirect("/admin");
+
+  const validationError = validateAdminForm(formData, schoolFormRules.reorderSchoolProject);
+  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
 
   const id = String(formData.get("id") ?? "");
   const schoolId = Number(formData.get("school_id"));
