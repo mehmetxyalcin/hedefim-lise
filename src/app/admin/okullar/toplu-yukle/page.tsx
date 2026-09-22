@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
-import { BulkUploadWizard } from "@/components/admin/BulkUploadWizard";
+import { BulkUploadWizard } from "@/components/admin/bulk-upload/BulkUploadWizard";
 
 export const metadata: Metadata = {
   title: "Toplu Okul Yükle | Admin",
