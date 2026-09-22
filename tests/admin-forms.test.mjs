@@ -109,3 +109,14 @@ test('uploads and explicitly blank enum values are rejected before saving', asyn
   assert.equal(validate(form({...data,image_file:new Blob(['fixture'],{type:'image/png'})}),school.updateSchool),null);
   assert.ok(validate(form({...data,placement_type:''}),school.updateSchool));
 });
+test('create and update stay on the tabbed form when the slug belongs to another school', async () => {
+  const taken = () => ({data:{id:99},error:null});
+  for (const [name,data] of [['createSchool',{...validBasic,id:undefined}],['updateSchool',validBasic]]) {
+    const {calls,api}=actions('src/app/admin/okullar/actions.ts',taken);
+    const fields = Object.fromEntries(Object.entries(data).filter(([,v])=>v!==undefined));
+    const result = await api[name](null,form(fields));
+    assert.equal(result.success,false,name);
+    assert.match(result.message,/slug/i,name);
+    assert.equal(calls.some(c=>c[0]==='insert'||c[0]==='update'),false,name);
+  }
+});

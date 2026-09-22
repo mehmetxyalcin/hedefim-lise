@@ -55,13 +55,14 @@ function normalizeSlug(value: string) {
     .replace(/-{2,}/g, "-");
 }
 
-function getNormalizedSlug(formData: FormData, redirectPath: string) {
-  const slug = normalizeSlug(getRequiredString(formData, "slug", "Slug", redirectPath));
+// Okul formu hataları: sekmeli form mesajı gösterir ve taslak korunur.
+class SchoolFormError extends Error {}
+
+function getNormalizedSlug(formData: FormData) {
+  const slug = normalizeSlug(getRequiredString(formData, "slug", "Slug"));
 
   if (!slug) {
-    redirect(
-      `${redirectPath}?error=${encodeURIComponent("Slug küçük harf, rakam veya tire içermelidir.")}`,
-    );
+    throw new SchoolFormError("Slug küçük harf, rakam veya tire içermelidir.");
   }
 
   return slug;
@@ -70,7 +71,7 @@ function getNormalizedSlug(formData: FormData, redirectPath: string) {
 
 function getActionErrorMessage(error: { code?: string; message: string }) {
   if (error.code === "23505" || error.message.toLowerCase().includes("slug")) {
-    return "Bu slug zaten baska bir okul tarafindan kullaniliyor.";
+    return "Bu slug zaten başka bir okul tarafından kullanılıyor.";
   }
 
   return error.message;
@@ -94,25 +95,31 @@ function redirectToAdminWithSuccess(message: string) {
   redirect(`/admin?success=${encodeURIComponent(message)}`);
 }
 
-function getRequiredString(
-  formData: FormData,
-  key: string,
-  label: string,
-  redirectPath: string,
-) {
+function getRequiredString(formData: FormData, key: string, label: string) {
   const value = String(formData.get(key) ?? "").trim();
 
   if (!value) {
-    redirect(`${redirectPath}?error=${encodeURIComponent(`${label} zorunludur.`)}`);
+    throw new SchoolFormError(`${label} zorunludur.`);
   }
 
   return value;
 }
 
+function readSchoolBasics(formData: FormData) {
+  return {
+    name: getRequiredString(formData, "name", "Okul adı"),
+    slug: getNormalizedSlug(formData),
+    type: getRequiredString(formData, "type", "Tür"),
+    district: getRequiredString(formData, "district", "İlçe"),
+    logo: getRequiredString(formData, "logo", "Logo"),
+    color: getRequiredString(formData, "color", "Renk sınıfı"),
+    description: getRequiredString(formData, "description", "Açıklama"),
+  };
+}
+
 async function ensureUniqueSlug(
   supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
   slug: string,
-  redirectPath: string,
   currentSchoolId?: number,
 ) {
   const { data, error } = await supabase
@@ -122,13 +129,11 @@ async function ensureUniqueSlug(
     .maybeSingle();
 
   if (error) {
-    redirect(`${redirectPath}?error=${encodeURIComponent(error.message)}`);
+    throw new SchoolFormError(error.message);
   }
 
   if (data && data.id !== currentSchoolId) {
-    redirect(
-      `${redirectPath}?error=${encodeURIComponent("Bu slug zaten baska bir okul tarafindan kullaniliyor.")}`,
-    );
+    throw new SchoolFormError("Bu slug zaten başka bir okul tarafından kullanılıyor.");
   }
 }
 
@@ -193,25 +198,19 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
   const validationError = validateAdminForm(formData, schoolFormRules.createSchool);
   if (validationError) return { success: false, message: validationError };
 
-  const redirectPath = "/admin/schools/new";
-  const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
-  const slug = getNormalizedSlug(formData, redirectPath);
-  const type = getRequiredString(formData, "type", "Tur", redirectPath);
-  const district = getRequiredString(formData, "district", "İlçe", redirectPath);
-  const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
-  const color = getRequiredString(formData, "color", "Renk sinifi", redirectPath);
-  const description = getRequiredString(
-    formData,
-    "description",
-    "Açıklama",
-    redirectPath,
-  );
+  let basics: ReturnType<typeof readSchoolBasics>;
+  try {
+    basics = readSchoolBasics(formData);
+    await ensureUniqueSlug(supabase, basics.slug);
+  } catch (error) {
+    if (error instanceof SchoolFormError) return { success: false, message: error.message };
+    throw error;
+  }
+  const { name, slug, type, district, logo, color, description } = basics;
   const vocationalFieldIds = toNumberArray(
     formData.getAll("vocational_field_ids"),
   );
   let uploadedImage: string | null = null;
-
-  await ensureUniqueSlug(supabase, slug, redirectPath);
 
   try {
     uploadedImage = await uploadSchoolImage(
@@ -224,7 +223,7 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
       error instanceof Error
         ? getUploadErrorMessage(error)
         : "Görsel yükleme başarısız oldu.";
-    redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
+    return { success: false, message };
   }
 
   const payload = {
@@ -262,9 +261,7 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
     .single();
 
   if (error) {
-    redirect(
-      `${redirectPath}?error=${encodeURIComponent(getActionErrorMessage(error))}`,
-    );
+    return { success: false, message: getActionErrorMessage(error) };
   }
 
   try {
@@ -272,8 +269,8 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
   } catch (error) {
     await supabase.from("schools").delete().eq("id", data.id);
     const message =
-      error instanceof Error ? error.message : "Meslek alanlari kaydedilemedi.";
-    redirect(`${redirectPath}?error=${encodeURIComponent(message)}`);
+      error instanceof Error ? error.message : "Meslek alanları kaydedilemedi.";
+    return { success: false, message };
   }
 
   revalidatePath("/admin");
@@ -295,28 +292,22 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
   if (validationError) return { success: false, message: validationError };
 
   const id = Number(formData.get("id"));
-  const redirectPath = `/admin/schools/${id}/edit`;
   if (!Number.isInteger(id) || id <= 0) {
-    redirect(`/admin?error=${encodeURIComponent("Geçersiz okul kaydi.")}`);
+    return { success: false, message: "Geçersiz okul kaydı." };
   }
 
-  const name = getRequiredString(formData, "name", "Okul adi", redirectPath);
-  const slug = getNormalizedSlug(formData, redirectPath);
-  const type = getRequiredString(formData, "type", "Tur", redirectPath);
-  const district = getRequiredString(formData, "district", "İlçe", redirectPath);
-  const logo = getRequiredString(formData, "logo", "Logo", redirectPath);
-  const color = getRequiredString(formData, "color", "Renk sinifi", redirectPath);
-  const description = getRequiredString(
-    formData,
-    "description",
-    "Açıklama",
-    redirectPath,
-  );
+  let basics: ReturnType<typeof readSchoolBasics>;
+  try {
+    basics = readSchoolBasics(formData);
+    await ensureUniqueSlug(supabase, basics.slug, id);
+  } catch (error) {
+    if (error instanceof SchoolFormError) return { success: false, message: error.message };
+    throw error;
+  }
+  const { name, slug, type, district, logo, color, description } = basics;
   const currentImage = String(formData.get("current_image") ?? "").trim();
   const removeImage = formData.get("remove_image") === "on";
   let uploadedImage: string | null = null;
-
-  await ensureUniqueSlug(supabase, slug, redirectPath, id);
 
   try {
     uploadedImage = await uploadSchoolImage(

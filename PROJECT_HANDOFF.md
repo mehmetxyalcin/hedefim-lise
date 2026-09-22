@@ -280,3 +280,9 @@ Canlı doğrulama eki: 301c519 Hostinger üzerinde 2026-09-08 01:24'te 58 saniye
 - `.claude/worktrees/` altındaki iki eski worktree (temiz, commit'leri `main` içinde) kaldırıldı. ESLint `.claude/**` ve `.next-*/**` dizinlerini taramaz.
 - `npx eslint .`: 0 hata, 0 uyarı. `/okullar` aralık yardımcısı modül düzeyine taşındı (davranış aynı; altı filtre URL'sinde canlıyla aynı sonuç). İletişim formu kısa sorguda effect içinde setState yapmaz, sonuçları render'da gizler. Okul detay yükleyicisindeki ham sorgu `console.log`'u kaldırıldı.
 - README Hostinger/`main` yayını, test komutu ve migration geçmişi olmayan canlı veritabanı kuralıyla yeniden yazıldı. `.env.example` depoya alındı (`.gitignore` istisnası); kodun okumadığı `NEXT_PUBLIC_GA_ID` satırı çıkarıldı. GA kimliği hâlâ `layout.tsx` içinde sabit.
+
+## 21. Eski yönetim yolları kaldırıldı — 22 Eylül 2026
+
+- Hata: sekmeli yeni/düzenle ekranları da `createSchool`/`updateSchool` kullanıyordu; slug çakışması, zorunlu alan, görsel yükleme, insert ve meslek alanı hataları kullanıcıyı eski `/admin/schools/new` veya `/admin/schools/[id]/edit` sayfasına yönlendiriyor, sekmeli taslak kayboluyordu. Artık tüm bu hatalar `{ success: false, message }` döner (`SchoolFormError`, `readSchoolBasics`); sekmeli form mesajı gösterir, taslak korunur.
+- `/admin/schools/new` → kalıcı yönlendirme `/admin/okullar/yeni`; `/admin/schools/[id]/edit` → id'den slug bulunup `/admin/okullar/[slug]/duzenle` (yoksa `/admin?error`). Eski `SchoolForm.tsx` silindi.
+- Taslak koruma testi sekmeli forma taşındı; slug çakışması için yeni action testi. 38 test, lint 0, derleme başarılı. Oturumlu tarayıcıda eski yol yönlendirmesi ve slug çakışması denenmedi.
