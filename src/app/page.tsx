@@ -6,6 +6,7 @@ import {
 } from "@/components/home/FeaturedSchoolStrip";
 import { Hero } from "@/components/home/Hero";
 import { createStaticClient } from "@/lib/supabase/static";
+import { valuesBySchool } from "@/lib/school-scores";
 
 export const metadata: Metadata = {
   title: "Hedefim Lise",
@@ -59,43 +60,33 @@ async function getLandingData(): Promise<LandingData> {
       .limit(1);
     const latestYear = (yearRows?.[0]?.year as number | undefined) ?? null;
 
-    // Ölçek dağılımları: son yıldaki aktif okulların değerleri.
-    // İKİ metrik ayrı ayrı çizilir çünkü okulların çoğu yalnızca birine sahip:
-    // merkezi yerleştirme yüzdelik dilimi, yerel yerleştirme OBP puanı üretir.
-    //
-    // Her iki dağılımda da okul başına TEK değer alınır: okulun EN REKABETÇİ
-    // değeri. Bir okulun aynı yıl içinde meslek alanı başına birden çok kaydı
-    // olabilir; ölçek okulları çizer, kayıtları değil. Rekabetçilik yönü
-    // metriğe göre terstir — yüzdelikte düşük, OBP'de yüksek daha rekabetçi.
-    // /okullar filtresi birebir aynı tanımı kullanır (işaret = listedeki okul).
+    // Ölçek dağılımları: son yıldaki aktif okulların değerleri. İki metrik ayrı
+    // çizilir; iki puanı olan okul iki sekmede de yer alır. Okul başına TEK
+    // değer, okulun en erişilebilir programı: en büyük yüzdelik, en düşük OBP
+    // (kural: lib/school-scores). /okullar filtresi aynı kuralı kullanır.
     let percentiles: number[] = [];
     let obpScores: number[] = [];
     if (latestYear != null) {
       const { data: distRows } = await supabase
         .from("school_scores")
-        .select("school_id, percentile, obp_score")
+        .select("school_id, year, percentile, obp_score")
         .eq("year", latestYear);
 
-      const lowestPercentile = new Map<number, number>();
-      const highestObp = new Map<number, number>();
-      for (const r of distRows ?? []) {
-        const id = r.school_id as number;
-        if (!activeIds.has(id)) continue;
-
-        const p = r.percentile as number | null;
-        if (p != null && Number.isFinite(p)) {
-          const prev = lowestPercentile.get(id);
-          if (prev == null || p < prev) lowestPercentile.set(id, p);
-        }
-
-        const o = r.obp_score as number | null;
-        if (o != null && Number.isFinite(o)) {
-          const prev = highestObp.get(id);
-          if (prev == null || o > prev) highestObp.set(id, o);
-        }
-      }
-      percentiles = [...lowestPercentile.values()].sort((a, b) => a - b);
-      obpScores = [...highestObp.values()].sort((a, b) => a - b);
+      const values = valuesBySchool(
+        (distRows ?? []).filter((r) => activeIds.has(r.school_id as number)) as {
+          school_id: number;
+          year: number;
+          percentile: number | null;
+          obp_score: number | null;
+        }[],
+        latestYear,
+      );
+      values.forEach(({ merkezi, yerel }) => {
+        if (merkezi != null) percentiles.push(merkezi);
+        if (yerel != null) obpScores.push(yerel);
+      });
+      percentiles = percentiles.sort((a, b) => a - b);
+      obpScores = obpScores.sort((a, b) => a - b);
     }
 
     // Öne çıkan okul: son yılın en rekabetçi aktif okulu.
