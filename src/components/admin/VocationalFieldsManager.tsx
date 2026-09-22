@@ -186,11 +186,11 @@ export function VocationalFieldsManager({
                       <ChevronRight className="h-4 w-4 shrink-0 text-admin-faint" />
                     )}
                     <span className="font-semibold text-admin-ink">{field.title}</span>
-                    <span className="ml-1 rounded-full bg-admin-line-soft px-2 py-0.5 text-xs text-admin-muted">
+                    <span className="ml-1 shrink-0 rounded-full bg-admin-line-soft px-2 py-0.5 text-xs whitespace-nowrap text-admin-muted tabular-nums">
                       {field.vocational_branches.length} dal
                     </span>
                     {typeof field.school_count === "number" && (
-                      <span className="text-xs text-admin-muted tabular-nums">
+                      <span className="shrink-0 text-xs whitespace-nowrap text-admin-muted tabular-nums">
                         {field.school_count} okul
                       </span>
                     )}
@@ -203,7 +203,7 @@ export function VocationalFieldsManager({
                         field.title,
                       )
                     }
-                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-admin-accent hover:bg-admin-tint"
+                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-admin-body hover:bg-admin-line-soft"
                   >
                     <Pencil className="h-3 w-3" />
                     Düzenle
@@ -253,7 +253,7 @@ export function VocationalFieldsManager({
                                   branch.name,
                                 )
                               }
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold text-admin-accent hover:bg-admin-tint"
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold text-admin-body hover:bg-admin-line-soft"
                             >
                               <Pencil className="h-3 w-3" />
                               Düzenle
@@ -287,7 +287,7 @@ export function VocationalFieldsManager({
                           fieldTitle: field.title,
                         })
                       }
-                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-admin-accent hover:bg-admin-tint"
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-admin-body hover:bg-admin-line-soft"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       Dal ekle
