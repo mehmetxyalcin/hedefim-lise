@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AdminSchoolList } from "@/components/admin/AdminSchoolList";
-import { mapSchool } from "@/lib/supabase/public";
+import { Plus } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
+import { mapSchool } from "@/lib/supabase/public";
+import { countMissing, evaluateSchoolHealth, latestYear } from "@/lib/school-health";
+import type { LedgerRow } from "@/lib/admin-ledger";
 import {
   bulkUpdateSchoolStatus,
   deleteSchool,
   toggleSchoolStatus,
 } from "@/app/admin/okullar/actions";
+import { AdminPage } from "@/components/admin/ui/AdminPage";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { FlashBanner } from "@/components/admin/ui/FlashBanner";
+import { adminButton } from "@/components/admin/ui/Button";
+import { LedgerSummary } from "@/components/admin/ledger/LedgerSummary";
+import { SchoolLedger } from "@/components/admin/ledger/SchoolLedger";
 
 export const metadata: Metadata = {
-  title: "Admin Paneli",
+  title: "Okullar | Yönetim",
   robots: {
     index: false,
     follow: false,
@@ -24,18 +32,25 @@ type AdminPageProps = {
   }>;
 };
 
-export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const { supabase, user, profile } = await requireAdmin();
+type SchoolRow = Parameters<typeof mapSchool>[0];
+
+type LedgerSourceRow = Omit<SchoolRow, "school_scores"> & {
+  school_facilities?: { facility_id: string }[] | null;
+  school_scores?: { year: number }[] | null;
+  school_quotas?: { year: number }[] | null;
+};
+
+export default async function AdminSchoolsPage({ searchParams }: AdminPageProps) {
+  const { supabase } = await requireAdmin();
   const params = searchParams ? await searchParams : undefined;
 
-  if (!profile) {
-    return <h1>Yetkisiz erişim.</h1>;
-  }
-
+  // İlişkiler gömülü okunur: üst düzey sorgular 1000 satırla sınırlı, tesis ilişkisi bunu aşıyor.
   const [schoolsResult, unreadResult] = await Promise.all([
     supabase
       .from("schools")
-      .select("*, school_vocational_fields(vocational_field_id)")
+      .select(
+        "*, school_vocational_fields(vocational_field_id), school_facilities(facility_id), school_scores(year), school_quotas(year)",
+      )
       .order("name"),
     supabase
       .from("contact_messages")
@@ -43,91 +58,85 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       .eq("status", "unread"),
   ]);
 
-  const { data, error } = schoolsResult;
-  const unreadCount = unreadResult.count ?? 0;
-
-  if (error) {
-    return <h1>Okullar yüklenemedi.</h1>;
+  if (schoolsResult.error) {
+    return (
+      <AdminPage>
+        <PageHeader title="Okullar" />
+        <FlashBanner error={`Okullar yüklenemedi: ${schoolsResult.error.message}`} />
+      </AdminPage>
+    );
   }
 
-  const schools = (data ?? []).map(mapSchool);
+  const source = (schoolsResult.data ?? []) as LedgerSourceRow[];
+  const years = {
+    scoreYear: latestYear(source.flatMap((row) => (row.school_scores ?? []).map((s) => s.year))),
+    quotaYear: latestYear(source.flatMap((row) => (row.school_quotas ?? []).map((q) => q.year))),
+  };
+
+  const rows: LedgerRow[] = source.map((raw) => {
+    const school = mapSchool({ ...raw, school_scores: [] } as SchoolRow);
+    return {
+      id: school.id,
+      name: school.name,
+      slug: school.slug,
+      district: school.district,
+      type: school.type,
+      isActive: school.isActive !== false,
+      updatedAt: school.updatedAt ?? school.createdAt ?? null,
+      createdAt: school.createdAt ?? null,
+      health: evaluateSchoolHealth(
+        {
+          type: school.type,
+          description: school.description,
+          images: school.images,
+          languages: school.languages,
+          phone: school.phone,
+          vocationalFieldCount: school.vocationalFields?.length ?? 0,
+          facilityCount: raw.school_facilities?.length ?? 0,
+          scoreYears: (raw.school_scores ?? []).map((s) => s.year),
+          quotaYears: (raw.school_quotas ?? []).map((q) => q.year),
+        },
+        years,
+      ),
+    };
+  });
+
+  const active = rows.filter((row) => row.isActive).length;
 
   return (
-    <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-      <div className="mx-auto max-w-7xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="mb-3 text-3xl font-extrabold tracking-tight text-slate-900">
-              Admin Paneli
-            </h1>
-            <p className="text-sm leading-relaxed text-slate-500">
-              Giriş yapıldı: {profile.email ?? user.email}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/soru-cevap"
-              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Soru-Cevap
-            </Link>
-            <Link
-              href="/admin/mesajlar"
-              className="relative inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Mesajlar
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-bold text-white">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-            <Link
-              href="/admin/site-settings"
-              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Site Ayarları
-            </Link>
-            <Link
-              href="/admin/meslek-alanlari"
-              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Meslek Alanları
-            </Link>
-            <Link
-              href="/admin/okullar/toplu-yukle"
-              className="inline-flex rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Toplu Yükle
-            </Link>
-            <Link
-              href="/admin/okullar/yeni"
-              className="inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
-            >
-              Yeni Okul Ekle
-            </Link>
-          </div>
-        </div>
-
-        {params?.success && (
-          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-            {params.success}
-          </div>
-        )}
-
-        {params?.error && (
-          <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-            {params.error}
-          </div>
-        )}
-
-        <AdminSchoolList
-          bulkStatusAction={bulkUpdateSchoolStatus}
-          deleteAction={deleteSchool}
-          schools={schools}
-          toggleStatusAction={toggleSchoolStatus}
-        />
-      </div>
-    </div>
+    <AdminPage>
+      <PageHeader
+        title="Okullar"
+        description="Kayıtların veri sağlığı, yayın durumu ve düzenleme."
+        actions={
+          <Link href="/admin/okullar/yeni" className={adminButton({ variant: "primary" })}>
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Yeni okul
+          </Link>
+        }
+      />
+      <FlashBanner success={params?.success} error={params?.error} />
+      <LedgerSummary
+        data={{
+          active,
+          passive: rows.length - active,
+          complete: rows.filter((row) => row.health.complete).length,
+          total: rows.length,
+          scoreYear: years.scoreYear,
+          missingScore: countMissing(
+            rows.map((row) => row.health),
+            "puan",
+          ),
+          unread: unreadResult.count ?? 0,
+        }}
+      />
+      <SchoolLedger
+        rows={rows}
+        nowIso={new Date().toISOString()}
+        bulkStatusAction={bulkUpdateSchoolStatus}
+        toggleStatusAction={toggleSchoolStatus}
+        deleteAction={deleteSchool}
+      />
+    </AdminPage>
   );
 }
