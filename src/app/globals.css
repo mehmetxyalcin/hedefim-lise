@@ -13,6 +13,23 @@
   /* Landing dünyası (Yön #3) — font-display/font-reading utility'leri üretir. */
   --font-display: var(--font-archivo), system-ui, sans-serif;
   --font-reading: var(--font-source-serif), Georgia, serif;
+  /* Yönetim paneli (.admin kapsamı) — değerler yalnız .admin altında tanımlı. */
+  --color-admin-ground: var(--admin-ground);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-ink: var(--admin-ink);
+  --color-admin-body: var(--admin-body);
+  --color-admin-muted: var(--admin-muted);
+  --color-admin-faint: var(--admin-faint);
+  --color-admin-line: var(--admin-line);
+  --color-admin-line-soft: var(--admin-line-soft);
+  --color-admin-line-strong: var(--admin-line-strong);
+  --color-admin-accent: var(--admin-accent);
+  --color-admin-accent-deep: var(--admin-accent-deep);
+  --color-admin-accent-soft: var(--admin-accent-soft);
+  --color-admin-tint: var(--admin-tint);
+  --color-admin-tint-ink: var(--admin-tint-ink);
+  --color-admin-missing: var(--admin-missing);
+  --shadow-admin-card: 0 1px 2px rgb(30 34 53 / 0.04), 0 4px 12px rgb(30 34 53 / 0.04);
 }
 
 /* ── Landing paleti (Yön #3: Yerleştirme Kılavuzu) ─────────────────────────
@@ -43,6 +60,63 @@
 }
 
 /* Yüzdelik işaretinin ilk belirişi: pop yerine kısa fade. */
+/* ── Yönetim paneli: "Veri Sağlık Defteri" ──────────────────────────────
+   Yalnız .admin kapsamında. Tek vurgu indigo; yalnız yön bulma için
+   (etkin menü, seçili satır, birincil eylem, odak). Emerald/amber/rose
+   yalnız anlam taşırken. Exam Blue ve landing renkleri buraya girmez. */
+.admin {
+  --admin-ground: #f4f5fa;
+  --admin-surface: #ffffff;
+  --admin-ink: #1e2235;
+  --admin-body: #3d4257;
+  --admin-muted: #5b6178;
+  --admin-faint: #656a80; /* zemin #f4f5fa üzerinde bile ≥4.5:1 (AA) */
+  --admin-line: #e6e8f0;
+  --admin-line-soft: #eef0f6;
+  --admin-line-strong: #d3d6e2;
+  --admin-accent: #4f46e5;
+  --admin-accent-deep: #4338ca;
+  --admin-accent-soft: #c7d2fe;
+  --admin-tint: #eef2ff;
+  --admin-tint-ink: #3730a3;
+  --admin-missing: #c2410c;
+  background-color: var(--admin-ground);
+  color: var(--admin-ink);
+  caret-color: var(--admin-accent);
+  scrollbar-color: var(--admin-line-strong) transparent;
+}
+.admin ::selection {
+  background: var(--admin-accent);
+  color: #ffffff;
+}
+.admin input[type="checkbox"],
+.admin input[type="radio"] {
+  accent-color: var(--admin-accent);
+}
+@keyframes admin-fade-out {
+  0%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.admin .admin-fade-out {
+  animation: admin-fade-out 4s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin *,
+  .admin *::before,
+  .admin *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+  .admin .admin-fade-out {
+    animation: none;
+  }
+}
+
 @keyframes marker-in {
   from {
     opacity: 0;
