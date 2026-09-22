@@ -5,7 +5,7 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { excludeInvalidSchools } from "@/lib/import-validation";
-import { AlertCircle, ArrowLeft, CheckCircle2, Download, Loader2, XCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Download, Loader2, XCircle } from "lucide-react";
 import { fetchSchoolsByInstitutionCodes, fetchAllFacilities, bulkUploadFacilities } from "@/app/admin/okullar/toplu-yukle/actions";
 import type { ParsedFacilityRow, FacilityUploadResult } from "@/app/admin/okullar/toplu-yukle/actions";
 import { str, normalizeStr, parseFacilities } from "@/components/admin/bulk-upload/parsers";
@@ -225,8 +225,9 @@ export function FacilityUploadWizard() {
                           : "border-b border-emerald-100 bg-emerald-50"
                     }`}
                   >
-                    <span className="mt-0.5 text-base leading-none">
-                      {isError ? "🔴" : hasWarning ? "🟡" : "🟢"}
+                    <span className="mt-0.5 shrink-0">
+                      {isError ? <XCircle aria-hidden="true" className="h-4 w-4 text-rose-600" /> : hasWarning ? <AlertCircle aria-hidden="true" className="h-4 w-4 text-amber-600" /> : <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-emerald-600" />}
+                      <span className="sr-only">{isError ? "Hatalı" : hasWarning ? "Uyarı" : "Hazır"}</span>
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-admin-ink">
@@ -254,7 +255,8 @@ export function FacilityUploadWizard() {
                     <div className="divide-y divide-admin-line-soft bg-white">
                       {group.matched.map((fac) => (
                         <div key={fac.id} className="flex items-center gap-2 px-4 py-2 text-sm">
-                          <span className="text-xs font-bold text-emerald-500">✓</span>
+                          <Check aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                          <span className="sr-only">Eşleşti:</span>
                           <span className="text-admin-body">{fac.name}</span>
                         </div>
                       ))}
@@ -263,7 +265,8 @@ export function FacilityUploadWizard() {
                           key={name}
                           className="flex items-center gap-2 bg-amber-50 px-4 py-2 text-sm"
                         >
-                          <span className="text-xs font-bold text-amber-500">⚠</span>
+                          <AlertCircle aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-amber-700" />
+                          <span className="sr-only">Eşleşmedi:</span>
                           <span className="text-amber-700">{name}</span>
                           <span className="text-xs text-amber-400">(bulunamadı; bu okul yüklenmeyecek)</span>
                         </div>
@@ -285,7 +288,7 @@ export function FacilityUploadWizard() {
                   </li>
                 ))}
                 {errorGroups.length > 5 && (
-                  <li className="text-rose-400">...ve {errorGroups.length - 5} satır daha</li>
+                  <li className="text-rose-700">...ve {errorGroups.length - 5} satır daha</li>
                 )}
               </ul>
             </div>

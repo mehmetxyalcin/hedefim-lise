@@ -5,7 +5,7 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { excludeInvalidSchools } from "@/lib/import-validation";
-import { ArrowLeft, CheckCircle2, Download, Loader2, XCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, Download, Loader2, XCircle } from "lucide-react";
 import { fetchSchoolsByInstitutionCodes, fetchVocationalData, bulkUploadScores } from "@/app/admin/okullar/toplu-yukle/actions";
 import type { ScoreRow, ScoreUploadResult } from "@/app/admin/okullar/toplu-yukle/actions";
 import { str, normalizeStr, parseScore, parsePercentile } from "@/components/admin/bulk-upload/parsers";
@@ -207,7 +207,7 @@ export function ScoreUploadWizard() {
 
   function ScoreCell({ value }: { value: number | null | undefined }) {
     if (value === undefined) return <span className="text-admin-line-strong">—</span>;
-    if (value === null) return <span className="font-bold text-rose-500">!</span>;
+    if (value === null) return <span className="font-bold text-rose-700">!</span>;
     return <span>{value}</span>;
   }
 
@@ -285,19 +285,20 @@ export function ScoreUploadWizard() {
                       className={`border-b border-admin-line-soft ${hasError ? "bg-rose-50" : ""}`}
                     >
                       <td className="px-3 py-2 text-center text-base leading-none">
-                        <span title={hasError ? row.errors.join("; ") : "Güncellenecek"}>
-                          {hasError ? "🔴" : "🟡"}
+                        <span title={hasError ? row.errors.join("; ") : "Güncellenecek"} className="inline-flex">
+                          {hasError ? <XCircle aria-hidden="true" className="h-4 w-4 text-rose-600" /> : <AlertCircle aria-hidden="true" className="h-4 w-4 text-amber-600" />}
+                          <span className="sr-only">{hasError ? "Hatalı" : "Güncellenecek"}</span>
                         </span>
                       </td>
                       <td className="px-3 py-2 font-mono text-admin-body">{row.institution_code}</td>
                       <td className="max-w-[180px] truncate px-3 py-2 text-admin-body">
-                        {row.school_name || <span className="text-rose-500 text-xs">Bulunamadı</span>}
+                        {row.school_name || <span className="text-rose-700 text-xs">Bulunamadı</span>}
                       </td>
                       <td className="max-w-[160px] truncate px-3 py-2">
                         {!row.vocational_field_name ? (
                           <span className="italic text-admin-faint">Okul geneli</span>
                         ) : !row.vocational_field_found ? (
-                          <span className="text-rose-500">🔴 {row.vocational_field_name} (bulunamadı)</span>
+                          <span className="text-rose-700">{row.vocational_field_name} (bulunamadı)</span>
                         ) : (
                           <span className="text-admin-body">{row.vocational_field_name}</span>
                         )}
@@ -328,7 +329,7 @@ export function ScoreUploadWizard() {
                   </li>
                 ))}
                 {errorRows.length > 10 && (
-                  <li className="text-rose-400">...ve {errorRows.length - 10} satır daha</li>
+                  <li className="text-rose-700">...ve {errorRows.length - 10} satır daha</li>
                 )}
               </ul>
             </div>

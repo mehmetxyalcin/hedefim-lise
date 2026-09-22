@@ -4,7 +4,7 @@ import { adminButton } from "@/components/admin/ui/Button";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Download, Loader2, XCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Download, Loader2, X, XCircle } from "lucide-react";
 import { fetchSchoolsByInstitutionCodes, fetchVocationalData, bulkUploadVocational } from "@/app/admin/okullar/toplu-yukle/actions";
 import type { VocationalRow, VocationalUploadResult } from "@/app/admin/okullar/toplu-yukle/actions";
 import { MAX_VOC_ROWS, str, normalizeStr } from "@/components/admin/bulk-upload/parsers";
@@ -272,8 +272,9 @@ export function VocationalUploadWizard() {
                         : "border-b border-amber-100 bg-amber-50"
                     }`}
                   >
-                    <span className="mt-0.5 text-base leading-none">
-                      {isError ? "🔴" : "🟡"}
+                    <span className="mt-0.5 shrink-0">
+                      {isError ? <XCircle aria-hidden="true" className="h-4 w-4 text-rose-600" /> : <AlertCircle aria-hidden="true" className="h-4 w-4 text-amber-600" />}
+                      <span className="sr-only">{isError ? "Hatalı" : "Uyarı"}</span>
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-admin-ink">
@@ -309,13 +310,12 @@ export function VocationalUploadWizard() {
                             row.errors.length > 0 ? "bg-rose-50" : ""
                           }`}
                         >
-                          <span
-                            className={`mt-0.5 text-xs font-bold ${
-                              row.errors.length > 0 ? "text-rose-400" : "text-emerald-500"
-                            }`}
-                          >
-                            {row.errors.length > 0 ? "✗" : "✓"}
-                          </span>
+                          {row.errors.length > 0 ? (
+                            <X aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-600" />
+                          ) : (
+                            <Check aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                          )}
+                          <span className="sr-only">{row.errors.length > 0 ? "Hatalı:" : "Geçerli:"}</span>
                           <div className="min-w-0 flex-1">
                             <span className="font-medium text-admin-body">
                               {row.vocational_field || "—"}
@@ -324,7 +324,7 @@ export function VocationalUploadWizard() {
                               <span className="ml-2 text-admin-faint">└─ {row.branch}</span>
                             )}
                             {row.errors.length > 0 && (
-                              <p className="mt-0.5 text-xs text-rose-500">
+                              <p className="mt-0.5 text-xs text-rose-700">
                                 {row.errors.join("; ")}
                               </p>
                             )}

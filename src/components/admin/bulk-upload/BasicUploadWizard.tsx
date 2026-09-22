@@ -283,7 +283,7 @@ export function BasicUploadWizard() {
                       ) : row.boarding_type === "kiz_erkek" ? (
                         "Kız/Erkek"
                       ) : (
-                        <span className="text-rose-500">Geçersiz</span>
+                        <span className="text-rose-700">Geçersiz</span>
                       )}
                     </td>
                     <td className="max-w-[180px] truncate px-3 py-2 text-admin-muted">
@@ -349,7 +349,7 @@ export function BasicUploadWizard() {
                     </li>
                   ))}
                 {stats.error > 10 && (
-                  <li className="text-rose-400">...ve {stats.error - 10} satır daha</li>
+                  <li className="text-rose-700">...ve {stats.error - 10} satır daha</li>
                 )}
               </ul>
               <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-admin-body">
