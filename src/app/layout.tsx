@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Archivo, Inter, Roboto_Mono, Source_Serif_4 } from "next/font/google";
-import { Footer } from "@/components/layout/Footer";
-import { Navbar } from "@/components/layout/Navbar";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -85,9 +83,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <div hidden dangerouslySetInnerHTML={{ __html: `<!--\n${DIRECTION_CONTRACT}\n-->` }} />
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        {children}
         {/* Google Analytics (gtag.js) */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}

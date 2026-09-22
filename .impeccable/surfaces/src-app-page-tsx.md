@@ -1,13 +1,13 @@
 ---
 version: 1
 slug: "src-app-page-tsx"
-primary_target: "src/app/page.tsx"
+primary_target: "src/app/(site)/page.tsx"
 related_targets: ["src/components/home/Hero.tsx","src/components/home/PercentileScale.tsx","src/components/home/FeaturedSchoolStrip.tsx","src/components/home/FeatureSection.tsx"]
 ---
 
 # Surface Brief — Landing (`/`)
 
-**Scope:** `src/app/page.tsx` + `src/components/home/{Hero,PercentileScale,FeaturedSchoolStrip,FeatureSection}.tsx`, styled by the `.landing` scope in `globals.css`. The landing world (Yön #3 — Yerleştirme Kılavuzu, seed 87596005) is **landing-scoped only**; Navbar/Footer and every other route stay in the incumbent Exam Blue system (see DESIGN.md → Landing Surface World).
+**Scope:** `src/app/(site)/page.tsx` + `src/components/home/{Hero,PercentileScale,FeaturedSchoolStrip,FeatureSection}.tsx`, styled by the `.landing` scope in `globals.css`. The landing world (Yön #3 — Yerleştirme Kılavuzu, seed 87596005) is **landing-scoped only**; Navbar/Footer and every other route stay in the incumbent Exam Blue system (see DESIGN.md → Landing Surface World).
 
 **Mode:** Persuade.
 
