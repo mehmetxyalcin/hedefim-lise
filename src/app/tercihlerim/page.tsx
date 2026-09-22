@@ -1,12 +1,60 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Star, ChevronUp, ChevronDown, X, MapPin, Printer } from "lucide-react";
+import { Star, ChevronUp, ChevronDown, X, MapPin, Printer, AlertTriangle } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
+import { createClient } from "@/lib/supabase/client";
+import type { FreshSchoolRow } from "@/lib/favorites";
+
+type RefreshStatus = "idle" | "loading" | "done" | "error";
+
+const FRESH_SELECT = `
+  id, name, slug, district, type,
+  school_scores ( year, percentile, obp_score, lgs_score, vocational_field:vocational_fields ( title ) )
+`;
 
 export default function TercihlerimPage() {
-  const { favorites, removeFavorite, moveUp, moveDown, clearAll } =
-    useFavorites();
+  const {
+    favorites,
+    ready,
+    removeFavorite,
+    moveUp,
+    moveDown,
+    clearAll,
+    applyFreshRows,
+  } = useFavorites();
+  const [refreshStatus, setRefreshStatus] = useState<RefreshStatus>("idle");
+  const [missingIds, setMissingIds] = useState<string[]>([]);
+  const refreshStarted = useRef(false);
+
+  // Liste, okul eklendiği andaki puanların kopyasını tutar. Sayfa her
+  // açıldığında adlar, adresler ve son yıl puanları yayındaki veriden
+  // yenilenir; yayından kalkan okullar silinmez, işaretlenir.
+  useEffect(() => {
+    if (!ready || refreshStarted.current || favorites.length === 0) return;
+    refreshStarted.current = true;
+
+    const ids = favorites.map((f) => f.id);
+    const numericIds = ids.filter((id) => /^\d+$/.test(id)).map(Number);
+
+    const run = async () => {
+      setRefreshStatus("loading");
+      try {
+        const { data, error } = await createClient()
+          .from("schools")
+          .select(FRESH_SELECT)
+          .in("id", numericIds)
+          .eq("is_active", true);
+        if (error) throw error;
+        setMissingIds(applyFreshRows((data ?? []) as unknown as FreshSchoolRow[], ids));
+        setRefreshStatus("done");
+      } catch {
+        setRefreshStatus("error");
+      }
+    };
+    void run();
+  }, [ready, favorites, applyFreshRows]);
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-12">
@@ -18,8 +66,19 @@ export default function TercihlerimPage() {
               Tercih Listem
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              {favorites.length} okul listelendi
+              {ready ? `${favorites.length} okul listelendi` : "\u00a0"}
             </p>
+            {refreshStatus === "loading" && (
+              <p className="no-print mt-1 text-xs text-slate-400">
+                Güncel puanlar kontrol ediliyor…
+              </p>
+            )}
+            {refreshStatus === "error" && (
+              <p className="no-print mt-1 text-xs text-amber-700">
+                Güncel puanlar alınamadı. Okulların listeye eklendiği andaki
+                bilgileri gösteriliyor.
+              </p>
+            )}
           </div>
           <div className="no-print flex shrink-0 gap-2">
             <button
@@ -29,7 +88,7 @@ export default function TercihlerimPage() {
               <Printer className="h-4 w-4" />
               Yazdır
             </button>
-            {favorites.length > 0 && (
+            {ready && favorites.length > 0 && (
               <button
                 onClick={clearAll}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
@@ -41,7 +100,7 @@ export default function TercihlerimPage() {
         </div>
 
         {/* Boş durum */}
-        {favorites.length === 0 ? (
+        {!ready ? null : favorites.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white py-20 text-center shadow-sm">
             <Star className="mx-auto mb-4 h-12 w-12 text-slate-300" />
             <h3 className="text-lg font-semibold text-slate-600">
@@ -59,7 +118,9 @@ export default function TercihlerimPage() {
           </div>
         ) : (
           <div className="print-title space-y-3">
-            {favorites.map((school, index) => (
+            {favorites.map((school, index) => {
+              const missing = missingIds.includes(school.id);
+              return (
               <div
                 key={school.id}
                 className="favorite-card flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
@@ -71,12 +132,26 @@ export default function TercihlerimPage() {
 
                 {/* Okul bilgileri */}
                 <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/okullar/${school.slug}`}
-                    className="line-clamp-1 text-base font-semibold text-slate-900 transition-colors hover:text-blue-600"
-                  >
-                    {school.name}
-                  </Link>
+                  {missing ? (
+                    <p className="line-clamp-1 text-base font-semibold text-slate-900">
+                      {school.name}
+                    </p>
+                  ) : (
+                    <Link
+                      href={`/okullar/${school.slug}`}
+                      className="line-clamp-1 text-base font-semibold text-slate-900 transition-colors hover:text-blue-600"
+                    >
+                      {school.name}
+                    </Link>
+                  )}
+
+                  {missing && (
+                    <p className="mt-1 flex items-start gap-1.5 text-xs text-amber-700">
+                      <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" />
+                      Bu okul şu anda rehberde yayında değil. Bilgiler listeye
+                      eklendiği andaki haliyle gösteriliyor.
+                    </p>
+                  )}
 
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
                     <span className="flex items-center gap-1 text-xs text-slate-500">
@@ -159,7 +234,8 @@ export default function TercihlerimPage() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

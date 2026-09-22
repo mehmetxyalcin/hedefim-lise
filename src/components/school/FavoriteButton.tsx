@@ -1,40 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star, StarOff, Check } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
+import { latestYearScores } from "@/lib/favorites";
 import type { SchoolWithDetails } from "@/types/schoolDetail";
 
 type Props = { school: SchoolWithDetails };
 
 export function FavoriteButton({ school }: Props) {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const [mounted, setMounted] = useState(false);
   const [showAdded, setShowAdded] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const id = String(school.id);
   const added = isFavorite(id);
 
-  const latestYear =
-    school.scores.length > 0
-      ? Math.max(...school.scores.map((s) => s.year))
-      : null;
-
-  const latestScores = latestYear
-    ? school.scores
-        .filter((s) => s.year === latestYear)
-        .map((s) => ({
-          year: s.year,
-          percentile: s.percentile,
-          obp_score: s.obpScore,
-          lgs_score: s.lgsScore,
-          vocational_field_name: s.vocationalField?.name ?? null,
-        }))
-    : [];
+  const latestScores = latestYearScores(
+    school.scores.map((s) => ({
+      year: s.year,
+      percentile: s.percentile,
+      obp_score: s.obpScore,
+      lgs_score: s.lgsScore,
+      vocational_field_name: s.vocationalField?.name ?? null,
+    })),
+  );
 
   const handleClick = () => {
     if (added) {
@@ -52,18 +41,6 @@ export function FavoriteButton({ school }: Props) {
       setTimeout(() => setShowAdded(false), 2000);
     }
   };
-
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition-all hover:bg-blue-700"
-      >
-        <Star className="h-5 w-5" />
-        Tercihe Ekle
-      </button>
-    );
-  }
 
   if (showAdded) {
     return (

@@ -71,6 +71,7 @@ export default function ContactForm() {
       const { data } = await supabase
         .from("schools")
         .select("id, name, district")
+        .eq("is_active", true)
         .regexIMatch("name", buildTurkishNameRegex(schoolQuery.trim()))
         .limit(8);
 

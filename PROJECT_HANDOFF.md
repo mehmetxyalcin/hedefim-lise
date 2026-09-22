@@ -257,3 +257,10 @@ Kullanıcı sıradaki iki işi sormadan tamamlayıp yayımlamamızı istedi. Ço
 - Kalan işler: eski/yeni yönetim yollarının tüm kayıt kapsamını uyumlama ve proje genelindeki önceki lint borcu. Bu çalışmada sıralama işlemlerinin çoklu yazma atomikliği veya yüklenen dosyaların yaşam döngüsü yeniden tasarlanmadı.
 
 Canlı doğrulama eki: 301c519 Hostinger üzerinde 2026-09-08 01:24'te 58 saniyede tamamlandı. Canlı yeni okul formunda ftp://example.com adresi sunucuda engellendi ve açıklayıcı uyarı göründü; kayıt oluşturulmadı. Kontenjan kartında Mut Osman Nuri Yalman Anadolu Lisesi için 2026→2025 geçişi doğrulandı. Form denemesi, React'in hata yanıtında bazı alanları sıfırladığını ortaya çıkardı; ana okul formlarında gönderim transition içinde elle başlatılarak taslak korunuyor ve kaydetme süresince buton devre dışı kalıyor. Bu davranış ayrı React DOM testiyle doğrulandı; toplam 31 test.
+
+## 18. Pasif okul görünürlüğü ve tercih listesi — 22 Eylül 2026
+
+- İletişim formu okul araması yalnız aktif okulları listeler; sunucu action'ı gönderilen okulun aktif olduğunu doğrular.
+- `016_schools_hide_inactive.sql` canlıya uygulandı (tek BEGIN/COMMIT, `execute_sql`; migration geçmişi yine oluşturulmadı). Canlıda depoda olmayan `schools_select USING (true)` politikası vardı; o da kaldırıldı. Okuma artık `anon_read_active_schools` (anon, yalnız aktif) ve `authenticated_read_schools` (aktif veya admin). Uygulama öncesi hata ile geri alınan denemede bir okul pasife çekildi: anon/üye 183, admin 184 okul gördü. Uygulama anında canlıda pasif okul yoktu; anon REST 184 aktif okul döndürdü.
+- `useFavorites` `useSyncExternalStore` ile yeniden yazıldı; sekmeler arası `storage` eşitlemesi var. Saf mantık `src/lib/favorites.ts`. `/tercihlerim` her açılışta ad/slug/ilçe/tür ve son yıl puanlarını yayındaki veriden yeniler; yayında olmayan okul silinmez, işaretlenir.
+- 37 test, TypeScript ve üretim derlemesi başarılı; ESLint 26→23 hata. Kalan: `ContactForm.tsx` effect içi setState ve önceki lint borcu. İletişim formu gerçek gönderimle denenmedi.

@@ -1,98 +1,124 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
+import {
+  mergeFreshFavorites,
+  moveFavorite,
+  parseFavorites,
+  type FavoriteSchool,
+  type FreshSchoolRow,
+} from "@/lib/favorites";
 
-export type FavoriteScore = {
-  year: number;
-  percentile: number | null;
-  obp_score: number | null;
-  lgs_score: number | null;
-  vocational_field_name: string | null;
-};
-
-export type FavoriteSchool = {
-  id: string;
-  name: string;
-  district: string;
-  school_type: string;
-  slug: string;
-  scores: FavoriteScore[];
-};
+export type { FavoriteSchool, FavoriteScore } from "@/lib/favorites";
 
 const STORAGE_KEY = "hedefim_favorites";
 const SYNC_EVENT = "hedefim_favorites_updated";
+const EMPTY: FavoriteSchool[] = [];
 
-function migrate(raw: unknown[]): FavoriteSchool[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return raw.map((f: any) => ({
-    ...f,
-    scores: f.scores ?? (f.latest_score ? [f.latest_score] : []),
-  }));
-}
+// useSyncExternalStore aynı veri için aynı referansı ister; ham metin
+// değişmedikçe önceki ayrıştırılmış liste döner.
+let cachedRaw: string | null = null;
+let cachedList: FavoriteSchool[] = EMPTY;
 
-function readStorage(): FavoriteSchool[] {
+function readRaw(): string | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    const parsed = JSON.parse(stored);
-    return migrate(Array.isArray(parsed) ? parsed : []);
+    return localStorage.getItem(STORAGE_KEY);
   } catch {
-    return [];
+    return null;
   }
 }
 
-export function useFavorites() {
-  const [favorites, setFavorites] = useState<FavoriteSchool[]>([]);
+function getSnapshot(): FavoriteSchool[] {
+  const raw = readRaw();
+  if (raw !== cachedRaw) {
+    cachedRaw = raw;
+    cachedList = raw ? parseFavorites(raw) : EMPTY;
+  }
+  return cachedList;
+}
 
-  useEffect(() => {
-    setFavorites(readStorage());
+function getServerSnapshot(): FavoriteSchool[] {
+  return EMPTY;
+}
 
-    const onSync = () => setFavorites(readStorage());
-    window.addEventListener(SYNC_EVENT, onSync);
-    return () => window.removeEventListener(SYNC_EVENT, onSync);
-  }, []);
-
-  const save = (list: FavoriteSchool[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    setFavorites(list);
-    window.dispatchEvent(new Event(SYNC_EVENT));
+function subscribe(onChange: () => void) {
+  // Aynı sekmedeki bileşenler SYNC_EVENT, diğer sekmeler `storage` ile.
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === null || event.key === STORAGE_KEY) onChange();
   };
+  window.addEventListener(SYNC_EVENT, onChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(SYNC_EVENT, onChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+function write(list: FavoriteSchool[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    // Gizli pencere / dolu depolama: liste bu oturumda değişmez.
+    return;
+  }
+  window.dispatchEvent(new Event(SYNC_EVENT));
+}
+
+const noopSubscribe = () => () => {};
+
+/** Sunucu ve hidrasyon sırasında false, tarayıcıda localStorage okunduktan sonra true. */
+function useIsClient() {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+}
+
+export function useFavorites() {
+  const favorites = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const ready = useIsClient();
 
   const addFavorite = (school: FavoriteSchool) => {
-    const current = readStorage();
+    const current = getSnapshot();
     if (current.some((f) => f.id === school.id)) return;
-    save([...current, school]);
+    write([...current, school]);
   };
 
   const removeFavorite = (id: string) => {
-    save(readStorage().filter((f) => f.id !== id));
+    write(getSnapshot().filter((f) => f.id !== id));
   };
 
-  const moveUp = (index: number) => {
-    if (index === 0) return;
-    const list = [...favorites];
-    [list[index - 1], list[index]] = [list[index], list[index - 1]];
-    save(list);
-  };
+  const moveUp = (index: number) => write(moveFavorite(getSnapshot(), index, -1));
 
-  const moveDown = (index: number) => {
-    if (index === favorites.length - 1) return;
-    const list = [...favorites];
-    [list[index], list[index + 1]] = [list[index + 1], list[index]];
-    save(list);
-  };
+  const moveDown = (index: number) => write(moveFavorite(getSnapshot(), index, 1));
 
-  const clearAll = () => save([]);
+  const clearAll = () => write([]);
 
   const isFavorite = (id: string) => favorites.some((f) => f.id === id);
 
+  /**
+   * Sunucudan gelen güncel okul satırlarını listeye işler ve yanıtta
+   * bulunmayan okulların kimliklerini döner. Liste o arada başka yerde
+   * değişmiş olabileceği için her zaman depodaki son hal esas alınır.
+   */
+  const applyFreshRows = (rows: FreshSchoolRow[], requestedIds: string[]) => {
+    const current = getSnapshot();
+    const requested = new Set(requestedIds);
+    const { list, missingIds } = mergeFreshFavorites(current, rows);
+    if (JSON.stringify(list) !== JSON.stringify(current)) write(list);
+    return missingIds.filter((id) => requested.has(id));
+  };
+
   return {
     favorites,
+    ready,
     addFavorite,
     removeFavorite,
     moveUp,
     moveDown,
     clearAll,
     isFavorite,
+    applyFreshRows,
   };
 }

@@ -30,6 +30,9 @@ before(async () => {
   // Real project detail schema and policies; base tables above predate migrations.
   await db.exec(readFileSync('supabase/migrations/003_school_detail_tables.sql','utf8'));
   for (const file of ['006_schools_rls.sql','007_school_vocational_fields_rls.sql','008_vocational_fields_rls.sql']) await db.exec(readFileSync('supabase/migrations/'+file,'utf8'));
+  // Live-only extras seen in pg_policies/grants on 2026-09-22.
+  await db.exec(`create policy schools_select on schools for select using(true); grant select on profiles, schools to anon;`);
+  await db.exec(readFileSync('supabase/migrations/016_schools_hide_inactive.sql','utf8'));
   // Required by the current app, but absent from the historical migrations.
   await db.exec(`alter table school_scores add column vocational_field_id integer references vocational_fields; alter table school_scores drop constraint school_scores_school_id_year_key;
     grant select,insert,update,delete on all tables in schema public to authenticated;
@@ -135,4 +138,16 @@ test('silently denied branch deletion prevents a field-only replacement from lea
   } finally {
     await db.exec('drop policy reject_test_delete on school_vocational_branches');
   }
+});
+
+test('inactive schools are visible to the admin only',async()=>{
+  await db.exec("insert into schools(id,institution_code,name,slug,type,district,is_active) values(2,'222222','Pasif Lise','pasif-lise','Anadolu Lisesi','Mezitli',false)");
+  const names=async(role,user)=>db.transaction(async tx=>{
+    await tx.exec(`set local role ${role}`);
+    await tx.query("select set_config('request.jwt.claim.sub', $1, true)",[user]);
+    return (await tx.query('select name from schools order by id')).rows.map(r=>r.name);
+  });
+  assert.deepEqual(await names('anon',''),['Örnek Lise']);
+  assert.deepEqual(await names('authenticated',member),['Örnek Lise']);
+  assert.deepEqual(await names('authenticated',admin),['Örnek Lise','Pasif Lise']);
 });

@@ -28,6 +28,21 @@ export async function sendContactMessage(payload: ContactFormPayload): Promise<C
 
   const supabase = await createClient();
 
+  if (payload.schoolId != null) {
+    if (!Number.isSafeInteger(payload.schoolId) || payload.schoolId <= 0)
+      return { success: false, error: "Seçilen okul bulunamadı. Lütfen okulu yeniden seçin." };
+    const { data: school, error: schoolError } = await supabase
+      .from("schools")
+      .select("id")
+      .eq("id", payload.schoolId)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (schoolError)
+      return { success: false, error: "Mesajınız gönderilemedi. Lütfen tekrar deneyin." };
+    if (!school)
+      return { success: false, error: "Seçilen okul bulunamadı. Lütfen okulu yeniden seçin." };
+  }
+
   const { error } = await supabase.from("contact_messages").insert({
     name: name.trim(),
     email: email.trim(),
