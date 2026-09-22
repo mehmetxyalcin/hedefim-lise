@@ -277,7 +277,7 @@ git commit -m "feat: landing scale plots each school's most accessible score"
 
 **Interfaces:**
 - Consumes: `placementValues`, `valuesBySchool`, `compareByScore`, `parsePlacement`, `type ScoreSort`, `type PlacementValues` from Task 1.
-- Produces for Task 4: `SchoolList` props `placement: Placement | null`, `scoreYear: number | null`, `scoreValues: Record<number, PlacementValues>`; `initialPlacement` becomes the parsed value (`""` when none).
+- Produces for Task 4: `SchoolList` props `activePlacement: Placement | null` (the list already has a `placement` select state), `scoreYear: number | null`, `scoreValues: Record<number, PlacementValues>`; `initialPlacement` becomes the parsed value (`""` when none).
 
 - [ ] **Step 1: Remove the old range helper**
 
@@ -375,7 +375,7 @@ After `schools` is known:
 
 `mapSchool` must carry `vocational_field_id` into `scores` — check `src/lib/supabase/public.ts` around line 170 and add `vocational_field_id: s.vocational_field_id ?? null` if missing (type `SchoolScoreRaw` already has the optional field).
 
-Pagination: `if (yerlestirme) paginationSearchParams.yerlestirme = yerlestirme;` stays (now only valid values). `SchoolList` gets `initialPlacement={yerlestirme ?? ""}`, `placement={yerlestirme}`, `scoreYear={scoreYear}`, `scoreValues={scoreValues}`; the `key` keeps `yerlestirme`.
+Pagination: `if (yerlestirme) paginationSearchParams.yerlestirme = yerlestirme;` stays (now only valid values). `SchoolList` gets `initialPlacement={yerlestirme ?? ""}`, `activePlacement={yerlestirme}`, `scoreYear={scoreYear}`, `scoreValues={scoreValues}`; the `key` keeps `yerlestirme`.
 
 - [ ] **Step 7: Verify**
 
@@ -402,7 +402,7 @@ const PLACEMENT_OPTIONS = [
 ] as const;
 ```
 
-Props: add `placement: Placement | null; scoreYear: number | null; scoreValues: Record<number, PlacementValues>;` and destructure them.
+Props: add `activePlacement: Placement | null; scoreYear: number | null; scoreValues: Record<number, PlacementValues>;` and destructure them (`activePlacement`, not `placement`, which is already the select state).
 
 - [ ] **Step 2: Replace `DisplayScore` / `getDisplayScore` with the score box**
 
@@ -448,7 +448,7 @@ function ScoreBox({ values, placement, year }: { values: PlacementValues | undef
 }
 ```
 
-In the card replace the IIFE with `<ScoreBox values={scoreValues[school.id]} placement={placement} year={scoreYear} />`. Remove the now-unused `SchoolScoreRaw` import if nothing else uses it.
+In the card replace the IIFE with `<ScoreBox values={scoreValues[school.id]} placement={activePlacement} year={scoreYear} />`. Remove the now-unused `SchoolScoreRaw` import if nothing else uses it.
 
 - [ ] **Step 3: Verify both tasks**
 

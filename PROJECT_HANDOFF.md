@@ -286,3 +286,13 @@ Canlı doğrulama eki: 301c519 Hostinger üzerinde 2026-09-08 01:24'te 58 saniye
 - Hata: sekmeli yeni/düzenle ekranları da `createSchool`/`updateSchool` kullanıyordu; slug çakışması, zorunlu alan, görsel yükleme, insert ve meslek alanı hataları kullanıcıyı eski `/admin/schools/new` veya `/admin/schools/[id]/edit` sayfasına yönlendiriyor, sekmeli taslak kayboluyordu. Artık tüm bu hatalar `{ success: false, message }` döner (`SchoolFormError`, `readSchoolBasics`); sekmeli form mesajı gösterir, taslak korunur.
 - `/admin/schools/new` → kalıcı yönlendirme `/admin/okullar/yeni`; `/admin/schools/[id]/edit` → id'den slug bulunup `/admin/okullar/[slug]/duzenle` (yoksa `/admin?error`). Eski `SchoolForm.tsx` silindi.
 - Taslak koruma testi sekmeli forma taşındı; slug çakışması için yeni action testi. 38 test, lint 0, derleme başarılı. Oturumlu tarayıcıda eski yol yönlendirmesi ve slug çakışması denenmedi.
+
+## 22. Yerleştirme türüne göre puan — 22 Eylül 2026
+
+Tasarım: `docs/superpowers/specs/2026-09-22-yerlesim-turune-gore-puan-design.md`; plan: `docs/superpowers/plans/2026-09-22-yerlesim-turune-gore-puan.md`. 16. bölümdeki ertelenen program puanı sorununun kullanıcıyla kararlaştırılan çözümüdür.
+
+- Tek kural `src/lib/school-scores.ts`: veri kümesinin son yılında okul başına **en erişilebilir** değer — merkezi = en büyük yüzdelik, yerel = en düşük OBP; geçerli değer `0 < v <= 100`. Ana sayfa ölçeği, `/okullar` filtre/aralık/sıralama ve liste kartı bunu kullanır. Önceki "en rekabetçi değer" kuralı kalktı.
+- Yerleştirme filtresi yalnız `yerel` | `merkezi`; türü `placement_type` değil okulun puanı belirler. Eski `yerel_merkezi` adresleri filtresiz liste açar. Yönetim formu ve detay şeridi `placement_type` üç değerini göstermeye devam eder.
+- Alan filtresi merkezi değeri yalnız o alanın yüzdeliğinden hesaplar. Veride sınavlı programlar ayrı "(SINAVLI)" alanlarıdır ve yüzdelikler onlarda; sınavsız alan seçilince kartta OBP görünür.
+- Kart: Merkezi seçiliyse yüzdelik, Yerel seçiliyse OBP; seçim yoksa iki puanlı okulda iki satır ("Merkezi", "Yerel OBP"). Sayılar tr-TR.
+- Doğrulama (yerel, canlı veri): Merkezi 55, Yerel 126, tam yüzdelik aralığı 55, tam OBP aralığı 126, ikisi birlikte 26, `yerel_merkezi` 184. Fatma Aliye: iki satır %99,73 / 57,04; Merkezi %99,73; Yerel 57,04; alan 78 + Merkezi %72,95; alan 12 → OBP 57,04. Sıralamalar ve değeri olmayanların sonda kalması kontrol edildi. 44 test, lint 0, derleme başarılı; masaüstü ve 375px ekran görüntüsü.
