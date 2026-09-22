@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { AdminPage } from "@/components/admin/ui/AdminPage";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { FlashBanner } from "@/components/admin/ui/FlashBanner";
+import { Card } from "@/components/admin/ui/Card";
+import { adminInput } from "@/components/admin/ui/styles";
+import { ConfirmButton } from "@/components/admin/ui/ConfirmButton";
+import { adminButton } from "@/components/admin/ui/Button";
+import { ChevronDown, ChevronUp, Eye, EyeOff, X } from "lucide-react";
+import { Badge } from "@/components/admin/ui/Badge";
+import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
 import { getAdminNavigationItems } from "@/lib/site-settings";
 import type { NavigationItem } from "@/lib/site-settings";
 import {
@@ -14,7 +23,7 @@ import {
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Menü Yönetimi",
+  title: "Menü | Yönetim",
   robots: { index: false, follow: false },
 };
 
@@ -26,33 +35,7 @@ type PageProps = {
   }>;
 };
 
-const inputClassName =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
-
-function SettingsTabs({ active }: { active: "general" | "navigation" | "footer" }) {
-  const tabs = [
-    { id: "general" as const, href: "/admin/site-settings", label: "Genel" },
-    { id: "navigation" as const, href: "/admin/site-settings/navigation", label: "Menü" },
-    { id: "footer" as const, href: "/admin/site-settings/footer", label: "Footer" },
-  ];
-  return (
-    <div className="mb-6 flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
-      {tabs.map((tab) => (
-        <Link
-          key={tab.id}
-          href={tab.href}
-          className={`flex-1 rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors ${
-            active === tab.id
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-500 hover:text-slate-800"
-          }`}
-        >
-          {tab.label}
-        </Link>
-      ))}
-    </div>
-  );
-}
+const inputClassName = adminInput;
 
 function FormSection({
   children,
@@ -64,15 +47,9 @@ function FormSection({
   title: string;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-5 border-b border-slate-100 pb-4">
-        <h2 className="text-lg font-bold tracking-tight text-slate-900">{title}</h2>
-        {description && (
-          <p className="mt-1 text-sm leading-relaxed text-slate-500">{description}</p>
-        )}
-      </div>
+    <Card title={title} description={description}>
       {children}
-    </section>
+    </Card>
   );
 }
 
@@ -86,13 +63,13 @@ function EditRow({
   isLast: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-4">
+    <div className="rounded-xl border border-admin-accent-soft bg-admin-tint/50 p-4">
       <form action={updateNavigationItem} className="space-y-4">
         <input type="hidden" name="id" value={item.id} />
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-slate-700">Etiket</span>
+            <span className="mb-2 block text-sm font-semibold text-admin-body">Etiket</span>
             <input
               name="label"
               defaultValue={item.label}
@@ -102,7 +79,7 @@ function EditRow({
             />
           </label>
           <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-slate-700">Bağlantı</span>
+            <span className="mb-2 block text-sm font-semibold text-admin-body">Bağlantı</span>
             <input
               name="href"
               defaultValue={item.href}
@@ -115,11 +92,11 @@ function EditRow({
 
         <div className="flex flex-wrap items-center gap-4">
           <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-slate-700">Hedef</span>
+            <span className="mb-2 block text-sm font-semibold text-admin-body">Hedef</span>
             <select
               name="target"
               defaultValue={item.target}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              className="rounded-xl border border-admin-line bg-white px-4 py-3 text-admin-ink outline-none focus:border-admin-accent focus:ring-4 focus:ring-admin-accent/10"
             >
               <option value="_self">Aynı sekme</option>
               <option value="_blank">Yeni sekme</option>
@@ -133,31 +110,32 @@ function EditRow({
               defaultChecked={item.is_visible}
               className="h-4 w-4"
             />
-            <span className="text-sm font-semibold text-slate-700">Görünür</span>
+            <span className="text-sm font-semibold text-admin-body">Görünür</span>
           </label>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-blue-100 pt-4">
-          <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor..." />
+        <div className="flex flex-wrap items-center gap-2 border-t border-admin-tint pt-4">
+          <AdminSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
           <Link
             href="/admin/site-settings/navigation"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
+            className={adminButton()}
           >
             İptal
           </Link>
         </div>
       </form>
 
-      <div className="mt-3 flex gap-2 border-t border-blue-100 pt-3">
+      <div className="mt-3 flex gap-2 border-t border-admin-tint pt-3">
         <form action={moveNavigationItem}>
           <input type="hidden" name="id" value={item.id} />
           <input type="hidden" name="direction" value="up" />
           <button
             type="submit"
             disabled={isFirst}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className={adminButton({ size: "sm" })}
           >
-            ↑ Yukarı
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
+            Yukarı
           </button>
         </form>
         <form action={moveNavigationItem}>
@@ -166,19 +144,20 @@ function EditRow({
           <button
             type="submit"
             disabled={isLast}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className={adminButton({ size: "sm" })}
           >
-            ↓ Aşağı
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
+            Aşağı
           </button>
         </form>
         <form action={deleteNavigationItem}>
           <input type="hidden" name="id" value={item.id} />
-          <button
-            type="submit"
-            className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100"
+          <ConfirmButton
+            message={`"${item.label}" menü öğesini silmek istediğinize emin misiniz?`}
+            className={adminButton({ variant: "danger", size: "sm" })}
           >
             Sil
-          </button>
+          </ConfirmButton>
         </form>
       </div>
     </div>
@@ -187,30 +166,29 @@ function EditRow({
 
 function ReadRow({
   item,
+  position,
   isFirst,
   isLast,
 }: {
   item: NavigationItem;
+  position: number;
   isFirst: boolean;
   isLast: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-admin-line bg-white px-4 py-3">
+      <span className="w-5 shrink-0 text-right text-xs text-admin-muted tabular-nums">{position}</span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-900">{item.label}</span>
-          <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-500">
+          <span className="font-semibold text-admin-ink">{item.label}</span>
+          <span className="rounded-md bg-admin-line-soft px-2 py-0.5 font-mono text-xs text-admin-muted">
             {item.href}
           </span>
           {item.target === "_blank" && (
-            <span className="rounded-md bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
-              yeni sekme
-            </span>
+            <Badge>yeni sekme</Badge>
           )}
           {!item.is_visible && (
-            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-              gizli
-            </span>
+            <Badge tone="warning">gizli</Badge>
           )}
         </div>
       </div>
@@ -227,13 +205,14 @@ function ReadRow({
           <button
             type="submit"
             title={item.is_visible ? "Gizle" : "Göster"}
-            className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
-              item.is_visible
-                ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
-            }`}
+            className={adminButton({ size: "sm" })}
           >
-            {item.is_visible ? "👁 Gizle" : "👁 Göster"}
+            {item.is_visible ? (
+              <EyeOff aria-hidden="true" className="h-4 w-4" />
+            ) : (
+              <Eye aria-hidden="true" className="h-4 w-4" />
+            )}
+            {item.is_visible ? "Gizle" : "Göster"}
           </button>
         </form>
 
@@ -245,9 +224,9 @@ function ReadRow({
             type="submit"
             disabled={isFirst}
             aria-label="Yukarı taşı"
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className={adminButton({ variant: "ghost", size: "sm", className: "px-2" })}
           >
-            ↑
+            <ChevronUp aria-hidden="true" className="h-4 w-4" />
           </button>
         </form>
         <form action={moveNavigationItem}>
@@ -257,16 +236,16 @@ function ReadRow({
             type="submit"
             disabled={isLast}
             aria-label="Aşağı taşı"
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className={adminButton({ variant: "ghost", size: "sm", className: "px-2" })}
           >
-            ↓
+            <ChevronDown aria-hidden="true" className="h-4 w-4" />
           </button>
         </form>
 
         {/* Düzenle */}
         <Link
           href={`/admin/site-settings/navigation?editing=${item.id}`}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+          className={adminButton({ size: "sm" })}
         >
           Düzenle
         </Link>
@@ -274,13 +253,13 @@ function ReadRow({
         {/* Sil */}
         <form action={deleteNavigationItem}>
           <input type="hidden" name="id" value={item.id} />
-          <button
-            type="submit"
+          <ConfirmButton
+            message={`"${item.label}" menü öğesini silmek istediğinize emin misiniz?`}
             aria-label={`${item.label} öğesini sil`}
-            className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-2 text-sm text-rose-700 transition-colors hover:bg-rose-100"
+            className={adminButton({ variant: "danger", size: "sm" })}
           >
-            ✕
-          </button>
+            <X aria-hidden="true" className="h-4 w-4" />
+          </ConfirmButton>
         </form>
       </div>
     </div>
@@ -289,7 +268,13 @@ function ReadRow({
 
 export default async function NavigationPage({ searchParams }: PageProps) {
   const { supabase, profile } = await requireAdmin();
-  if (!profile) return <h1>Yetkisiz erişim.</h1>;
+  if (!profile) {
+    return (
+      <AdminPage width="narrow">
+        <PageHeader title="Yetkisiz erişim" />
+      </AdminPage>
+    );
+  }
 
   const params = searchParams ? await searchParams : undefined;
   const editingId = params?.editing;
@@ -297,46 +282,17 @@ export default async function NavigationPage({ searchParams }: PageProps) {
   const items = await getAdminNavigationItems(supabase);
 
   return (
-    <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-8">
-          <div className="mb-4 flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
-            >
-              ← Admin Paneli
-            </Link>
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Site Ayarları
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Navbar&apos;da görünen menü öğelerini sıralayın ve düzenleyin.
-          </p>
-        </div>
-
-        <SettingsTabs active="navigation" />
-
-        {params?.success && (
-          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-            {params.success}
-          </div>
-        )}
-
-        {params?.error && (
-          <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-            {params.error}
-          </div>
-        )}
+    <AdminPage width="narrow">
+      <PageHeader title="Menü" description="Navbar'da görünen öğeler, sırası ve görünürlüğü." />
+      <FlashBanner success={params?.success} error={params?.error} />
 
         {/* Mevcut öğeler */}
         <FormSection
-          title="Mevcut Menü Öğeleri"
-          description="Sıralamayı ↑↓ butonlarıyla, görünürlüğü 👁 ile değiştirebilirsiniz."
+          title="Menü öğeleri"
+          description="Sırayı oklarla, görünürlüğü Gizle/Göster ile değiştirin."
         >
           {items.length === 0 ? (
-            <p className="text-sm text-slate-500">Henüz menü öğesi yok.</p>
+            <p className="text-sm text-admin-muted">Henüz menü öğesi yok.</p>
           ) : (
             <div className="space-y-3">
               {items.map((item, index) =>
@@ -349,6 +305,7 @@ export default async function NavigationPage({ searchParams }: PageProps) {
                   />
                 ) : (
                   <ReadRow
+                    position={index + 1}
                     key={item.id}
                     item={item}
                     isFirst={index === 0}
@@ -362,13 +319,13 @@ export default async function NavigationPage({ searchParams }: PageProps) {
 
         {/* Yeni öğe ekle */}
         <FormSection
-          title="Yeni Menü Öğesi Ekle"
+          title="Yeni menü öğesi"
           description="Listeye yeni bir navigasyon bağlantısı ekleyin."
         >
           <form action={createNavigationItem} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">
+                <span className="mb-2 block text-sm font-semibold text-admin-body">
                   Etiket
                 </span>
                 <input
@@ -379,7 +336,7 @@ export default async function NavigationPage({ searchParams }: PageProps) {
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">
+                <span className="mb-2 block text-sm font-semibold text-admin-body">
                   Bağlantı (href)
                 </span>
                 <input
@@ -391,22 +348,21 @@ export default async function NavigationPage({ searchParams }: PageProps) {
               </label>
             </div>
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">
+              <span className="mb-2 block text-sm font-semibold text-admin-body">
                 Hedef
               </span>
               <select
                 name="target"
                 defaultValue="_self"
-                className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="rounded-xl border border-admin-line bg-white px-4 py-3 text-admin-ink outline-none focus:border-admin-accent focus:ring-4 focus:ring-admin-accent/10"
               >
                 <option value="_self">Aynı sekme</option>
                 <option value="_blank">Yeni sekme</option>
               </select>
             </label>
-            <SubmitButton label="Ekle" pendingLabel="Ekleniyor..." />
+            <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
           </form>
         </FormSection>
-      </div>
-    </div>
+    </AdminPage>
   );
 }
