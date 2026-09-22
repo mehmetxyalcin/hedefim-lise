@@ -85,7 +85,7 @@ export function ScoresTab({
                       className="inline-flex items-center gap-1.5 rounded-lg border border-admin-accent-soft bg-admin-tint px-3 py-1.5 text-xs font-semibold text-admin-accent-deep hover:bg-admin-tint"
                     >
                       <Plus className="h-3 w-3" />
-                      Puan Ekle
+                      Puan ekle
                     </button>
                   )}
                 </div>
@@ -188,10 +188,10 @@ export function ScoresTab({
 
                               <div>
                                 <span className="mb-1 block text-xs font-semibold text-admin-body">
-                                  Meslek Alanı
+                                  Meslek alanı
                                 </span>
                                 <p className="rounded-xl border border-admin-line bg-admin-ground px-3 py-2 text-sm text-admin-body">
-                                  {fieldName ?? "Okul Geneli"}
+                                  {fieldName ?? "Okul geneli"}
                                 </p>
                               </div>
 
@@ -275,10 +275,10 @@ export function ScoresTab({
 
                     <label className="block">
                       <span className="mb-1 block text-xs font-semibold text-admin-body">
-                        Meslek Alanı
+                        Meslek alanı
                       </span>
                       <select name="vocational_field_id" className={inputCls}>
-                        {canAddSchoolWide && <option value="">Okul Geneli</option>}
+                        {canAddSchoolWide && <option value="">Okul geneli</option>}
                         {availableFields.map((f) => (
                           <option key={f.id} value={f.id}>
                             {f.title}

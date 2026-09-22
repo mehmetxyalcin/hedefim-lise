@@ -107,7 +107,7 @@ export function SmartSchoolBasicFields({
     <div className="grid gap-4 md:grid-cols-2">
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-admin-body">
-          Okul Adı
+          Okul adı
         </span>
         <input
           name="name"
@@ -127,7 +127,7 @@ export function SmartSchoolBasicFields({
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-admin-body">
-          Kurum Kodu
+          Kurum kodu
         </span>
         <input
           name="institution_code"
@@ -160,7 +160,7 @@ export function SmartSchoolBasicFields({
           </span>
         ) : (
           <span className="mt-2 block text-xs text-admin-muted">
-            Public URL: /okullar/{slug || "slug"}
+            Sitedeki adres: /okullar/{slug || "slug"}
           </span>
         )}
         <button
@@ -219,7 +219,7 @@ export function SmartSchoolBasicFields({
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-admin-body">
-          Logo / Kısa Kod
+          Logo / kısa kod
         </span>
         <input
           name="logo"
@@ -239,7 +239,7 @@ export function SmartSchoolBasicFields({
 
       <label className="block md:col-span-2">
         <span className="mb-2 block text-sm font-semibold text-admin-body">
-          Renk Sınıfı
+          Renk sınıfı
         </span>
         <input
           name="color"

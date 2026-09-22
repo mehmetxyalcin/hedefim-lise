@@ -171,7 +171,7 @@ export function ScholarshipsTab({
             className={inputCls}
           />
           <div className="flex justify-end">
-            <AdminSubmitButton label="Burs Ekle" pendingLabel="Ekleniyor…" />
+            <AdminSubmitButton label="Burs ekle" pendingLabel="Ekleniyor…" />
           </div>
         </form>
       </div>

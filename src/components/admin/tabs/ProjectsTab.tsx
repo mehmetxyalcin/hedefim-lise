@@ -216,7 +216,7 @@ export function ProjectsTab({
             />
           </div>
           <div className="flex justify-end">
-            <AdminSubmitButton label="Proje Ekle" pendingLabel="Ekleniyor…" />
+            <AdminSubmitButton label="Proje ekle" pendingLabel="Ekleniyor…" />
           </div>
         </form>
       </div>

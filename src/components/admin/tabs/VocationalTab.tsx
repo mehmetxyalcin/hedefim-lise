@@ -116,7 +116,7 @@ export function VocationalTab({
                             placeholder="Dal adı"
                             className="rounded-xl border border-admin-line bg-white px-3 py-2 text-sm outline-none focus:border-admin-accent focus:ring-4 focus:ring-admin-accent/10"
                           />
-                          <AdminSubmitButton label="Ekle" pendingLabel="…" />
+                          <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
                           <button
                             type="button"
                             onClick={() => setAddingBranchForField(null)}
@@ -144,7 +144,7 @@ export function VocationalTab({
         </div>
 
         <div className="mt-6 flex justify-end">
-          <AdminSubmitButton label="Alanları ve Dalları Kaydet" pendingLabel="Kaydediliyor…" />
+          <AdminSubmitButton label="Alanları ve dalları kaydet" pendingLabel="Kaydediliyor…" />
         </div>
       </form>
     </section>

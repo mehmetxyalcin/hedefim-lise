@@ -75,7 +75,7 @@ export function FacilitiesTab({
         )}
 
         <div className="flex justify-end pt-2">
-          <AdminSubmitButton label="Tesisleri Kaydet" pendingLabel="Kaydediliyor…" />
+          <AdminSubmitButton label="Tesisleri kaydet" pendingLabel="Kaydediliyor…" />
         </div>
       </form>
 
@@ -87,7 +87,7 @@ export function FacilitiesTab({
           className="flex items-center gap-2 text-sm font-semibold text-admin-accent hover:text-admin-accent-deep"
         >
           <Plus className="h-4 w-4" />
-          {showAddForm ? "İptal" : "Listeye Yeni Tesis Ekle"}
+          {showAddForm ? "İptal" : "Listeye yeni tesis ekle"}
         </button>
 
         {showAddForm && (
