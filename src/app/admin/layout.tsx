@@ -1,33 +1,36 @@
-import { headers } from "next/headers";
-import { signOutAdmin } from "./login/actions";
+import { cookies, headers } from "next/headers";
+import { requireAdmin } from "@/lib/admin-auth";
+import { AdminFrame } from "@/components/admin/shell/AdminFrame";
+import { ADMIN_SIDEBAR_COOKIE } from "@/components/admin/shell/nav";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const isLoginPage = pathname === "/admin/login";
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = (await headers()).get("x-pathname") ?? "";
+
+  if (pathname === "/admin/login") {
+    return <div className="admin flex min-h-screen w-full flex-1">{children}</div>;
+  }
+
+  // Yalnız kabuk verisi içindir; her sayfa kendi requireAdmin() kontrolünü yapar.
+  const { supabase, user, profile } = await requireAdmin();
+  const [cookieStore, schoolsResult, unreadResult] = await Promise.all([
+    cookies(),
+    supabase.from("schools").select("id, name, slug, district").order("name"),
+    supabase
+      .from("contact_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "unread"),
+  ]);
+  const schools = schoolsResult.data ?? [];
 
   return (
-    <>
-      {!isLoginPage && (
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-2">
-          <span className="text-xs font-medium text-slate-400">
-            Yönetim Paneli
-          </span>
-          <form action={signOutAdmin}>
-            <button
-              type="submit"
-              className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-rose-700"
-            >
-              Çıkış Yap
-            </button>
-          </form>
-        </div>
-      )}
+    <AdminFrame
+      collapsed={cookieStore.get(ADMIN_SIDEBAR_COOKIE)?.value === "collapsed"}
+      email={profile.email ?? user.email ?? ""}
+      unreadCount={unreadResult.count ?? 0}
+      schoolCount={schools.length}
+      schools={schools}
+    >
       {children}
-    </>
+    </AdminFrame>
   );
 }

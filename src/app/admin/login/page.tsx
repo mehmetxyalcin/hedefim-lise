@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
+import { adminHint, adminInput, adminLabel } from "@/components/admin/ui/styles";
 import { signInAdmin } from "./actions";
 
 export const metadata: Metadata = {
@@ -52,66 +53,58 @@ export default async function AdminLoginPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-slate-50 px-6 py-16">
-      <div className="w-full max-w-md">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          {/* Başlık */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-              Admin Girişi
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-500">
-              Yönetim paneline erişmek için e-posta ve şifrenizle giriş yapın.
-            </p>
-          </div>
+    <div className="flex w-full items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm">
+        <div className="mb-6 flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-admin-accent text-sm font-bold text-white">
+            HL
+          </span>
+          <span className="leading-tight">
+            <span className="block text-sm font-bold text-admin-ink">Hedefim Lise</span>
+            <span className="block text-xs text-admin-muted">Yönetim</span>
+          </span>
+        </div>
+        <div className="rounded-xl border border-admin-line bg-white p-6 shadow-admin-card">
+          <h1 className="text-xl font-bold tracking-tight text-admin-ink">Giriş yap</h1>
+          <p className="mt-1 text-sm text-admin-muted">
+            Yönetim paneline e-posta ve şifrenizle girin.
+          </p>
 
-          {/* Hata mesajı */}
           {params?.error && (
             <div
               role="alert"
-              className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700"
+              className="mt-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
             >
               {params.error}
             </div>
           )}
 
-          {/* Form */}
-          <form action={signInAdmin} className="space-y-5">
+          <form action={signInAdmin} className="mt-5 space-y-4">
             <input type="hidden" name="next" value={nextPath} />
-
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">
-                E-posta
-              </span>
+              <span className={adminLabel}>E-posta</span>
               <input
                 type="email"
                 name="email"
                 required
                 autoComplete="email"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className={adminInput}
                 placeholder="ornek@site.com"
               />
             </label>
-
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">
-                Şifre
-              </span>
+              <span className={adminLabel}>Şifre</span>
               <input
                 type="password"
                 name="password"
                 required
                 minLength={8}
                 autoComplete="current-password"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                placeholder="En az 8 karakter"
+                className={adminInput}
               />
-              <span className="mt-1.5 block text-xs text-slate-400">
-                Şifre en az 8 karakter içermelidir.
-              </span>
+              <span className={adminHint}>En az 8 karakter.</span>
             </label>
-
-            <SubmitButton label="Giriş Yap" pendingLabel="Giriş yapılıyor…" />
+            <AdminSubmitButton label="Giriş yap" pendingLabel="Giriş yapılıyor…" className="w-full" />
           </form>
         </div>
       </div>
