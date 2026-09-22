@@ -1,22 +1,29 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft, CircleHelp, Eye, EyeOff, Trash2 } from "lucide-react";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { ChevronDown, ExternalLink, Eye, EyeOff, Plus, Search, Trash2 } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
+import { AdminPage } from "@/components/admin/ui/AdminPage";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { FlashBanner } from "@/components/admin/ui/FlashBanner";
+import { Badge } from "@/components/admin/ui/Badge";
+import { EmptyState } from "@/components/admin/ui/EmptyState";
+import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
+import { ConfirmButton } from "@/components/admin/ui/ConfirmButton";
+import { adminButton } from "@/components/admin/ui/Button";
+import { adminCard, adminControl, adminInput, adminLabel } from "@/components/admin/ui/styles";
+import { cn } from "@/lib/cn";
 import { mapFaq, type FaqRow } from "@/types/faq";
 import { createFaq, deleteFaq, updateFaq } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Soru-Cevap Yönetimi | Admin",
+  title: "Soru-cevap | Yönetim",
   robots: { index: false, follow: false },
 };
 
 type PageProps = {
-  searchParams?: Promise<{ success?: string; error?: string }>;
+  searchParams?: Promise<{ success?: string; error?: string; ara?: string; kategori?: string }>;
 };
 
-const inputClassName =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+const inputClassName = adminInput;
 
 const categories = [
   "Tercih İşlemleri",
@@ -28,7 +35,13 @@ const categories = [
 
 export default async function AdminFaqPage({ searchParams }: PageProps) {
   const { supabase, profile } = await requireAdmin();
-  if (!profile) return <h1>Yetkisiz erişim.</h1>;
+  if (!profile) {
+    return (
+      <AdminPage width="narrow">
+        <PageHeader title="Yetkisiz erişim" />
+      </AdminPage>
+    );
+  }
 
   const params = searchParams ? await searchParams : undefined;
   const { data, error } = await supabase
@@ -39,299 +52,231 @@ export default async function AdminFaqPage({ searchParams }: PageProps) {
 
   if (error) {
     return (
-      <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-        <div className="mx-auto max-w-4xl">
-          <Link
-            href="/admin"
-            className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900"
-          >
-            <ArrowLeft className="h-4 w-4" /> Admin Paneli
-          </Link>
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-800">
-            <h1 className="font-bold">Soru-cevap tablosu yüklenemedi</h1>
-            <p className="mt-2 text-sm">
-              Supabase üzerinde 010_faqs.sql migration dosyasını uygulayın.
-              Hata: {error.message}
-            </p>
-          </div>
+      <AdminPage width="narrow">
+        <PageHeader title="Soru-cevap" />
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-rose-800">
+          <h2 className="font-bold">Soru-cevap tablosu yüklenemedi</h2>
+          <p className="mt-2 text-sm">
+            Supabase üzerinde 010_faqs.sql migration dosyasını uygulayın. Hata: {error.message}
+          </p>
         </div>
-      </div>
+      </AdminPage>
     );
   }
 
   const faqs = ((data ?? []) as FaqRow[]).map(mapFaq);
   const nextSortOrder = (faqs.at(-1)?.sortOrder ?? 0) + 10;
+  const query = (params?.ara ?? "").trim().toLocaleLowerCase("tr-TR");
+  const categoryFilter = params?.kategori ?? "";
+  const visible = faqs.filter(
+    (faq) =>
+      (!categoryFilter || faq.category === categoryFilter) &&
+      (!query || `${faq.question} ${faq.answer}`.toLocaleLowerCase("tr-TR").includes(query)),
+  );
+  const groups = [...new Set(visible.map((faq) => faq.category))].map((category) => ({
+    category,
+    items: visible.filter((faq) => faq.category === category),
+  }));
+  const allCategories = [...new Set([...categories, ...faqs.map((faq) => faq.category)])];
+  const published = faqs.filter((faq) => faq.isPublished).length;
 
   return (
-    <div className="min-h-[70vh] bg-slate-50 px-4 py-12 md:px-6 md:py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8">
-          <Link
-            href="/admin"
-            className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900"
-          >
-            <ArrowLeft className="h-4 w-4" /> Admin Paneli
-          </Link>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="flex items-center gap-3 text-3xl font-extrabold tracking-tight text-slate-900">
-                <CircleHelp className="h-8 w-8 text-blue-600" />
-                Soru-Cevap Yönetimi
-              </h1>
-              <p className="mt-2 text-sm text-slate-500">
-                Yayındaki soruları düzenleyin veya yeni soru-cevap ekleyin.
-              </p>
-            </div>
-            <Link
-              href="/soru-cevap"
-              target="_blank"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
-            >
-              Sayfayı Görüntüle ↗
-            </Link>
-          </div>
-        </div>
+    <AdminPage width="narrow">
+      <PageHeader
+        title="Soru-cevap"
+        description={`${faqs.length} soru · ${published} yayında`}
+        actions={
+          <a href="/soru-cevap" target="_blank" rel="noopener noreferrer" className={adminButton({ variant: "ghost" })}>
+            <ExternalLink aria-hidden="true" className="h-4 w-4" />
+            Sayfayı görüntüle
+          </a>
+        }
+      />
+      <FlashBanner success={params?.success} error={params?.error} />
 
-        {params?.success && (
-          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-            {params.success}
-          </div>
-        )}
-        {params?.error && (
-          <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-            {params.error}
-          </div>
-        )}
-
-        <section className="mb-8 rounded-3xl border border-blue-100 bg-white p-5 shadow-sm md:p-7">
-          <div className="mb-5 border-b border-slate-100 pb-4">
-            <h2 className="text-xl font-extrabold text-slate-900">
-              Yeni soru-cevap ekle
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Kaydedilen içerik yayın seçeneği açıksa ziyaretçilere gösterilir.
-            </p>
-          </div>
+      <details className={cn(adminCard, "group mb-6")}>
+        <summary
+          className={cn(
+            adminButton({ variant: "primary" }),
+            "m-4 w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden",
+          )}
+        >
+          <Plus aria-hidden="true" className="h-4 w-4" />
+          Yeni soru
+        </summary>
+        <div className="border-t border-admin-line p-5">
+          <p className="mb-4 text-sm text-admin-muted">
+            Yayında seçeneği açıksa kaydedilen soru ziyaretçilere gösterilir.
+          </p>
           <form action={createFaq} className="space-y-4">
             <label className="block">
-              <span className="mb-1.5 block text-sm font-bold text-slate-700">Soru</span>
+              <span className={adminLabel}>Soru</span>
               <input name="question" required className={inputClassName} />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-sm font-bold text-slate-700">Yanıt</span>
-              <textarea
-                name="answer"
-                required
-                rows={5}
-                className={inputClassName}
-              />
+              <span className={adminLabel}>Yanıt</span>
+              <textarea name="answer" required rows={5} className={inputClassName} />
             </label>
             <div className="grid gap-4 sm:grid-cols-3">
               <label>
-                <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                  Kategori
-                </span>
-                <input
-                  name="category"
-                  list="faq-categories"
-                  defaultValue={categories[0]}
-                  required
-                  className={inputClassName}
-                />
+                <span className={adminLabel}>Kategori</span>
+                <input name="category" list="faq-categories" defaultValue={categories[0]} required className={inputClassName} />
               </label>
               <label>
-                <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                  Sıra
-                </span>
-                <input
-                  name="sort_order"
-                  type="number"
-                  min="0"
-                  defaultValue={nextSortOrder}
-                  className={inputClassName}
-                />
+                <span className={adminLabel}>Sıra</span>
+                <input name="sort_order" type="number" min="0" defaultValue={nextSortOrder} className={inputClassName} />
               </label>
               <label>
-                <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                  Kaynak sayfa
-                </span>
-                <input
-                  name="source_page"
-                  type="number"
-                  min="1"
-                  max="15"
-                  className={inputClassName}
-                />
+                <span className={adminLabel}>Kaynak sayfa</span>
+                <input name="source_page" type="number" min="1" max="15" className={inputClassName} />
               </label>
             </div>
-            <div className="flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <label className="inline-flex items-center gap-3 text-sm font-bold text-slate-700">
-                <input
-                  name="is_published"
-                  type="checkbox"
-                  defaultChecked
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600"
-                />
+            <div className="flex flex-col gap-4 border-t border-admin-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <label className="inline-flex items-center gap-3 text-sm font-semibold text-admin-body">
+                <input name="is_published" type="checkbox" defaultChecked className="h-4 w-4" />
                 Yayında
               </label>
-              <SubmitButton label="Soru-Cevap Ekle" pendingLabel="Ekleniyor..." />
+              <AdminSubmitButton label="Soruyu kaydet" pendingLabel="Kaydediliyor…" />
             </div>
           </form>
-        </section>
+        </div>
+      </details>
 
-        <datalist id="faq-categories">
-          {categories.map((category) => (
-            <option key={category} value={category} />
+      <datalist id="faq-categories">
+        {categories.map((category) => (
+          <option key={category} value={category} />
+        ))}
+      </datalist>
+
+      <form method="get" className="mb-2 flex flex-wrap gap-2" role="search">
+        <label className="relative min-w-0 grow basis-60">
+          <span className="sr-only">Sorularda ara</span>
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-admin-faint"
+          />
+          <input
+            type="search"
+            name="ara"
+            defaultValue={params?.ara ?? ""}
+            placeholder="Soru veya yanıtta ara"
+            className={cn(inputClassName, "pl-9")}
+          />
+        </label>
+        <select name="kategori" defaultValue={categoryFilter} aria-label="Kategori" className={cn(adminControl, "grow sm:grow-0")}>
+          <option value="">Tüm kategoriler</option>
+          {allCategories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
           ))}
-        </datalist>
+        </select>
+        <button type="submit" className={adminButton()}>
+          Uygula
+        </button>
+      </form>
 
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-extrabold text-slate-900">Mevcut Sorular</h2>
-            <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-600">
-              {faqs.length} kayıt
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            {faqs.map((faq) => (
-              <details
-                key={faq.id}
-                className="group rounded-2xl border border-slate-200 bg-white shadow-sm open:border-blue-200"
-              >
-                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-5 marker:content-none">
-                  <div>
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700">
-                        {faq.category}
-                      </span>
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                          faq.isPublished
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {faq.isPublished ? (
-                          <Eye className="h-3 w-3" />
+      {visible.length === 0 ? (
+        <div className={cn(adminCard, "mt-4")}>
+          <EmptyState
+            title={faqs.length === 0 ? "Henüz soru yok" : "Eşleşen soru yok"}
+            body={
+              faqs.length === 0
+                ? "İlk soruyu “Yeni soru” ile ekleyin."
+                : "Aramayı ya da kategoriyi değiştirin."
+            }
+          />
+        </div>
+      ) : (
+        groups.map((group) => (
+          <section key={group.category} aria-label={group.category}>
+            <h2 className="mt-6 mb-2 text-sm font-semibold text-admin-muted">
+              {group.category} <span className="tabular-nums">· {group.items.length}</span>
+            </h2>
+            <div className="space-y-2">
+              {group.items.map((faq) => (
+                <details key={faq.id} className={cn(adminCard, "group open:ring-1 open:ring-admin-accent-soft")}>
+                  <summary className="flex cursor-pointer list-none items-start gap-3 px-5 py-4 [&::-webkit-details-marker]:hidden">
+                    <span className="mt-0.5 w-8 shrink-0 text-xs text-admin-muted tabular-nums">
+                      #{faq.sortOrder}
+                    </span>
+                    <span className="flex-1 font-semibold leading-6 text-admin-ink">{faq.question}</span>
+                    <Badge
+                      tone={faq.isPublished ? "success" : "neutral"}
+                      icon={
+                        faq.isPublished ? (
+                          <Eye aria-hidden="true" className="h-3 w-3" />
                         ) : (
-                          <EyeOff className="h-3 w-3" />
-                        )}
-                        {faq.isPublished ? "Yayında" : "Taslak"}
-                      </span>
-                      <span className="text-xs font-medium text-slate-400">
-                        Sıra: {faq.sortOrder}
-                      </span>
-                    </div>
-                    <h3 className="font-bold leading-6 text-slate-900">
-                      {faq.question}
-                    </h3>
-                  </div>
-                  <span className="text-xl text-slate-400 transition-transform group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-
-                <div className="border-t border-slate-100 p-5">
-                  <form action={updateFaq} className="space-y-4">
-                    <input type="hidden" name="id" value={faq.id} />
-                    <label className="block">
-                      <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                        Soru
-                      </span>
-                      <input
-                        name="question"
-                        defaultValue={faq.question}
-                        required
-                        className={inputClassName}
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                        Yanıt
-                      </span>
-                      <textarea
-                        name="answer"
-                        defaultValue={faq.answer}
-                        required
-                        rows={6}
-                        className={inputClassName}
-                      />
-                    </label>
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <label>
-                        <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                          Kategori
-                        </span>
-                        <input
-                          name="category"
-                          list="faq-categories"
-                          defaultValue={faq.category}
-                          required
-                          className={inputClassName}
-                        />
-                      </label>
-                      <label>
-                        <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                          Sıra
-                        </span>
-                        <input
-                          name="sort_order"
-                          type="number"
-                          min="0"
-                          defaultValue={faq.sortOrder}
-                          className={inputClassName}
-                        />
-                      </label>
-                      <label>
-                        <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                          Kaynak sayfa
-                        </span>
-                        <input
-                          name="source_page"
-                          type="number"
-                          min="1"
-                          max="15"
-                          defaultValue={faq.sourcePage ?? ""}
-                          className={inputClassName}
-                        />
-                      </label>
-                    </div>
-                    <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <label className="inline-flex items-center gap-3 text-sm font-bold text-slate-700">
-                        <input
-                          name="is_published"
-                          type="checkbox"
-                          defaultChecked={faq.isPublished}
-                          className="h-4 w-4 rounded border-slate-300 text-blue-600"
-                        />
-                        Yayında
-                      </label>
-                      <SubmitButton label="Değişiklikleri Kaydet" />
-                    </div>
-                  </form>
-
-                  <form action={deleteFaq} className="mt-3 flex justify-end border-t border-slate-100 pt-3">
-                    <input type="hidden" name="id" value={faq.id} />
-                    <button
-                      type="submit"
-                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50"
+                          <EyeOff aria-hidden="true" className="h-3 w-3" />
+                        )
+                      }
                     >
-                      <Trash2 className="h-4 w-4" /> Sil
-                    </button>
-                  </form>
-                </div>
-              </details>
-            ))}
+                      {faq.isPublished ? "Yayında" : "Taslak"}
+                    </Badge>
+                    <ChevronDown
+                      aria-hidden="true"
+                      className="mt-0.5 h-4 w-4 shrink-0 text-admin-faint transition-transform group-open:rotate-180"
+                    />
+                  </summary>
 
-            {faqs.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-500">
-                Henüz soru-cevap kaydı bulunmuyor.
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-    </div>
+                  <div className="border-t border-admin-line p-5">
+                    <form action={updateFaq} className="space-y-4">
+                      <input type="hidden" name="id" value={faq.id} />
+                      <label className="block">
+                        <span className={adminLabel}>Soru</span>
+                        <input name="question" defaultValue={faq.question} required className={inputClassName} />
+                      </label>
+                      <label className="block">
+                        <span className={adminLabel}>Yanıt</span>
+                        <textarea name="answer" defaultValue={faq.answer} required rows={6} className={inputClassName} />
+                      </label>
+                      <div className="grid gap-4 sm:grid-cols-3">
+                        <label>
+                          <span className={adminLabel}>Kategori</span>
+                          <input name="category" list="faq-categories" defaultValue={faq.category} required className={inputClassName} />
+                        </label>
+                        <label>
+                          <span className={adminLabel}>Sıra</span>
+                          <input name="sort_order" type="number" min="0" defaultValue={faq.sortOrder} className={inputClassName} />
+                        </label>
+                        <label>
+                          <span className={adminLabel}>Kaynak sayfa</span>
+                          <input
+                            name="source_page"
+                            type="number"
+                            min="1"
+                            max="15"
+                            defaultValue={faq.sourcePage ?? ""}
+                            className={inputClassName}
+                          />
+                        </label>
+                      </div>
+                      <div className="flex flex-col gap-3 border-t border-admin-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <label className="inline-flex items-center gap-3 text-sm font-semibold text-admin-body">
+                          <input name="is_published" type="checkbox" defaultChecked={faq.isPublished} className="h-4 w-4" />
+                          Yayında
+                        </label>
+                        <AdminSubmitButton label="Değişiklikleri kaydet" />
+                      </div>
+                    </form>
+
+                    <form action={deleteFaq} className="mt-3 flex justify-end border-t border-admin-line pt-3">
+                      <input type="hidden" name="id" value={faq.id} />
+                      <ConfirmButton
+                        message={`"${faq.question}" sorusunu silmek istediğinize emin misiniz? Bu işlem geri alınmaz.`}
+                        className={adminButton({ variant: "danger", size: "sm" })}
+                      >
+                        <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
+                        Soruyu sil
+                      </ConfirmButton>
+                    </form>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+    </AdminPage>
   );
 }
