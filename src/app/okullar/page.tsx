@@ -53,6 +53,35 @@ type Props = {
   }>;
 };
 
+type ScoreRow = {
+  school_id: number;
+  percentile: number | null;
+  obp_score: number | null;
+};
+
+// Bir metriğin aralığını, okul başına en rekabetçi değere göre çözer.
+function idsInRange(
+  scoreRows: ScoreRow[],
+  read: (r: ScoreRow) => number | null,
+  moreCompetitive: (candidate: number, current: number) => boolean,
+  lo: number,
+  hi: number,
+): number[] {
+  const bestBySchool = new Map<number, number>();
+  for (const r of scoreRows) {
+    const v = read(r);
+    if (v == null || !Number.isFinite(v)) continue;
+    const id = r.school_id;
+    const prev = bestBySchool.get(id);
+    if (prev == null || moreCompetitive(v, prev)) bestBySchool.set(id, v);
+  }
+  const out: number[] = [];
+  bestBySchool.forEach((v, id) => {
+    if (v >= lo && v <= hi) out.push(id);
+  });
+  return out;
+}
+
 export default async function OkullarPage({ searchParams }: Props) {
   const params = searchParams ? await searchParams : {};
 
@@ -109,11 +138,6 @@ export default async function OkullarPage({ searchParams }: Props) {
       .limit(1);
     const scaleYear = (yearRows?.[0]?.year as number | undefined) ?? null;
 
-    type ScoreRow = {
-      school_id: number;
-      percentile: number | null;
-      obp_score: number | null;
-    };
     const { data: rawScoreRows } = scaleYear
       ? await supabase
           .from("school_scores")
@@ -122,40 +146,17 @@ export default async function OkullarPage({ searchParams }: Props) {
       : { data: null };
     const scoreRows = (rawScoreRows ?? []) as ScoreRow[];
 
-    // Bir metriğin aralığını, okul başına en rekabetçi değere göre çözer.
-    const idsInRange = (
-      read: (r: ScoreRow) => number | null,
-      moreCompetitive: (candidate: number, current: number) => boolean,
-      lo: number,
-      hi: number,
-    ): number[] => {
-      const bestBySchool = new Map<number, number>();
-      for (const r of scoreRows) {
-        const v = read(r);
-        if (v == null || !Number.isFinite(v)) continue;
-        const id = r.school_id;
-        const prev = bestBySchool.get(id);
-        if (prev == null || moreCompetitive(v, prev)) bestBySchool.set(id, v);
-      }
-      const out: number[] = [];
-      bestBySchool.forEach((v, id) => {
-        if (v >= lo && v <= hi) out.push(id);
-      });
-      return out;
-    };
-
-    const narrow = (ids: number[]) => {
-      if (schoolIdFilter === null) {
-        schoolIdFilter = ids;
-      } else {
-        const allowed = new Set(ids);
-        schoolIdFilter = schoolIdFilter.filter((id) => allowed.has(id));
-      }
+    const intersect = (current: number[] | null, ids: number[]) => {
+      if (current === null) return ids;
+      const allowed = new Set(ids);
+      return current.filter((id) => allowed.has(id));
     };
 
     if (hasYuzdelikRange) {
-      narrow(
+      schoolIdFilter = intersect(
+        schoolIdFilter,
         idsInRange(
+          scoreRows,
           (r) => r.percentile,
           (c, cur) => c < cur, // düşük yüzdelik = daha rekabetçi
           yuzdelikMin!,
@@ -164,8 +165,10 @@ export default async function OkullarPage({ searchParams }: Props) {
       );
     }
     if (hasObpRange) {
-      narrow(
+      schoolIdFilter = intersect(
+        schoolIdFilter,
         idsInRange(
+          scoreRows,
           (r) => r.obp_score,
           (c, cur) => c > cur, // yüksek OBP = daha rekabetçi
           obpMin!,
@@ -178,18 +181,21 @@ export default async function OkullarPage({ searchParams }: Props) {
   const SCHOOLS_SELECT =
     "*, school_scores(id, school_id, year, obp_score, lgs_score, percentile), school_vocational_fields(vocational_field_id)";
 
+  // Filtre burada son halini alır; sorgu yardımcısı yalnız bu sabiti okur.
+  const idFilter = schoolIdFilter;
+
   // Helper: apply shared filters to any supabase query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function applyFilters<T extends ReturnType<typeof supabase.from>>(q: any): any {
+  const applyFilters = (q: any): any => {
     if (ara) q = q.regexIMatch("name", buildTurkishNameRegex(ara));
     if (ilce) q = q.eq("district", ilce);
     if (tur) q = q.eq("type", tur);
     if (yerlestirme) q = q.eq("placement_type", yerlestirme);
-    if (schoolIdFilter !== null) {
-      q = q.in("id", schoolIdFilter!.length > 0 ? schoolIdFilter : [-1]);
+    if (idFilter !== null) {
+      q = q.in("id", idFilter.length > 0 ? idFilter : [-1]);
     }
     return q;
-  }
+  };
 
   const fieldsPromise = supabase.from("vocational_fields").select("*").order("title");
 

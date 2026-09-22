@@ -86,14 +86,13 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
   const school = mapSchool(sd);
   const publicHref = school.isActive ? `/okullar/${school.slug}` : undefined;
 
-  const selectedFacilityIds: string[] = (sd.school_facilities ?? []).map((f: any) => f.facility_id);
-  const selectedBranchIds: string[] = (sd.school_vocational_branches ?? []).map((b: any) => b.branch_id);
-  const selectedFieldIds: number[] = (sd.school_vocational_fields ?? []).map((f: any) => f.vocational_field_id);
+  const selectedFacilityIds: string[] = (sd.school_facilities ?? []).map((f: { facility_id: string }) => f.facility_id);
+  const selectedBranchIds: string[] = (sd.school_vocational_branches ?? []).map((b: { branch_id: string }) => b.branch_id);
+  const selectedFieldIds: number[] = (sd.school_vocational_fields ?? []).map((f: { vocational_field_id: number }) => f.vocational_field_id);
 
   // school_scores'u ayrı sorgula; vocational_field_id kolonu DB'de henüz yoksa
   // (migration çalıştırılmamış) fallback olarak sütun olmadan çek.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let scoresRaw: any[] = [];
+  let scoresRaw: Parameters<typeof mapSchoolScore>[0][] = [];
   {
     const { data: scoresWithField, error: scoresErr } = await supabase
       .from("school_scores")
@@ -113,13 +112,13 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
   const scores = scoresRaw.map(mapSchoolScore);
   const quotas = (sd.school_quotas ?? []).map(mapSchoolQuota);
   const schoolVocationalFields: { id: number; title: string }[] = (vocationalFieldsData ?? [])
-    .filter((vf: any) => selectedFieldIds.includes(vf.id as number))
-    .map((vf: any) => ({ id: vf.id as number, title: vf.title as string }));
+    .filter((vf: { id: number }) => selectedFieldIds.includes(vf.id))
+    .map((vf: { id: number; title: string }) => ({ id: vf.id, title: vf.title }));
   const scholarships = [...(sd.school_scholarships ?? [])]
-    .sort((a: any, b: any) => a.order_index - b.order_index)
+    .sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index)
     .map(mapSchoolScholarship);
   const schoolProjects = [...(sd.school_projects ?? [])]
-    .sort((a: any, b: any) => a.order_index - b.order_index)
+    .sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index)
     .map(mapSchoolProject);
 
   return (

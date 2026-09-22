@@ -297,7 +297,6 @@ export function mapSchoolWithDetails(row: any): SchoolWithDetails {
     .sort((a: SchoolProject, b: SchoolProject) => a.orderIndex - b.orderIndex);
 
   // school_vocational_branches üst seviyeden gelir; vocational_field_id'ye göre grupla
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const branchesByFieldId = new Map<number, VocationalBranch[]>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (row.school_vocational_branches ?? []).forEach((svb: any) => {

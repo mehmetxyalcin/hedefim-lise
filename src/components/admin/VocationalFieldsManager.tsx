@@ -340,12 +340,12 @@ export function VocationalFieldsManager({
                 <p className="text-sm text-slate-700">
                   {modal.kind === "delete-field" ? (
                     <>
-                      <span className="font-semibold">"{modal.title}"</span> meslek alanını
+                      <span className="font-semibold">“{modal.title}”</span> meslek alanını
                       silmek istediğinize emin misiniz?
                     </>
                   ) : (
                     <>
-                      <span className="font-semibold">"{modal.name}"</span> dalını silmek
+                      <span className="font-semibold">“{modal.name}”</span> dalını silmek
                       istediğinize emin misiniz?
                     </>
                   )}

@@ -6,9 +6,6 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { VocationalField } from "@/types/vocationalField";
 import type { VocationalBranch } from "@/types/schoolDetail";
 
-const inputCls =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
-
 type Props = {
   schoolId: number;
   allFields: Pick<VocationalField, "id" | "title">[];

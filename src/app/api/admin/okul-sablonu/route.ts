@@ -1,7 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   await requireAdmin();
 
   const XLSX = await import("xlsx");

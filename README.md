@@ -1,8 +1,13 @@
-Hedefim Lise is a Next.js App Router project with:
-- public school and vocational field pages
-- Supabase-backed data loading
-- admin login with Supabase Auth
-- school CRUD with image upload and vocational field relations
+# Hedefim Lise
+
+Mersin'deki liseler için tercih rehberi: okul arama ve filtreleme, okul
+detayları, meslek alanları, istatistikler, soru-cevap ve tarayıcıda tutulan
+tercih listesi. Yönetim paneli okul içeriklerini, yıllık puan/kontenjanları,
+Excel toplu yüklemeyi, SSS'yi, mesajları ve site ayarlarını yönetir.
+
+Next.js 16 (App Router) + React 19 + Supabase + Tailwind CSS 4. Ürün niyeti
+`PRODUCT.md`, tasarım kuralları `DESIGN.md`, ayrıntılı proje haritası ve
+devir notları `PROJECT_HANDOFF.md` içinde.
 
 ## Environment Variables
 
@@ -14,45 +19,39 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Production notes:
-- In Vercel, set the same three variables in Project Settings.
-- `NEXT_PUBLIC_SITE_URL` should be your full production domain, for example `https://your-app.vercel.app`.
-- In Supabase Auth, add your local and production callback URLs:
-  - `http://localhost:3000/auth/callback`
-  - `https://your-app.vercel.app/auth/callback`
+In Supabase Auth, allow the local and production callback URLs:
+`http://localhost:3000/auth/callback` and `https://hedefimlise.com/auth/callback`.
 
-## Getting Started
-
-First, run the development server:
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Deploy on Vercel
-
-The project is ready for Vercel deployment.
-
-Checklist:
-- Add the environment variables from `.env.example`
-- Ensure the Supabase Storage bucket `school-images` exists and is public
-- Ensure Supabase auth redirect URLs include `/auth/callback`
-- Ensure your `profiles` table contains an admin user with `role = 'admin'`
-
-Build locally before deploy:
-
-```bash
+npm install
+npm run dev          # http://localhost:3000
+npm run dev:preview  # uses .next-dev, safe beside a running `next start`
+npm test             # node:test suites, incl. PGlite RLS/RPC tests
 npm run lint
 npm run build
 ```
+
+## Deploy
+
+Production runs as a Node app (`next start`) on Hostinger at
+https://hedefimlise.com. Hostinger pulls and builds GitHub `main`
+automatically, so **pushing to `main` publishes**. Set the three environment
+variables above in the Hostinger panel.
+
+Supabase checklist:
+- Storage buckets `school-images` and `site-assets` exist and are public.
+- `profiles` contains an admin user with `role = 'admin'`.
+
+### Database migrations
+
+The live project has **no migration history table**. Migrations in
+`supabase/migrations/` were applied one by one after checking the live schema;
+do not run `supabase db push` or replay old files in bulk. Test a new
+migration against PGlite (`tests/admin-import.database.test.mjs`) and with a
+rolled-back transaction on the live database before applying it. The
+repository is not a complete bootstrap schema; see `PROJECT_HANDOFF.md` §8.
 
 ## Row Level Security (RLS)
 
@@ -72,7 +71,8 @@ When you add a new table that admins write to, add this policy
 ```sql
 alter table public.YOUR_TABLE enable row level security;
 
--- public read (only if the table feeds public pages)
+-- public read (only if the table feeds public pages; `schools` instead
+-- limits anon reads to active rows, see migration 016)
 drop policy if exists "public_read_YOUR_TABLE" on public.YOUR_TABLE;
 create policy "public_read_YOUR_TABLE"
   on public.YOUR_TABLE for select using (true);

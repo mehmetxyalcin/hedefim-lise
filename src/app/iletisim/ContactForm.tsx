@@ -52,6 +52,9 @@ export default function ContactForm() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isSchoolSubject = SCHOOL_SUBJECTS.includes(subject);
+  const schoolQueryReady = schoolQuery.trim().length >= 2;
+  const visibleSchoolResults = schoolQueryReady ? schoolResults : [];
+  const schoolListOpen = schoolDropdownOpen && schoolQueryReady;
 
   // Okul arama debounce
   useEffect(() => {
@@ -59,11 +62,8 @@ export default function ContactForm() {
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (schoolQuery.trim().length < 2) {
-      setSchoolResults([]);
-      setSchoolDropdownOpen(false);
-      return;
-    }
+    // Kısa sorguda istek atılmaz; eski sonuçlar render'da gizlenir.
+    if (schoolQuery.trim().length < 2) return;
 
     debounceRef.current = setTimeout(async () => {
       setSchoolLoading(true);
@@ -289,7 +289,7 @@ export default function ContactForm() {
                   setSchoolQuery(e.target.value);
                 }}
                 onFocus={() => {
-                  if (schoolResults.length > 0) setSchoolDropdownOpen(true);
+                  if (visibleSchoolResults.length > 0) setSchoolDropdownOpen(true);
                 }}
                 placeholder="Okul adı ile arayın..."
                 className={INPUT_CLASS}
@@ -299,9 +299,9 @@ export default function ContactForm() {
                   <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
                 </div>
               )}
-              {schoolDropdownOpen && (
+              {schoolListOpen && (
                 <div className="absolute z-10 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
-                  {schoolResults.map((school) => (
+                  {visibleSchoolResults.map((school) => (
                     <button
                       key={school.id}
                       type="button"
@@ -328,7 +328,7 @@ export default function ContactForm() {
                   </button>
                 </div>
               )}
-              {!schoolDropdownOpen && schoolQuery.length >= 2 && !schoolLoading && schoolResults.length === 0 && (
+              {!schoolListOpen && schoolQueryReady && !schoolLoading && visibleSchoolResults.length === 0 && (
                 <button
                   type="button"
                   onClick={() => setSchoolNotInList(true)}

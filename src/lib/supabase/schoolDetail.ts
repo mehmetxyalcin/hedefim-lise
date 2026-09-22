@@ -215,18 +215,6 @@ export async function getSchoolWithDetails(
 
   if (!data) return null;
 
-  // Hangi alanların dolu geldiğini terminalde göster
-  console.log("[getSchoolWithDetails] Ham sorgu sonucu:", {
-    slug,
-    school_facilities: (data as any).school_facilities?.length ?? 0,
-    school_vocational_fields: (data as any).school_vocational_fields?.length ?? 0,
-    school_vocational_branches: (data as any).school_vocational_branches?.length ?? 0,
-    school_scores: (data as any).school_scores?.length ?? 0,
-    school_quotas: (data as any).school_quotas?.length ?? 0,
-    school_scholarships: (data as any).school_scholarships?.length ?? 0,
-    school_projects: (data as any).school_projects?.length ?? 0,
-  });
-
   return mapRawToSchoolWithDetails(data);
 }
 

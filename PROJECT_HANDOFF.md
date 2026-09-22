@@ -272,3 +272,11 @@ Canlı doğrulama eki: 301c519 Hostinger üzerinde 2026-09-08 01:24'te 58 saniye
 - `/iletisim` sabit RAM e-postası yerine footer ayarlarını okur.
 - Canlı `footer_settings` güncellendi (e-posta info@hedefimlise.com, telefon NULL, adres "Mersin, Türkiye"). Kullanıcı info@ kutusunun açık olduğunu doğruladı.
 - Hakkında sayfasında RAM'ler yalnız "Yararlanılan Kaynaklar" altında; "Sosyal Sorumluluk Projesi" etiketi korundu.
+
+## 20. Temizlik ve lint — 22 Eylül 2026
+
+- Canlı footer tanıtım metnindeki yazım düzeltildi ("Mersin'de").
+- Kullanılmayan dosyalar silindi: `components/schools/SchoolDetail.tsx`, `components/auth/LoginForm.tsx`, `data/schools.ts`, `data/vocationalFields.ts`, `public/` altındaki Next şablon SVG'leri. Aktif detay bileşeni `components/school/SchoolDetail.tsx`.
+- `.claude/worktrees/` altındaki iki eski worktree (temiz, commit'leri `main` içinde) kaldırıldı. ESLint `.claude/**` ve `.next-*/**` dizinlerini taramaz.
+- `npx eslint .`: 0 hata, 0 uyarı. `/okullar` aralık yardımcısı modül düzeyine taşındı (davranış aynı; altı filtre URL'sinde canlıyla aynı sonuç). İletişim formu kısa sorguda effect içinde setState yapmaz, sonuçları render'da gizler. Okul detay yükleyicisindeki ham sorgu `console.log`'u kaldırıldı.
+- README Hostinger/`main` yayını, test komutu ve migration geçmişi olmayan canlı veritabanı kuralıyla yeniden yazıldı. `.env.example` depoya alındı (`.gitignore` istisnası); kodun okumadığı `NEXT_PUBLIC_GA_ID` satırı çıkarıldı. GA kimliği hâlâ `layout.tsx` içinde sabit.

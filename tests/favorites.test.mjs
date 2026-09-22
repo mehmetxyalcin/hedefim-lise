@@ -71,12 +71,12 @@ test('hook follows same-tab writes and changes from another tab', async () => {
   Object.assign(global, { window: dom.window, document: dom.window.document, IS_REACT_ACT_ENVIRONMENT: true });
   const { useFavorites } = load('src/hooks/useFavorites.ts', globals);
   let api;
-  function Probe() { api = useFavorites(); return React.createElement('p', null, api.favorites.map(f => f.id).join(',')); }
+  function Probe({ expose }) { const current = useFavorites(); expose(current); return React.createElement('p', null, current.favorites.map(f => f.id).join(',')); }
   const container = document.getElementById('root');
   const root = createRoot(container);
   try {
     dom.window.localStorage.setItem('hedefim_favorites', JSON.stringify([fav('1')]));
-    await act(async () => root.render(React.createElement(React.StrictMode, null, React.createElement(Probe))));
+    await act(async () => root.render(React.createElement(React.StrictMode, null, React.createElement(Probe, { expose: value => { api = value; } }))));
     assert.equal(container.textContent, '1');
     assert.equal(api.ready, true);
     await act(async () => api.addFavorite(fav('2')));
