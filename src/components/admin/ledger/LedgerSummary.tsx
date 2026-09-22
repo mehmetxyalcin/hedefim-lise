@@ -19,6 +19,7 @@ function Stat({
   suffix,
   title,
   attention = false,
+  className,
 }: {
   href: string;
   label: string;
@@ -26,12 +27,17 @@ function Stat({
   suffix?: string;
   title?: string;
   attention?: boolean;
+  className?: string;
 }) {
   return (
     <Link
       href={href}
       title={title}
-      className={cn("group flex flex-col gap-0.5 bg-white px-4 py-3 transition-colors hover:bg-admin-ground", adminFocus)}
+      className={cn(
+        "group flex flex-col gap-0.5 bg-white px-4 py-3 transition-colors hover:bg-admin-ground",
+        adminFocus,
+        className,
+      )}
     >
       <span className="text-xs text-admin-muted group-hover:text-admin-body">{label}</span>
       <span
@@ -68,7 +74,13 @@ export function LedgerSummary({ data }: { data: LedgerSummaryData }) {
           attention
         />
       )}
-      <Stat href="/admin/mesajlar?durum=okunmamis" label="Okunmamış mesaj" value={data.unread} />
+      <Stat
+        href="/admin/mesajlar?durum=okunmamis"
+        label="Okunmamış mesaj"
+        value={data.unread}
+        // Beş sayaç 2 ve 3 sütunlu ızgarada boş hücre bırakmasın.
+        className={data.scoreYear !== null ? "col-span-2 lg:col-span-1" : undefined}
+      />
     </div>
   );
 }

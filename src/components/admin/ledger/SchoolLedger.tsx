@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
 import {
   applyLedgerFilters,
@@ -31,7 +31,6 @@ type Props = {
 const compareText = (a: string, b: string) => a.localeCompare(b, "tr", { sensitivity: "base" });
 
 export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusAction, deleteAction }: Props) {
-  const router = useRouter();
   const pathname = usePathname() ?? "/admin";
   const searchParams = useSearchParams();
   const filters = useMemo(() => parseLedgerFilters(searchParams), [searchParams]);
@@ -56,11 +55,13 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
   }, [checked, rows]);
   const checkedSet = useMemo(() => new Set(checkedIds), [checkedIds]);
 
+  // Filtreler istemcide uygulanır; URL yalnız paylaşım ve geri tuşu için.
+  // Native replaceState, Next yönlendiricisiyle eşleşir ve sunucu turu yapmaz.
   const navigate = useCallback(
     (next: Filters, okul: string | null) => {
-      router.replace(`${pathname}${ledgerSearch(next, { okul })}`, { scroll: false });
+      window.history.replaceState(null, "", `${pathname}${ledgerSearch(next, { okul })}`);
     },
-    [pathname, router],
+    [pathname],
   );
 
   const close = useCallback(() => {

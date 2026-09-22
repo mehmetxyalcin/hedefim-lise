@@ -31,15 +31,18 @@ export function AdminTopbar({
       </button>
       <SchoolQuickSearch schools={schools} />
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={adminButton({ variant: "ghost", size: "sm", className: "hidden sm:inline-flex" })}
-        >
-          <ExternalLink aria-hidden="true" className="h-4 w-4" />
-          Siteyi aç
-        </a>
+        {/* Görünürlük sarmalayıcıda: düğme sınıfındaki inline-flex ile hidden çakışmasın. */}
+        <span className="hidden sm:block">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={adminButton({ variant: "ghost", size: "sm" })}
+          >
+            <ExternalLink aria-hidden="true" className="h-4 w-4" />
+            Siteyi aç
+          </a>
+        </span>
         <UserMenu email={email} />
       </div>
     </header>

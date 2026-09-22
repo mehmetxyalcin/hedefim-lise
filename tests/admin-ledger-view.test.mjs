@@ -11,14 +11,13 @@ const require = createRequire(import.meta.url);
 const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: 'https://example.com/admin' });
 global.window = dom.window; global.document = dom.window.document; global.IS_REACT_ACT_ENVIRONMENT = true;
 let search = new URLSearchParams('');
-const replaced = [];
 const cache = new Map();
 function load(file) {
   if (cache.has(file)) return cache.get(file);
   const exports = {}; cache.set(file, exports);
   const code = ts.transpileModule(readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
   vm.runInNewContext(code, { exports, document, window, URLSearchParams, Intl, require: (name) => {
-    if (name === 'next/navigation') return { useRouter: () => ({ replace: (url) => replaced.push(url) }), usePathname: () => '/admin', useSearchParams: () => search };
+    if (name === 'next/navigation') return { usePathname: () => '/admin', useSearchParams: () => search };
     if (name === 'next/link') return { default: ({ children, ...props }) => React.createElement('a', props, children) };
     if (name.startsWith('@/')) { const base = `src/${name.slice(2)}`; return load(existsSync(base + '.ts') ? base + '.ts' : base + '.tsx'); }
     return require(name);
@@ -49,7 +48,7 @@ test('ledger renders rows, pips and opens the detail panel', async () => {
     assert.match(container.textContent, /Eksik: Puan, Telefon/);
     assert.match(container.textContent, /2 \/ 2 okul/);
     await act(async () => container.querySelector('[data-ledger-slug="okul-2"]').click());
-    assert.equal(replaced.at(-1), '/admin?okul=okul-2');
+    assert.equal(window.location.pathname + window.location.search, '/admin?okul=okul-2');
   } finally { await act(async () => root.unmount()); }
 });
 

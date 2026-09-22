@@ -11,7 +11,7 @@ import {
   type LedgerSort,
   type LedgerStatus,
 } from "@/lib/admin-ledger";
-import { adminInput } from "@/components/admin/ui/styles";
+import { adminControl, adminInput } from "@/components/admin/ui/styles";
 import { AdminButton } from "@/components/admin/ui/Button";
 import { cn } from "@/lib/cn";
 
@@ -24,7 +24,8 @@ type Props = {
   onChange: (next: Filters) => void;
 };
 
-const selectClass = cn(adminInput, "w-auto min-w-0 max-w-full");
+// Mobilde satır başına iki kutu; geniş ekranda içeriğe göre, en fazla 11rem.
+const selectClass = cn(adminControl, "min-w-0 grow basis-[calc(50%-0.25rem)] sm:max-w-44 sm:grow-0 sm:basis-auto");
 
 export function LedgerFilters({ filters, districts, types, shown, total, onChange }: Props) {
   const [query, setQuery] = useState(filters.ara);
@@ -40,7 +41,7 @@ export function LedgerFilters({ filters, districts, types, shown, total, onChang
   return (
     <div className="mb-4 space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <label className="relative min-w-56 flex-1">
+        <label className="relative w-full min-w-0 sm:w-auto sm:min-w-56 sm:flex-1">
           <span className="sr-only">Bu listede ara</span>
           <Search
             aria-hidden="true"
@@ -98,7 +99,11 @@ export function LedgerFilters({ filters, districts, types, shown, total, onChang
           onChange={(event) =>
             onChange({ ...filters, eksik: (event.target.value || null) as LedgerMissing | null })
           }
-          className={cn(selectClass, filters.eksik && "border-admin-accent-soft bg-admin-tint text-admin-tint-ink")}
+          className={cn(
+            filters.eksik
+              ? "min-h-10 min-w-0 grow basis-[calc(50%-0.25rem)] sm:max-w-44 sm:grow-0 sm:basis-auto rounded-lg border border-admin-accent-soft bg-admin-tint px-3 py-2 text-sm font-medium text-admin-tint-ink outline-none focus:ring-2 focus:ring-admin-accent/20"
+              : selectClass,
+          )}
         >
           <option value="">Eksik: hepsi</option>
           <option value="herhangi">Eksiği olan</option>
@@ -108,21 +113,10 @@ export function LedgerFilters({ filters, districts, types, shown, total, onChang
             </option>
           ))}
         </select>
-        <select
-          aria-label="Sıralama"
-          value={filters.sirala}
-          onChange={(event) => onChange({ ...filters, sirala: event.target.value as LedgerSort })}
-          className={selectClass}
-        >
-          {Object.entries(LEDGER_SORT_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+
       </div>
-      <div className="flex min-h-8 items-center justify-between gap-3 text-xs text-admin-muted">
-        <span className="tabular-nums" aria-live="polite">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-admin-muted">
+        <span className="mr-auto tabular-nums" aria-live="polite">
           {shown} / {total} okul
         </span>
         {active > 0 && (
@@ -137,6 +131,21 @@ export function LedgerFilters({ filters, districts, types, shown, total, onChang
             Filtreleri sıfırla ({active})
           </AdminButton>
         )}
+        <label className="flex items-center gap-2">
+          <span aria-hidden="true">Sırala</span>
+          <select
+            aria-label="Sıralama"
+            value={filters.sirala}
+            onChange={(event) => onChange({ ...filters, sirala: event.target.value as LedgerSort })}
+            className={adminControl}
+          >
+            {Object.entries(LEDGER_SORT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
     </div>
   );
