@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { cn } from "@/lib/cn";
+import { adminButton } from "@/components/admin/ui/Button";
+import { adminInput } from "@/components/admin/ui/styles";
 import {
   addVocationalField,
   updateVocationalField,
@@ -18,6 +21,7 @@ export type VocFieldWithBranches = {
   title: string;
   slug: string;
   vocational_branches: Branch[];
+  school_count?: number;
 };
 
 type ModalState =
@@ -30,12 +34,12 @@ type ModalState =
   | { kind: "delete-branch"; id: string; name: string; fieldTitle: string };
 
 const MODAL_TITLES: Record<NonNullable<ModalState>["kind"], string> = {
-  "add-field": "Meslek Alanı Ekle",
-  "edit-field": "Meslek Alanını Düzenle",
-  "delete-field": "Meslek Alanını Sil",
-  "add-branch": "Dal Ekle",
-  "edit-branch": "Dalı Düzenle",
-  "delete-branch": "Dalı Sil",
+  "add-field": "Meslek alanı ekle",
+  "edit-field": "Meslek alanını düzenle",
+  "delete-field": "Meslek alanını sil",
+  "add-branch": "Dal ekle",
+  "edit-branch": "Dalı düzenle",
+  "delete-branch": "Dalı sil",
 };
 
 export function VocationalFieldsManager({
@@ -139,22 +143,22 @@ export function VocationalFieldsManager({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Meslek alanı veya dal ara..."
-          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+          className={cn(adminInput, "flex-1")}
         />
         <button
           type="button"
           onClick={() => openModal({ kind: "add-field" })}
-          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className={adminButton({ variant: "primary" })}
         >
           <Plus className="h-4 w-4" />
-          Yeni Meslek Alanı
+          Yeni meslek alanı
         </button>
       </div>
 
       {/* Liste */}
       {filteredFields.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-8 py-16 text-center">
-          <p className="text-slate-500">
+        <div className="rounded-xl border border-dashed border-admin-line bg-white px-8 py-16 text-center">
+          <p className="text-admin-muted">
             {search
               ? `"${search}" için sonuç bulunamadı.`
               : "Henüz meslek alanı eklenmemiş."}
@@ -167,7 +171,7 @@ export function VocationalFieldsManager({
             return (
               <div
                 key={field.id}
-                className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+                className="overflow-hidden rounded-xl border border-admin-line bg-white shadow-admin-card"
               >
                 {/* Alan başlığı */}
                 <div className="flex items-center gap-2 px-4 py-3">
@@ -177,14 +181,19 @@ export function VocationalFieldsManager({
                     className="flex flex-1 items-center gap-2 text-left"
                   >
                     {isOpen ? (
-                      <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+                      <ChevronDown className="h-4 w-4 shrink-0 text-admin-faint" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                      <ChevronRight className="h-4 w-4 shrink-0 text-admin-faint" />
                     )}
-                    <span className="font-semibold text-slate-800">{field.title}</span>
-                    <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                    <span className="font-semibold text-admin-ink">{field.title}</span>
+                    <span className="ml-1 rounded-full bg-admin-line-soft px-2 py-0.5 text-xs text-admin-muted">
                       {field.vocational_branches.length} dal
                     </span>
+                    {typeof field.school_count === "number" && (
+                      <span className="text-xs text-admin-muted tabular-nums">
+                        {field.school_count} okul
+                      </span>
+                    )}
                   </button>
                   <button
                     type="button"
@@ -194,7 +203,7 @@ export function VocationalFieldsManager({
                         field.title,
                       )
                     }
-                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-admin-accent hover:bg-admin-tint"
                   >
                     <Pencil className="h-3 w-3" />
                     Düzenle
@@ -218,13 +227,13 @@ export function VocationalFieldsManager({
 
                 {/* Dallar (accordion içeriği) */}
                 {isOpen && (
-                  <div className="border-t border-slate-100 bg-slate-50 px-4 pb-3 pt-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <div className="border-t border-admin-line-soft bg-admin-ground px-4 pb-3 pt-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-admin-faint">
                       Dallar
                     </p>
 
                     {field.vocational_branches.length === 0 ? (
-                      <p className="mb-3 text-sm text-slate-400">
+                      <p className="mb-3 text-sm text-admin-faint">
                         Bu alana henüz dal eklenmemiş.
                       </p>
                     ) : (
@@ -234,8 +243,8 @@ export function VocationalFieldsManager({
                             key={branch.id}
                             className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white"
                           >
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
-                            <span className="flex-1 text-sm text-slate-700">{branch.name}</span>
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-admin-line-strong" />
+                            <span className="flex-1 text-sm text-admin-body">{branch.name}</span>
                             <button
                               type="button"
                               onClick={() =>
@@ -244,7 +253,7 @@ export function VocationalFieldsManager({
                                   branch.name,
                                 )
                               }
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold text-admin-accent hover:bg-admin-tint"
                             >
                               <Pencil className="h-3 w-3" />
                               Düzenle
@@ -278,10 +287,10 @@ export function VocationalFieldsManager({
                           fieldTitle: field.title,
                         })
                       }
-                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-blue-600 hover:bg-blue-100"
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-admin-accent hover:bg-admin-tint"
                     >
                       <Plus className="h-3.5 w-3.5" />
-                      Dal Ekle
+                      Dal ekle
                     </button>
                   </div>
                 )}
@@ -294,26 +303,34 @@ export function VocationalFieldsManager({
       {/* Modal */}
       {modal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-admin-ink/40 p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget && !isPending) setModal(null);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && !isPending) setModal(null);
+          }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="mb-5 text-lg font-bold text-slate-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="voc-modal-title"
+            className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+          >
+            <h2 id="voc-modal-title" className="mb-5 text-lg font-bold text-admin-ink">
               {MODAL_TITLES[modal.kind]}
             </h2>
 
             {/* Metin girişi modali */}
             {isTextModal && (
               <div className="mb-5">
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                <label className="mb-1.5 block text-sm font-semibold text-admin-body">
                   {modal.kind === "add-field" || modal.kind === "edit-field"
-                    ? "Meslek Alanı Adı"
-                    : "Dal Adı"}
+                    ? "Meslek alanı adı"
+                    : "Dal adı"}
                 </label>
                 {modal.kind === "add-branch" && (
-                  <p className="mb-2 text-xs text-slate-400">Alan: {modal.fieldTitle}</p>
+                  <p className="mb-2 text-xs text-admin-faint">Alan: {modal.fieldTitle}</p>
                 )}
                 <input
                   autoFocus
@@ -329,7 +346,7 @@ export function VocationalFieldsManager({
                       ? "Örn: Bilişim Teknolojileri Alanı"
                       : "Örn: Yazılım Geliştirme"
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className={adminInput}
                 />
               </div>
             )}
@@ -337,7 +354,7 @@ export function VocationalFieldsManager({
             {/* Silme onay modali */}
             {isDeleteModal && (
               <div className="mb-5 space-y-3">
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-admin-body">
                   {modal.kind === "delete-field" ? (
                     <>
                       <span className="font-semibold">“{modal.title}”</span> meslek alanını
@@ -358,7 +375,7 @@ export function VocationalFieldsManager({
                   </div>
                 )}
                 {modal.kind === "delete-branch" && (
-                  <p className="text-xs text-slate-400">Alan: {modal.fieldTitle}</p>
+                  <p className="text-xs text-admin-faint">Alan: {modal.fieldTitle}</p>
                 )}
               </div>
             )}
@@ -376,7 +393,7 @@ export function VocationalFieldsManager({
                 type="button"
                 onClick={() => setModal(null)}
                 disabled={isPending}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-xl border border-admin-line bg-white px-4 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground disabled:opacity-50"
               >
                 İptal
               </button>
@@ -385,7 +402,7 @@ export function VocationalFieldsManager({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isPending}
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-admin-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-admin-accent-deep disabled:opacity-50"
                 >
                   {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   Kaydet
