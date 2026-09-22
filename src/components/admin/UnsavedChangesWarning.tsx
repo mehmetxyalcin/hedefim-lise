@@ -18,15 +18,32 @@ export function UnsavedChangesWarning() {
 
     formRef.current = form;
 
+    const announce = (dirty: boolean) => {
+      // Global CustomEvent yerine window.CustomEvent: test ortamı (vm + jsdom) global vermez.
+      window.dispatchEvent(new window.CustomEvent("admin-form-dirty", { detail: dirty }));
+    };
+
     const markDirty = () => {
-      if (!isSubmittingRef.current) {
+      if (!isSubmittingRef.current && !isDirtyRef.current) {
         isDirtyRef.current = true;
+        announce(true);
       }
     };
 
     const markSubmitting = () => {
       isSubmittingRef.current = true;
       isDirtyRef.current = false;
+      announce(false);
+    };
+
+    // Kayıt sonucu gelince izleme yeniden başlar. Hata dönerse taslak hâlâ
+    // kaydedilmemiştir: sayfadan ayrılırken uyarı yeniden devreye girer.
+    const settle = (event: Event) => {
+      isSubmittingRef.current = false;
+      if ((event as CustomEvent<{ success: boolean }>).detail?.success === false) {
+        isDirtyRef.current = true;
+        announce(true);
+      }
     };
 
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -69,6 +86,7 @@ export function UnsavedChangesWarning() {
     form.addEventListener("submit", markSubmitting);
     document.addEventListener("click", warnBeforeNavigation, true);
     window.addEventListener("beforeunload", warnBeforeUnload);
+    window.addEventListener("admin-form-settled", settle);
 
     return () => {
       form.removeEventListener("input", markDirty);
@@ -76,6 +94,7 @@ export function UnsavedChangesWarning() {
       form.removeEventListener("submit", markSubmitting);
       document.removeEventListener("click", warnBeforeNavigation, true);
       window.removeEventListener("beforeunload", warnBeforeUnload);
+      window.removeEventListener("admin-form-settled", settle);
     };
   }, []);
 

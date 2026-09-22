@@ -42,8 +42,8 @@ export function LogoUploadField({
       <input type="hidden" name="current_logo_url" value={currentLogoUrl ?? ""} />
 
       {displayUrl && (
-        <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="flex items-center gap-4 rounded-xl border border-admin-line bg-admin-ground p-4">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-admin-line bg-white">
             <Image
               src={displayUrl}
               alt={logoAlt}
@@ -52,16 +52,16 @@ export function LogoUploadField({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-slate-800">
+            <p className="text-sm font-semibold text-admin-ink">
               {previewUrl ? "Yeni logo seçildi" : "Mevcut logo"}
             </p>
             {previewUrl && (
-              <p className="mt-0.5 truncate text-xs text-slate-500">
+              <p className="mt-0.5 truncate text-xs text-admin-muted">
                 {selectedFileName}
               </p>
             )}
             {!previewUrl && (
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-admin-muted">
                 Yeni dosya seçerseniz mevcut logonun yerine geçer.
               </p>
             )}
@@ -70,7 +70,7 @@ export function LogoUploadField({
             <button
               type="button"
               onClick={clearSelection}
-              className="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-white"
+              className="shrink-0 rounded-lg border border-admin-line px-3 py-2 text-sm font-semibold text-admin-body transition-colors hover:bg-white"
             >
               Seçimi kaldır
             </button>
@@ -79,16 +79,16 @@ export function LogoUploadField({
       )}
 
       {!displayUrl && (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
-          <p className="text-sm font-semibold text-slate-700">Henüz logo yok</p>
-          <p className="mt-1 text-xs text-slate-500">
+        <div className="rounded-xl border border-dashed border-admin-line-strong bg-admin-ground px-4 py-6 text-center">
+          <p className="text-sm font-semibold text-admin-body">Henüz logo yok</p>
+          <p className="mt-1 text-xs text-admin-muted">
             Logo yoksa navbar&apos;da varsayılan ikon gösterilir.
           </p>
         </div>
       )}
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">
+        <span className="mb-2 block text-sm font-semibold text-admin-body">
           {currentLogoUrl ? "Logoyu değiştir" : "Logo yükle"}
         </span>
         <input
@@ -97,9 +97,9 @@ export function LogoUploadField({
           name="logo_file"
           accept="image/png,image/jpeg,image/svg+xml,image/webp"
           onChange={handleFileChange}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+          className="w-full rounded-xl border border-admin-line bg-white px-4 py-3 text-admin-ink outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-admin-line-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-admin-body focus:border-admin-accent focus:ring-4 focus:ring-admin-accent/10"
         />
-        <span className="mt-2 block text-xs text-slate-500">
+        <span className="mt-2 block text-xs text-admin-muted">
           PNG, JPG, SVG veya WebP. En fazla 2 MB.
         </span>
       </label>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
+import { adminInput } from "@/components/admin/ui/styles";
 
 type SmartSchoolBasicFieldsProps = {
   initialColor?: string;
@@ -14,11 +15,10 @@ type SmartSchoolBasicFieldsProps = {
   initialType?: string;
 };
 
-const inputClassName =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+const inputClassName = adminInput;
 
 const errorInputClassName =
-  "w-full rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10";
+  "min-h-10 w-full rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-admin-ink outline-none transition-colors duration-150 placeholder:text-admin-faint focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20";
 
 function slugify(value: string) {
   return value
@@ -106,7 +106,7 @@ export function SmartSchoolBasicFields({
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">
+        <span className="mb-2 block text-sm font-semibold text-admin-body">
           Okul Adı
         </span>
         <input
@@ -126,7 +126,7 @@ export function SmartSchoolBasicFields({
       </label>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">
+        <span className="mb-2 block text-sm font-semibold text-admin-body">
           Kurum Kodu
         </span>
         <input
@@ -139,7 +139,7 @@ export function SmartSchoolBasicFields({
       </label>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">Slug</span>
+        <span className="mb-2 block text-sm font-semibold text-admin-body">Slug</span>
         <input
           name="slug"
           value={slug}
@@ -159,7 +159,7 @@ export function SmartSchoolBasicFields({
             {errors.slug}
           </span>
         ) : (
-          <span className="mt-2 block text-xs text-slate-500">
+          <span className="mt-2 block text-xs text-admin-muted">
             Public URL: /okullar/{slug || "slug"}
           </span>
         )}
@@ -167,14 +167,14 @@ export function SmartSchoolBasicFields({
           type="button"
           onClick={regenerateSlug}
           disabled={!generatedSlug}
-          className="mt-2 text-xs font-bold text-blue-600 hover:text-blue-800 disabled:cursor-not-allowed disabled:text-slate-400"
+          className="mt-2 text-xs font-bold text-admin-accent hover:text-admin-accent-deep disabled:cursor-not-allowed disabled:text-admin-faint"
         >
           Okul adından yeniden oluştur
         </button>
       </label>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">Tür</span>
+        <span className="mb-2 block text-sm font-semibold text-admin-body">Tür</span>
         <select
           name="type"
           value={type}
@@ -196,7 +196,7 @@ export function SmartSchoolBasicFields({
       </label>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">İlçe</span>
+        <span className="mb-2 block text-sm font-semibold text-admin-body">İlçe</span>
         <select
           name="district"
           value={district}
@@ -218,7 +218,7 @@ export function SmartSchoolBasicFields({
       </label>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">
+        <span className="mb-2 block text-sm font-semibold text-admin-body">
           Logo / Kısa Kod
         </span>
         <input
@@ -238,7 +238,7 @@ export function SmartSchoolBasicFields({
       </label>
 
       <label className="block md:col-span-2">
-        <span className="mb-2 block text-sm font-semibold text-slate-700">
+        <span className="mb-2 block text-sm font-semibold text-admin-body">
           Renk Sınıfı
         </span>
         <input

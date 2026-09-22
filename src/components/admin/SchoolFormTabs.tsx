@@ -3,8 +3,11 @@
 import { startTransition, useActionState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
+import { adminButton } from "@/components/admin/ui/Button";
+import { SchoolTabRail } from "@/components/admin/school-form/SchoolTabRail";
+import { SaveBarStatus } from "@/components/admin/school-form/SaveBarStatus";
+import type { SchoolHealth } from "@/lib/school-health";
 import { UnsavedChangesWarning } from "@/components/admin/UnsavedChangesWarning";
 import type { ActionResult } from "@/app/admin/okullar/actions";
 import { BasicInfoTab } from "@/components/admin/tabs/BasicInfoTab";
@@ -37,14 +40,14 @@ type TabId =
   | "diger";
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: "temel",    label: "Temel Bilgiler" },
+  { id: "temel",    label: "Temel bilgiler" },
   { id: "iletisim", label: "İletişim" },
-  { id: "puanlar",  label: "Puanlar & Kontenjan" },
+  { id: "puanlar",  label: "Puanlar ve kontenjan" },
   { id: "tesisler", label: "Tesisler" },
-  { id: "meslekler",label: "Meslek Alanları" },
-  { id: "burslar",  label: "Burs İmkânları" },
+  { id: "meslekler",label: "Meslek alanları" },
+  { id: "burslar",  label: "Burslar" },
   { id: "projeler", label: "Projeler" },
-  { id: "diger",    label: "Diğer Bilgiler" },
+  { id: "diger",    label: "Diğer bilgiler" },
 ];
 
 // Sekme 1 → tam okul kaydı  (createSchool / updateSchool)
@@ -58,7 +61,8 @@ type ActionFn = (_prevState: ActionResult | null, formData: FormData) => Promise
 type Props = {
   school?: School;
   cancelHref?: string;
-  publicHref?: string;
+  // Okulun veri sağlığı; yeni okulda yok.
+  health?: SchoolHealth;
   submitLabel: string;
   // Tab 1: tam okul kaydı (createSchool / updateSchool)
   saveSchool: ActionFn;
@@ -104,7 +108,7 @@ type Props = {
 export function SchoolFormTabs({
   school,
   cancelHref = "/admin",
-  publicHref,
+  health,
   submitLabel,
   saveSchool,
   saveContact,
@@ -150,6 +154,18 @@ export function SchoolFormTabs({
     }
   }, [temelState, iletisimState, digerState, router]);
 
+  // Kayıt sonucu UnsavedChangesWarning'e bildirilir: hata dönerse taslak yine
+  // kaydedilmemiş sayılır ve ayrılma uyarısı devreye girer.
+  useEffect(() => {
+    for (const state of [temelState, iletisimState, digerState]) {
+      if (state) {
+        window.dispatchEvent(
+          new window.CustomEvent("admin-form-settled", { detail: { success: state.success } }),
+        );
+      }
+    }
+  }, [temelState, iletisimState, digerState]);
+
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId | null) ?? "temel";
   const isMainSaveTab = MAIN_SAVE_TABS.includes(activeTab);
@@ -172,160 +188,127 @@ export function SchoolFormTabs({
     return `?${params.toString()}`;
   }
 
+  const lockedTabs = school
+    ? []
+    : TABS.filter((tab) => !MAIN_SAVE_TABS.includes(tab.id)).map((tab) => tab.id);
+  const current = activeState();
+
   return (
-    <div className="space-y-6">
-      {/* Tab çubuğu */}
-      <div className="hide-scrollbar overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <nav className="flex min-w-max">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <a
-                key={tab.id}
-                href={tabHref(tab.id)}
-                className={`relative whitespace-nowrap border-b-2 px-5 py-3.5 text-sm font-semibold transition-colors ${
-                  isActive
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                {tab.label}
-              </a>
-            );
-          })}
-        </nav>
-      </div>
+    <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+      <SchoolTabRail
+        tabs={TABS}
+        activeTab={activeTab}
+        hrefFor={(id) => tabHref(id as TabId)}
+        health={health}
+        lockedTabs={lockedTabs}
+      />
 
-      {/* Ana form (Tab 1, 2, 8 için) */}
-      {isMainSaveTab && (
-        <form onSubmit={(event) => {
-          event.preventDefault();
-          const data = new FormData(event.currentTarget);
-          const dispatch = mainSaveAction();
-          startTransition(() => dispatch(data));
-        }} action={mainSaveAction()} data-admin-school-form="true" className="space-y-6">
-          <UnsavedChangesWarning />
-          {school && <input type="hidden" name="id" value={school.id} />}
-          {school && <input type="hidden" name="school_id" value={school.id} />}
+      <div className="min-w-0 space-y-6">
+        {/* Ana form (Tab 1, 2, 8 için) */}
+        {isMainSaveTab && (
+          <form onSubmit={(event) => {
+            event.preventDefault();
+            const data = new FormData(event.currentTarget);
+            const dispatch = mainSaveAction();
+            startTransition(() => dispatch(data));
+          }} action={mainSaveAction()} data-admin-school-form="true" className="space-y-6">
+            <UnsavedChangesWarning />
+            {school && <input type="hidden" name="id" value={school.id} />}
+            {school && <input type="hidden" name="school_id" value={school.id} />}
 
-          {activeTab === "temel"    && <BasicInfoTab school={school} />}
-          {activeTab === "iletisim" && <ContactTab school={school} />}
-          {activeTab === "diger"    && <OtherInfoTab school={school} />}
+            {activeTab === "temel"    && <BasicInfoTab school={school} />}
+            {activeTab === "iletisim" && <ContactTab school={school} />}
+            {activeTab === "diger"    && <OtherInfoTab school={school} />}
 
-          {/* Başarı / Hata mesajı */}
-          {activeState()?.success === true && (
-            <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-              ✓ {activeState()!.message}
-            </div>
-          )}
-          {activeState()?.success === false && (
-            <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-              ✗ {activeState()!.message}
-            </div>
-          )}
+            {current?.success === false && (
+              <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
+                {current.message}
+              </div>
+            )}
 
-          {/* Kayıt / İptal barı */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-slate-500">
-                {school
-                  ? "Kaydettiğinizde admin listesi ve public sayfalar yeniden doğrulanır."
-                  : "Kaydettiğinizde yeni okul admin listesine eklenir."}
-              </p>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                {publicHref && (
-                  <Link
-                    href={publicHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Public sayfayı aç
-                  </Link>
-                )}
-                <Link
-                  href={cancelHref}
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
-                >
+            {/* Yapışkan kayıt çubuğu */}
+            <div className="sticky bottom-4 z-20 flex flex-col gap-3 rounded-xl border border-admin-line bg-white px-4 py-3 shadow-lg sm:flex-row sm:items-center sm:justify-between">
+              <SaveBarStatus success={current?.success === true ? current.message : null} />
+              <div className="flex shrink-0 gap-2">
+                <Link href={cancelHref} className={adminButton()}>
                   İptal
                 </Link>
-                <SubmitButton label={submitLabel} />
+                <AdminSubmitButton label={submitLabel} />
               </div>
             </div>
+          </form>
+        )}
+
+        {/* Mini-action tab'ları (3-7) — kendi form'larını içeriyor */}
+        {activeTab === "puanlar" && school && (
+          <ScoresTab
+            schoolId={school.id}
+            scores={scores}
+            quotas={quotas}
+            schoolVocationalFields={schoolVocationalFields}
+            upsertScore={upsertScore}
+            upsertQuota={upsertQuota}
+            deleteScore={deleteScore}
+            deleteQuota={deleteQuota}
+          />
+        )}
+
+        {activeTab === "tesisler" && school && (
+          <FacilitiesTab
+            schoolId={school.id}
+            allFacilities={allFacilities}
+            selectedFacilityIds={selectedFacilityIds}
+            syncFacilities={syncFacilities}
+            addFacility={addFacility}
+          />
+        )}
+
+        {activeTab === "meslekler" && school && (
+          <VocationalTab
+            schoolId={school.id}
+            allFields={allVocationalFields}
+            allBranches={allBranches}
+            selectedFieldIds={selectedFieldIds}
+            selectedBranchIds={selectedBranchIds}
+            syncVocational={syncVocational}
+            addBranch={addBranch}
+          />
+        )}
+
+        {activeTab === "burslar" && school && (
+          <ScholarshipsTab
+            schoolId={school.id}
+            scholarships={scholarships}
+            addScholarship={addScholarship}
+            updateScholarship={updateScholarship}
+            deleteScholarship={deleteScholarship}
+            reorderScholarship={reorderScholarship}
+          />
+        )}
+
+        {activeTab === "projeler" && school && (
+          <ProjectsTab
+            schoolId={school.id}
+            projects={schoolProjects}
+            addProject={addProject}
+            updateProject={updateProject}
+            deleteProject={deleteProject}
+            reorderProject={reorderProject}
+          />
+        )}
+
+        {/* Yeni okul oluştururken 3-7 sekmeleri kilitli */}
+        {!school && !isMainSaveTab && (
+          <div className="rounded-xl border border-admin-line bg-white px-6 py-10 text-center shadow-admin-card">
+            <p className="text-sm font-semibold text-admin-ink">
+              Bu bölüm okul kaydedildikten sonra açılır.
+            </p>
+            <p className="mt-1 text-sm text-admin-muted">
+              Önce &quot;Temel bilgiler&quot; bölümünü kaydedin.
+            </p>
           </div>
-        </form>
-      )}
-
-      {/* Mini-action tab'ları (3-7) — kendi form'larını içeriyor */}
-      {activeTab === "puanlar" && school && (
-        <ScoresTab
-          schoolId={school.id}
-          scores={scores}
-          quotas={quotas}
-          schoolVocationalFields={schoolVocationalFields}
-          upsertScore={upsertScore}
-          upsertQuota={upsertQuota}
-          deleteScore={deleteScore}
-          deleteQuota={deleteQuota}
-        />
-      )}
-
-      {activeTab === "tesisler" && school && (
-        <FacilitiesTab
-          schoolId={school.id}
-          allFacilities={allFacilities}
-          selectedFacilityIds={selectedFacilityIds}
-          syncFacilities={syncFacilities}
-          addFacility={addFacility}
-        />
-      )}
-
-      {activeTab === "meslekler" && school && (
-        <VocationalTab
-          schoolId={school.id}
-          allFields={allVocationalFields}
-          allBranches={allBranches}
-          selectedFieldIds={selectedFieldIds}
-          selectedBranchIds={selectedBranchIds}
-          syncVocational={syncVocational}
-          addBranch={addBranch}
-        />
-      )}
-
-      {activeTab === "burslar" && school && (
-        <ScholarshipsTab
-          schoolId={school.id}
-          scholarships={scholarships}
-          addScholarship={addScholarship}
-          updateScholarship={updateScholarship}
-          deleteScholarship={deleteScholarship}
-          reorderScholarship={reorderScholarship}
-        />
-      )}
-
-      {activeTab === "projeler" && school && (
-        <ProjectsTab
-          schoolId={school.id}
-          projects={schoolProjects}
-          addProject={addProject}
-          updateProject={updateProject}
-          deleteProject={deleteProject}
-          reorderProject={reorderProject}
-        />
-      )}
-
-      {/* Yeni okul oluştururken 3-7 sekmeleri kilitli */}
-      {!school && !isMainSaveTab && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
-          <p className="text-sm font-semibold text-amber-700">
-            Bu sekme yalnızca okul kaydedildikten sonra kullanılabilir.
-          </p>
-          <p className="mt-1 text-xs text-amber-600">
-            Önce &quot;Temel Bilgiler&quot; sekmesinden okulu kaydedin.
-          </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

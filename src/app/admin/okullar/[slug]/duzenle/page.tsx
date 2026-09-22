@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { permanentRedirect } from "next/navigation";
 import { SchoolFormTabs } from "@/components/admin/SchoolFormTabs";
 import {
@@ -23,6 +23,12 @@ import {
   reorderSchoolProject,
 } from "@/app/admin/okullar/actions";
 import { requireAdmin } from "@/lib/admin-auth";
+import { evaluateSchoolHealth, latestYear } from "@/lib/school-health";
+import { AdminPage } from "@/components/admin/ui/AdminPage";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { FlashBanner } from "@/components/admin/ui/FlashBanner";
+import { Badge } from "@/components/admin/ui/Badge";
+import { adminButton } from "@/components/admin/ui/Button";
 import { findSchoolSlugInHistory } from "@/lib/supabase/slugHistory";
 import {
   mapSchool,
@@ -45,13 +51,21 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
   const { supabase, profile } = await requireAdmin();
   const query = searchParams ? await searchParams : undefined;
 
-  if (!profile) return <h1>Yetkisiz erişim.</h1>;
+  if (!profile) {
+    return (
+      <AdminPage width="form">
+        <PageHeader trail={[{ label: "Okullar", href: "/admin" }]} title="Yetkisiz erişim" />
+      </AdminPage>
+    );
+  }
 
   const [
     { data: schoolData, error: schoolError },
     { data: vocationalFieldsData },
     { data: facilitiesData },
     { data: branchesData },
+    { data: latestScoreRow },
+    { data: latestQuotaRow },
   ] = await Promise.all([
     supabase
       .from("schools")
@@ -69,6 +83,9 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
     supabase.from("vocational_fields").select("*").order("title"),
     supabase.from("facilities").select("*").order("name"),
     supabase.from("vocational_branches").select("*").order("name"),
+    // Veri kümesinin son puan ve kontenjan yılı (veri sağlığı kuralı için).
+    supabase.from("school_scores").select("year").order("year", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("school_quotas").select("year").order("year", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   if (schoolError || !schoolData) {
@@ -77,7 +94,15 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
     const currentSlug = await findSchoolSlugInHistory(slug);
     if (currentSlug) permanentRedirect(`/admin/okullar/${currentSlug}/duzenle`);
 
-    return <h1>Okul bulunamadı.</h1>;
+    return (
+      <AdminPage width="form">
+        <PageHeader
+          trail={[{ label: "Okullar", href: "/admin" }]}
+          title="Okul bulunamadı"
+          description="Adres değişmiş ya da okul silinmiş olabilir."
+        />
+      </AdminPage>
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,6 +139,23 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
   const schoolVocationalFields: { id: number; title: string }[] = (vocationalFieldsData ?? [])
     .filter((vf: { id: number }) => selectedFieldIds.includes(vf.id))
     .map((vf: { id: number; title: string }) => ({ id: vf.id, title: vf.title }));
+  const health = evaluateSchoolHealth(
+    {
+      type: school.type,
+      description: school.description,
+      images: school.images,
+      languages: school.languages,
+      phone: school.phone,
+      vocationalFieldCount: selectedFieldIds.length,
+      facilityCount: selectedFacilityIds.length,
+      scoreYears: scores.map((score) => score.year),
+      quotaYears: quotas.map((quota: { year: number }) => quota.year),
+    },
+    {
+      scoreYear: latestYear(latestScoreRow ? [latestScoreRow.year] : []),
+      quotaYear: latestYear(latestQuotaRow ? [latestQuotaRow.year] : []),
+    },
+  );
   const scholarships = [...(sd.school_scholarships ?? [])]
     .sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index)
     .map(mapSchoolScholarship);
@@ -122,36 +164,34 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
     .map(mapSchoolProject);
 
   return (
-    <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8">
-          <Link href="/admin" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-            Admin&apos;e dön
-          </Link>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">
-            Okulu Düzenle
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            {school.name} kaydını yönetin.
-          </p>
-        </div>
-
-        {query?.error && (
-          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-            {query.error}
-          </div>
-        )}
-        {query?.success && (
-          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-            {query.success}
-          </div>
-        )}
+    <AdminPage width="form">
+      <PageHeader
+        trail={[{ label: "Okullar", href: "/admin" }]}
+        title={
+          <span className="flex flex-wrap items-center gap-2.5">
+            {school.name}
+            <Badge tone={school.isActive ? "success" : "warning"}>
+              {school.isActive ? "Yayında" : "Pasif"}
+            </Badge>
+          </span>
+        }
+        description={`${school.district} · ${school.type}`}
+        actions={
+          publicHref ? (
+            <a href={publicHref} target="_blank" rel="noopener noreferrer" className={adminButton()}>
+              <ExternalLink aria-hidden="true" className="h-4 w-4" />
+              Sitede aç
+            </a>
+          ) : undefined
+        }
+      />
+      <FlashBanner success={query?.success} error={query?.error} />
 
         <SchoolFormTabs
           school={school}
           cancelHref="/admin"
-          publicHref={publicHref}
-          submitLabel="Değişiklikleri Kaydet"
+          health={health}
+          submitLabel="Değişiklikleri kaydet"
           saveSchool={updateSchool}
           saveContact={updateSchoolContact}
           saveOtherInfo={updateSchoolOtherInfo}
@@ -183,7 +223,6 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
           quotas={quotas}
           schoolVocationalFields={schoolVocationalFields}
         />
-      </div>
-    </div>
+    </AdminPage>
   );
 }

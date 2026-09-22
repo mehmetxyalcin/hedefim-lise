@@ -93,27 +93,12 @@
 .admin input[type="radio"] {
   accent-color: var(--admin-accent);
 }
-@keyframes admin-fade-out {
-  0%,
-  85% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-.admin .admin-fade-out {
-  animation: admin-fade-out 4s ease-out forwards;
-}
 @media (prefers-reduced-motion: reduce) {
   .admin *,
   .admin *::before,
   .admin *::after {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
-  }
-  .admin .admin-fade-out {
-    animation: none;
   }
 }
 

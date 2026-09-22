@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
 import type { SchoolScore, SchoolQuota } from "@/types/schoolDetail";
+import { adminInput } from "@/components/admin/ui/styles";
 
-const inputCls =
-  "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+const inputCls = adminInput;
 
 type VocationalFieldOption = { id: number; title: string };
 
@@ -53,10 +53,10 @@ export function ScoresTab({
   return (
     <div className="space-y-6">
       {/* Puan tablosu */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-5 border-b border-slate-100 pb-4">
-          <h2 className="text-base font-bold text-slate-900">Puan Bilgileri</h2>
-          <p className="mt-1 text-sm text-slate-500">
+      <section className="rounded-xl border border-admin-line bg-white p-5 shadow-admin-card">
+        <div className="mb-5 border-b border-admin-line-soft pb-4">
+          <h2 className="text-base font-bold text-admin-ink">Puan bilgileri</h2>
+          <p className="mt-1 text-sm text-admin-muted">
             Yıl ve meslek alanı bazlı OBP, LGS ve yüzdelik dilim verileri.
           </p>
         </div>
@@ -74,15 +74,15 @@ export function ScoresTab({
             return (
               <div
                 key={year}
-                className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+                className="rounded-xl border border-admin-line-soft bg-admin-ground p-4"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700">{year}</span>
+                  <span className="text-sm font-bold text-admin-body">{year}</span>
                   {!isAddingNew && (
                     <button
                       type="button"
                       onClick={() => setEditingScoreId(`new-${year}`)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-admin-accent-soft bg-admin-tint px-3 py-1.5 text-xs font-semibold text-admin-accent-deep hover:bg-admin-tint"
                     >
                       <Plus className="h-3 w-3" />
                       Puan Ekle
@@ -92,7 +92,7 @@ export function ScoresTab({
 
                 {/* Mevcut puanlar */}
                 {yearScores.length > 0 && (
-                  <div className="mb-3 divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                  <div className="mb-3 divide-y divide-admin-line-soft overflow-hidden rounded-lg border border-admin-line bg-white">
                     {yearScores.map((score) => {
                       const isEditingThis = editingScoreId === score.id;
                       const fieldName =
@@ -107,28 +107,28 @@ export function ScoresTab({
                           {!isEditingThis && (
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <p className="text-xs font-semibold text-slate-700">
+                                <p className="text-xs font-semibold text-admin-body">
                                   {fieldName ?? (
-                                    <span className="italic text-slate-500">Okul Geneli</span>
+                                    <span className="italic text-admin-muted">Okul geneli</span>
                                   )}
                                 </p>
-                                <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
+                                <div className="mt-1 flex flex-wrap gap-3 text-xs text-admin-muted">
                                   {score.obpScore !== null && (
                                     <span>
                                       OBP:{" "}
-                                      <strong className="text-slate-800">{score.obpScore}</strong>
+                                      <strong className="text-admin-ink tabular-nums">{score.obpScore}</strong>
                                     </span>
                                   )}
                                   {score.lgsScore !== null && (
                                     <span>
                                       LGS:{" "}
-                                      <strong className="text-slate-800">{score.lgsScore}</strong>
+                                      <strong className="text-admin-ink tabular-nums">{score.lgsScore}</strong>
                                     </span>
                                   )}
                                   {score.percentile !== null && (
                                     <span>
                                       Yüzdelik:{" "}
-                                      <strong className="text-slate-800">
+                                      <strong className="text-admin-ink tabular-nums">
                                         %{score.percentile}
                                       </strong>
                                     </span>
@@ -136,7 +136,7 @@ export function ScoresTab({
                                   {score.obpScore === null &&
                                     score.lgsScore === null &&
                                     score.percentile === null && (
-                                      <span className="text-slate-400">Veri yok</span>
+                                      <span className="text-admin-faint">Veri yok</span>
                                     )}
                                 </div>
                               </div>
@@ -146,19 +146,25 @@ export function ScoresTab({
                                   onClick={() =>
                                     setEditingScoreId(isEditingThis ? null : score.id)
                                   }
-                                  className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                                  className="rounded-lg border border-admin-line bg-white px-3 py-1 text-xs font-semibold text-admin-body hover:bg-admin-ground"
                                 >
                                   Düzenle
                                 </button>
-                                <form action={deleteScore}>
+                                <form
+  action={deleteScore}
+  onSubmit={(event) => {
+    if (!window.confirm("Bu puan kaydını silmek istediğinize emin misiniz?")) event.preventDefault();
+  }}
+>
                                   <input type="hidden" name="id" value={score.id} />
                                   <input type="hidden" name="school_id" value={schoolId} />
                                   <button
                                     type="submit"
-                                    className="rounded-lg border border-rose-200 bg-rose-50 p-1.5 text-rose-500 hover:bg-rose-100"
+                                    className="rounded-lg p-1.5 text-rose-700 hover:bg-rose-50"
                                     title="Sil"
+                                    aria-label="Sil"
                                   >
-                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
                                   </button>
                                 </form>
                               </div>
@@ -181,17 +187,17 @@ export function ScoresTab({
                               />
 
                               <div>
-                                <span className="mb-1 block text-xs font-semibold text-slate-600">
+                                <span className="mb-1 block text-xs font-semibold text-admin-body">
                                   Meslek Alanı
                                 </span>
-                                <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                                <p className="rounded-xl border border-admin-line bg-admin-ground px-3 py-2 text-sm text-admin-body">
                                   {fieldName ?? "Okul Geneli"}
                                 </p>
                               </div>
 
                               <div className="grid grid-cols-3 gap-3">
                                 <label className="block">
-                                  <span className="mb-1 block text-xs font-semibold text-slate-600">
+                                  <span className="mb-1 block text-xs font-semibold text-admin-body">
                                     OBP
                                   </span>
                                   <input
@@ -205,7 +211,7 @@ export function ScoresTab({
                                   />
                                 </label>
                                 <label className="block">
-                                  <span className="mb-1 block text-xs font-semibold text-slate-600">
+                                  <span className="mb-1 block text-xs font-semibold text-admin-body">
                                     LGS
                                   </span>
                                   <input
@@ -219,7 +225,7 @@ export function ScoresTab({
                                   />
                                 </label>
                                 <label className="block">
-                                  <span className="mb-1 block text-xs font-semibold text-slate-600">
+                                  <span className="mb-1 block text-xs font-semibold text-admin-body">
                                     Yüzdelik (%)
                                   </span>
                                   <input
@@ -239,11 +245,11 @@ export function ScoresTab({
                                 <button
                                   type="button"
                                   onClick={() => setEditingScoreId(null)}
-                                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                                  className="rounded-xl border border-admin-line bg-white px-3 py-2 text-xs font-semibold text-admin-body hover:bg-admin-ground"
                                 >
                                   İptal
                                 </button>
-                                <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
+                                <AdminSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
                               </div>
                             </form>
                           )}
@@ -254,7 +260,7 @@ export function ScoresTab({
                 )}
 
                 {yearScores.length === 0 && !isAddingNew && (
-                  <p className="text-xs text-slate-400">Bu yıl için puan kaydı yok.</p>
+                  <p className="text-xs text-admin-faint">Bu yıl için puan kaydı yok.</p>
                 )}
 
                 {/* Yeni puan ekleme formu */}
@@ -262,13 +268,13 @@ export function ScoresTab({
                   <form
                     action={upsertScore}
                     onSubmit={() => setEditingScoreId(null)}
-                    className="space-y-3 rounded-lg border border-blue-100 bg-blue-50/50 p-3"
+                    className="space-y-3 rounded-lg border border-admin-tint bg-admin-tint/50 p-3"
                   >
                     <input type="hidden" name="school_id" value={schoolId} />
                     <input type="hidden" name="year" value={year} />
 
                     <label className="block">
-                      <span className="mb-1 block text-xs font-semibold text-slate-600">
+                      <span className="mb-1 block text-xs font-semibold text-admin-body">
                         Meslek Alanı
                       </span>
                       <select name="vocational_field_id" className={inputCls}>
@@ -288,7 +294,7 @@ export function ScoresTab({
 
                     <div className="grid grid-cols-3 gap-3">
                       <label className="block">
-                        <span className="mb-1 block text-xs font-semibold text-slate-600">
+                        <span className="mb-1 block text-xs font-semibold text-admin-body">
                           OBP
                         </span>
                         <input
@@ -301,7 +307,7 @@ export function ScoresTab({
                         />
                       </label>
                       <label className="block">
-                        <span className="mb-1 block text-xs font-semibold text-slate-600">
+                        <span className="mb-1 block text-xs font-semibold text-admin-body">
                           LGS
                         </span>
                         <input
@@ -314,7 +320,7 @@ export function ScoresTab({
                         />
                       </label>
                       <label className="block">
-                        <span className="mb-1 block text-xs font-semibold text-slate-600">
+                        <span className="mb-1 block text-xs font-semibold text-admin-body">
                           Yüzdelik (%)
                         </span>
                         <input
@@ -333,11 +339,11 @@ export function ScoresTab({
                       <button
                         type="button"
                         onClick={() => setEditingScoreId(null)}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                        className="rounded-xl border border-admin-line bg-white px-3 py-2 text-xs font-semibold text-admin-body hover:bg-admin-ground"
                       >
                         İptal
                       </button>
-                      <SubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
+                      <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
                     </div>
                   </form>
                 )}
@@ -348,10 +354,10 @@ export function ScoresTab({
       </section>
 
       {/* Kontenjan tablosu */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-5 border-b border-slate-100 pb-4">
-          <h2 className="text-base font-bold text-slate-900">Kontenjan Bilgileri</h2>
-          <p className="mt-1 text-sm text-slate-500">
+      <section className="rounded-xl border border-admin-line bg-white p-5 shadow-admin-card">
+        <div className="mb-5 border-b border-admin-line-soft pb-4">
+          <h2 className="text-base font-bold text-admin-ink">Kontenjan bilgileri</h2>
+          <p className="mt-1 text-sm text-admin-muted">
             Yıllık sınavlı ve sınavsız kontenjan sayıları.
           </p>
         </div>
@@ -364,28 +370,34 @@ export function ScoresTab({
             return (
               <div
                 key={year}
-                className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+                className="rounded-xl border border-admin-line-soft bg-admin-ground p-4"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700">{year}</span>
+                  <span className="text-sm font-bold text-admin-body">{year}</span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setEditingQuota(isEditing ? null : year)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      className="rounded-lg border border-admin-line bg-white px-3 py-1.5 text-xs font-semibold text-admin-body hover:bg-admin-ground"
                     >
                       {isEditing ? "İptal" : quota ? "Düzenle" : "Ekle"}
                     </button>
                     {quota && !isEditing && (
-                      <form action={deleteQuota}>
+                      <form
+  action={deleteQuota}
+  onSubmit={(event) => {
+    if (!window.confirm("Bu kontenjan kaydını silmek istediğinize emin misiniz?")) event.preventDefault();
+  }}
+>
                         <input type="hidden" name="id" value={quota.id} />
                         <input type="hidden" name="school_id" value={schoolId} />
                         <button
                           type="submit"
-                          className="rounded-lg border border-rose-200 bg-rose-50 p-1.5 text-rose-500 hover:bg-rose-100"
+                          className="rounded-lg p-1.5 text-rose-700 hover:bg-rose-50"
                           title="Sil"
+                          aria-label="Sil"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
                         </button>
                       </form>
                     )}
@@ -393,21 +405,21 @@ export function ScoresTab({
                 </div>
 
                 {!isEditing && quota && (
-                  <div className="flex gap-4 text-sm text-slate-600">
+                  <div className="flex gap-4 text-sm text-admin-body">
                     {quota.sinavliCount !== null && (
                       <span>
-                        Sınavlı: <strong>{quota.sinavliCount}</strong>
+                        Sınavlı: <strong className="tabular-nums">{quota.sinavliCount}</strong>
                       </span>
                     )}
                     {quota.sinavsizCount !== null && (
                       <span>
-                        Sınavsız: <strong>{quota.sinavsizCount}</strong>
+                        Sınavsız: <strong className="tabular-nums">{quota.sinavsizCount}</strong>
                       </span>
                     )}
                   </div>
                 )}
                 {!isEditing && !quota && (
-                  <p className="text-xs text-slate-400">Kayıt yok</p>
+                  <p className="text-xs text-admin-faint">Kayıt yok</p>
                 )}
 
                 {isEditing && (
@@ -421,7 +433,7 @@ export function ScoresTab({
                     {quota?.id && <input type="hidden" name="id" value={quota.id} />}
 
                     <label className="block">
-                      <span className="mb-1 block text-xs font-semibold text-slate-600">
+                      <span className="mb-1 block text-xs font-semibold text-admin-body">
                         Sınavlı
                       </span>
                       <input
@@ -433,7 +445,7 @@ export function ScoresTab({
                       />
                     </label>
                     <label className="block">
-                      <span className="mb-1 block text-xs font-semibold text-slate-600">
+                      <span className="mb-1 block text-xs font-semibold text-admin-body">
                         Sınavsız
                       </span>
                       <input
@@ -445,7 +457,7 @@ export function ScoresTab({
                       />
                     </label>
                     <div className="col-span-full flex justify-end">
-                      <SubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
+                      <AdminSubmitButton label="Kaydet" pendingLabel="Kaydediliyor…" />
                     </div>
                   </form>
                 )}

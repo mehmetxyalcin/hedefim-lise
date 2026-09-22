@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SchoolFormTabs } from "@/components/admin/SchoolFormTabs";
 import {
   createSchool,
@@ -22,6 +21,9 @@ import {
   reorderSchoolProject,
 } from "@/app/admin/okullar/actions";
 import { requireAdmin } from "@/lib/admin-auth";
+import { AdminPage } from "@/components/admin/ui/AdminPage";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { FlashBanner } from "@/components/admin/ui/FlashBanner";
 import { mapVocationalField, mapFacility, mapVocationalBranch } from "@/lib/supabase/public";
 
 type Props = {
@@ -45,29 +47,17 @@ export default async function AdminNewSchoolPage({ searchParams }: Props) {
   ]);
 
   return (
-    <div className="min-h-[70vh] bg-slate-50 px-6 py-16">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8">
-          <Link href="/admin" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-            Admin&apos;e dön
-          </Link>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">
-            Yeni Okul
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Okul bilgilerini ekleyin.
-          </p>
-        </div>
-
-        {params?.error && (
-          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-            {params.error}
-          </div>
-        )}
+    <AdminPage width="form">
+      <PageHeader
+        trail={[{ label: "Okullar", href: "/admin" }]}
+        title="Yeni okul"
+        description="Önce temel bilgileri kaydedin; diğer bölümler kayıttan sonra açılır."
+      />
+      <FlashBanner success={params?.success} error={params?.error} />
 
         <SchoolFormTabs
           cancelHref="/admin"
-          submitLabel="Okulu Kaydet"
+          submitLabel="Okulu kaydet"
           saveSchool={createSchool}
           saveContact={updateSchoolContact}
           saveOtherInfo={updateSchoolOtherInfo}
@@ -99,7 +89,6 @@ export default async function AdminNewSchoolPage({ searchParams }: Props) {
           quotas={[]}
           schoolVocationalFields={[]}
         />
-      </div>
-    </div>
+    </AdminPage>
   );
 }
