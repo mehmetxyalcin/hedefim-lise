@@ -264,3 +264,11 @@ Canlı doğrulama eki: 301c519 Hostinger üzerinde 2026-09-08 01:24'te 58 saniye
 - `016_schools_hide_inactive.sql` canlıya uygulandı (tek BEGIN/COMMIT, `execute_sql`; migration geçmişi yine oluşturulmadı). Canlıda depoda olmayan `schools_select USING (true)` politikası vardı; o da kaldırıldı. Okuma artık `anon_read_active_schools` (anon, yalnız aktif) ve `authenticated_read_schools` (aktif veya admin). Uygulama öncesi hata ile geri alınan denemede bir okul pasife çekildi: anon/üye 183, admin 184 okul gördü. Uygulama anında canlıda pasif okul yoktu; anon REST 184 aktif okul döndürdü.
 - `useFavorites` `useSyncExternalStore` ile yeniden yazıldı; sekmeler arası `storage` eşitlemesi var. Saf mantık `src/lib/favorites.ts`. `/tercihlerim` her açılışta ad/slug/ilçe/tür ve son yıl puanlarını yayındaki veriden yeniler; yayında olmayan okul silinmez, işaretlenir.
 - 37 test, TypeScript ve üretim derlemesi başarılı; ESLint 26→23 hata. Kalan: `ContactForm.tsx` effect içi setState ve önceki lint borcu. İletişim formu gerçek gönderimle denenmedi.
+
+## 19. Kurumsal bağlılık metni ve iletişim — 22 Eylül 2026
+
+- Kullanıcı doğruladı: proje Akdeniz RAM çalışanlarının gönüllü projesidir, resmî RAM projesi değildir. Kural `PRODUCT.md` Brand Commitments içinde.
+- `site-settings.ts` yedek footer metnindeki "RAM koordinatörlüğünde" iddiası kaldırıldı; yedek iletişim info@hedefimlise.com, telefon yok, adres "Mersin, Türkiye".
+- `/iletisim` sabit RAM e-postası yerine footer ayarlarını okur.
+- Canlı `footer_settings` güncellendi (e-posta info@hedefimlise.com, telefon NULL, adres "Mersin, Türkiye"). Kullanıcı info@ kutusunun açık olduğunu doğruladı.
+- Hakkında sayfasında RAM'ler yalnız "Yararlanılan Kaynaklar" altında; "Sosyal Sorumluluk Projesi" etiketi korundu.

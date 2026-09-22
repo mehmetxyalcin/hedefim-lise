@@ -29,13 +29,13 @@ Used mostly in the LGS results-to-preference window. Typical flow: filter school
 - **Data:** Supabase-backed. Schools carry per-year scores (OBP, LGS, percentile), district, type, placement type, vocational fields, features, and contact info.
 - **Domain terminology to preserve exactly:** yüzdelik dilim, OBP (Ortaöğretim Başarı Puanı), LGS, yerel / merkezi yerleştirme, meslek alanı, ilçe.
 - **Scope:** Mersin high schools only (established by product copy).
-- **Technical constraints:** Next.js 16 (App Router) + Supabase; deployed as a Node app (`next start`) on Hostinger (moved off Vercel — a stray `@vercel/analytics` widget remains in the layout and no longer collects data). Google Analytics (gtag, `G-XQF1R11D55`) is wired in the root layout.
+- **Technical constraints:** Next.js 16 (App Router) + Supabase; deployed as a Node app (`next start`) on Hostinger, auto-deployed from GitHub `main`. Google Analytics (gtag, `G-XQF1R11D55`) is wired in the root layout.
 
 ## Brand Commitments
 
 - **Name:** "Hedefim Lise".
 - **Voice:** Turkish, plain and reassuring — readable by a nervous 8th-grader as well as a parent or counselor.
-- **No official institutional affiliation.** This is an independent project. The footer includes a "Proje Paydaşları" (project partners) section, but there is **no confirmed official partner or endorsement**. Future work must not imply MEB / municipality / foundation backing or invent partners.
+- **No official institutional affiliation.** A volunteer project built by people who work at Akdeniz Rehberlik ve Araştırma Merkezi (RAM), but **not an official RAM project** (confirmed by the owner, 22 Sep 2026). Copy must not say the project is run, coordinated, or endorsed by RAM, MEB, a municipality, or a foundation, and must not use RAM's institutional phone, address, or mailbox as project contact. RAMs and Millî Eğitim Müdürlükleri may appear only as sources consulted. Project contact: info@hedefimlise.com. The footer's partner-links section has no confirmed official partner or endorsement; do not invent partners.
 
 ## Evidence on Hand
 

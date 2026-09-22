@@ -73,12 +73,12 @@ const defaultSiteSettings: SiteSettings = {
 const defaultFooterSettings: FooterSettings = {
   id: FOOTER_SETTINGS_ID,
   about_text:
-    "Öğrencilerin doğru lise tercihleri yapabilmesi amacıyla Akdeniz Rehberlik ve Araştırma Merkezi koordinatörlüğünde yürütülen sosyal sorumluluk projesidir.",
+    "Mersin'de okuyan öğrencilerin doğru lise tercihleri yapabilmesi amacıyla geliştirilmiştir.",
   partners_title: "Proje Paydaşları",
   copyright_text: "© 2026 Hedefim Lise, Yolum Bilinçli Tercih Projesi.",
-  contact_email: "akdenizram33@gmail.com",
-  contact_phone: "0 (324) 336 11 84",
-  address: "Akdeniz Rehberlik ve Araştırma Merkezi, Akdeniz, Mersin",
+  contact_email: "info@hedefimlise.com",
+  contact_phone: null,
+  address: "Mersin, Türkiye",
   updated_at: new Date().toISOString(),
 };
 

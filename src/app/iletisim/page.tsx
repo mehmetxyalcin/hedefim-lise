@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Mail, MapPin, Clock } from "lucide-react";
 import ContactForm from "./ContactForm";
+import { getFooterSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "İletişim | Hedefim Lise",
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
     "Okul bilgisi güncelleme, hatalı bilgi bildirimi veya öneri ve görüşleriniz için bizimle iletişime geçin.",
 };
 
-export default function IletisimPage() {
+export default async function IletisimPage() {
+  const { contact_email, address } = await getFooterSettings();
+
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-16">
       <div className="mx-auto max-w-6xl">
@@ -37,18 +40,20 @@ export default function IletisimPage() {
                 İletişim Bilgileri
               </h3>
               <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-                  <a
-                    href="mailto:akdenizram33@gmail.com"
-                    className="text-sm text-slate-700 hover:text-blue-600"
-                  >
-                    akdenizram33@gmail.com
-                  </a>
-                </li>
+                {contact_email && (
+                  <li className="flex items-start gap-3">
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                    <a
+                      href={`mailto:${contact_email}`}
+                      className="text-sm text-slate-700 hover:text-blue-600"
+                    >
+                      {contact_email}
+                    </a>
+                  </li>
+                )}
                 <li className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-                  <span className="text-sm text-slate-700">Mersin, Türkiye</span>
+                  <span className="text-sm text-slate-700">{address || "Mersin, Türkiye"}</span>
                 </li>
               </ul>
             </div>
