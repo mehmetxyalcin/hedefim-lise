@@ -1,5 +1,6 @@
 "use client";
 
+import { adminButton } from "@/components/admin/ui/Button";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
@@ -156,20 +157,20 @@ export function FacilityUploadWizard() {
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Dosya Yükle</h2>
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-            <span className="text-sm text-slate-600">
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Dosya yükle</h2>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-admin-line bg-admin-ground px-4 py-3">
+            <span className="text-sm text-admin-body">
               Şablonu indirip{" "}
-              <span className="font-semibold text-blue-700">Tesisler</span>{" "}
+              <span className="font-semibold text-admin-ink">Tesisler</span>{" "}
               sekmesini doldurun, ardından yükleyin.
             </span>
             <a
               href="/api/admin/okul-sablonu"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ size: "sm" })}
             >
               <Download className="h-4 w-4" />
-              Şablon İndir
+              Şablonu indir
             </a>
           </div>
           <div className="mb-6 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -193,8 +194,8 @@ export function FacilityUploadWizard() {
 
       {/* ── ADIM 2 ── */}
       {step === 2 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Önizleme ve Doğrulama</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-6 shadow-admin-card">
+          <h2 className="mb-4 text-xl font-bold text-admin-ink">Önizleme ve Doğrulama</h2>
 
           <div className="mb-4 flex flex-wrap gap-2">
             <Pill label="Güncellenecek okul" count={validGroups.length} color="yellow" />
@@ -213,7 +214,7 @@ export function FacilityUploadWizard() {
               return (
                 <div
                   key={group.institution_code}
-                  className="overflow-hidden rounded-xl border border-slate-200"
+                  className="overflow-hidden rounded-xl border border-admin-line"
                 >
                   <div
                     className={`flex items-start gap-3 px-4 py-3 ${
@@ -228,7 +229,7 @@ export function FacilityUploadWizard() {
                       {isError ? "🔴" : hasWarning ? "🟡" : "🟢"}
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-sm font-semibold text-admin-ink">
                         {group.institution_code}
                         {group.school_name && ` — ${group.school_name}`}
                       </p>
@@ -250,11 +251,11 @@ export function FacilityUploadWizard() {
                   </div>
 
                   {group.found && (group.matched.length > 0 || group.unmatched.length > 0) && (
-                    <div className="divide-y divide-slate-100 bg-white">
+                    <div className="divide-y divide-admin-line-soft bg-white">
                       {group.matched.map((fac) => (
                         <div key={fac.id} className="flex items-center gap-2 px-4 py-2 text-sm">
                           <span className="text-xs font-bold text-emerald-500">✓</span>
-                          <span className="text-slate-700">{fac.name}</span>
+                          <span className="text-admin-body">{fac.name}</span>
                         </div>
                       ))}
                       {group.unmatched.map((name) => (
@@ -297,7 +298,7 @@ export function FacilityUploadWizard() {
                 setStep(1);
                 setGroups([]);
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-admin-line bg-white px-4 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
               <ArrowLeft className="h-4 w-4" />
               Geri
@@ -306,7 +307,7 @@ export function FacilityUploadWizard() {
               type="button"
               onClick={handleUpload}
               disabled={validGroups.length === 0 || isPending}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className={adminButton({ variant: "primary" })}
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Yükle ({validGroups.length} okul)
@@ -317,8 +318,8 @@ export function FacilityUploadWizard() {
 
       {/* ── ADIM 3 ── */}
       {step === 3 && uploadResult && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Yükleme Tamamlandı</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Yükleme tamamlandı</h2>
 
           <div className="mb-6 space-y-3">
             {uploadResult.updated > 0 && (
@@ -369,14 +370,14 @@ export function FacilityUploadWizard() {
               </div>
             )}
             {uploadResult.updated === 0 && uploadResult.errors.length === 0 && (
-              <p className="text-sm text-slate-500">Güncellenecek kayıt bulunamadı.</p>
+              <p className="text-sm text-admin-muted">Güncellenecek kayıt bulunamadı.</p>
             )}
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin"
-              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ variant: "primary" })}
             >
               Okul Listesine Git
             </Link>
@@ -389,9 +390,9 @@ export function FacilityUploadWizard() {
                 setParseError(null);
                 setUploadError(null);
               }}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-admin-line bg-white px-5 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
-              Yeni Yükleme
+              Yeni yükleme
             </button>
           </div>
         </div>

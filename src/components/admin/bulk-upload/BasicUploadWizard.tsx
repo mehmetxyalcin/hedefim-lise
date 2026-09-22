@@ -1,5 +1,6 @@
 "use client";
 
+import { adminButton } from "@/components/admin/ui/Button";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
@@ -155,19 +156,19 @@ export function BasicUploadWizard() {
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Dosya Yükle</h2>
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-            <span className="text-sm text-slate-600">
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Dosya yükle</h2>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-admin-line bg-admin-ground px-4 py-3">
+            <span className="text-sm text-admin-body">
               Şablonu indirip doldurun, ardından yükleyin.{" "}
-              <span className="text-slate-400">(Okullar sekmesi)</span>
+              <span className="text-admin-faint">(Okullar sekmesi)</span>
             </span>
             <a
               href="/api/admin/okul-sablonu"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ size: "sm" })}
             >
               <Download className="h-4 w-4" />
-              Şablon İndir
+              Şablonu indir
             </a>
           </div>
           <UploadDropzone
@@ -183,8 +184,8 @@ export function BasicUploadWizard() {
 
       {/* ── ADIM 2 ── */}
       {step === 2 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Önizleme ve Doğrulama</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-6 shadow-admin-card">
+          <h2 className="mb-4 text-xl font-bold text-admin-ink">Önizleme ve Doğrulama</h2>
 
           <div className="mb-2 flex flex-wrap gap-2">
             <Pill label="Toplam" count={stats.total} color="slate" />
@@ -199,10 +200,10 @@ export function BasicUploadWizard() {
             </p>
           )}
 
-          <div className="mb-4 overflow-x-auto rounded-xl border border-slate-200">
+          <div className="mb-4 overflow-x-auto rounded-xl border border-admin-line">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                <tr className="border-b border-admin-line bg-admin-ground text-left">
                   {[
                     "Durum",
                     "#",
@@ -223,7 +224,7 @@ export function BasicUploadWizard() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="whitespace-nowrap px-3 py-2 text-xs font-semibold text-slate-600"
+                      className="whitespace-nowrap px-3 py-2 text-xs font-semibold text-admin-body"
                     >
                       {h}
                     </th>
@@ -234,40 +235,43 @@ export function BasicUploadWizard() {
                 {parsedRows.map((row) => (
                   <tr
                     key={row.rowIndex}
-                    className={`border-b border-slate-100 ${row.status === "error" ? "bg-rose-50" : ""}`}
+                    className={`border-b border-admin-line-soft ${row.status === "error" ? "bg-rose-50" : ""}`}
                   >
                     <td className="px-3 py-2">
                       {row.status === "new" && (
                         <span title="Yeni eklenecek">
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                          <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-emerald-600" />
+                          <span className="sr-only">Yeni eklenecek</span>
                         </span>
                       )}
                       {row.status === "update" && (
                         <span title="Güncellenecek">
-                          <AlertCircle className="h-4 w-4 text-amber-500" />
+                          <AlertCircle aria-hidden="true" className="h-4 w-4 text-amber-600" />
+                          <span className="sr-only">Güncellenecek</span>
                         </span>
                       )}
                       {row.status === "error" && (
                         <span title={row.errors.join("; ")}>
-                          <XCircle className="h-4 w-4 text-rose-500" />
+                          <XCircle aria-hidden="true" className="h-4 w-4 text-rose-600" />
+                          <span className="sr-only">Hatalı</span>
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-slate-400">{row.rowIndex}</td>
-                    <td className="px-3 py-2 font-mono text-slate-700">
+                    <td className="px-3 py-2 text-admin-faint">{row.rowIndex}</td>
+                    <td className="px-3 py-2 font-mono text-admin-body">
                       {row.institution_code || "—"}
                     </td>
-                    <td className="max-w-[200px] truncate px-3 py-2 text-slate-700">
+                    <td className="max-w-[200px] truncate px-3 py-2 text-admin-body">
                       {row.name || "—"}
                     </td>
-                    <td className="px-3 py-2 text-slate-600">
+                    <td className="px-3 py-2 text-admin-body">
                       {row.education_type === "normal"
                         ? "Normal"
                         : row.education_type === "ikili"
                           ? "İkili"
                           : "—"}
                     </td>
-                    <td className="px-3 py-2 text-slate-600">
+                    <td className="px-3 py-2 text-admin-body">
                       {row.boarding_type === undefined ? (
                         "—"
                       ) : row.boarding_type === "yok" ? (
@@ -282,48 +286,48 @@ export function BasicUploadWizard() {
                         <span className="text-rose-500">Geçersiz</span>
                       )}
                     </td>
-                    <td className="max-w-[180px] truncate px-3 py-2 text-slate-500">
+                    <td className="max-w-[180px] truncate px-3 py-2 text-admin-muted">
                       {row.description
                         ? row.description.length > 50
                           ? row.description.slice(0, 50) + "..."
                           : row.description
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-center text-slate-600">
+                    <td className="px-3 py-2 text-center text-admin-body">
                       {row.sinavli_2026 !== undefined && row.sinavli_2026 !== null
                         ? row.sinavli_2026
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-center text-slate-600">
+                    <td className="px-3 py-2 text-center text-admin-body">
                       {row.sinavsiz_2026 !== undefined && row.sinavsiz_2026 !== null
                         ? row.sinavsiz_2026
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-center text-slate-600">
+                    <td className="px-3 py-2 text-center text-admin-body">
                       {row.sinavli_2025 !== undefined && row.sinavli_2025 !== null
                         ? row.sinavli_2025
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-center text-slate-600">
+                    <td className="px-3 py-2 text-center text-admin-body">
                       {row.sinavsiz_2025 !== undefined && row.sinavsiz_2025 !== null
                         ? row.sinavsiz_2025
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-center text-slate-600">
+                    <td className="px-3 py-2 text-center text-admin-body">
                       {row.sinavli_2024 !== undefined && row.sinavli_2024 !== null
                         ? row.sinavli_2024
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-center text-slate-600">
+                    <td className="px-3 py-2 text-center text-admin-body">
                       {row.sinavsiz_2024 !== undefined && row.sinavsiz_2024 !== null
                         ? row.sinavsiz_2024
                         : "—"}
                     </td>
-                    <td className="px-3 py-2 text-slate-500">{row.phone || "—"}</td>
-                    <td className="max-w-[140px] truncate px-3 py-2 text-slate-500">
+                    <td className="px-3 py-2 text-admin-muted">{row.phone || "—"}</td>
+                    <td className="max-w-[140px] truncate px-3 py-2 text-admin-muted">
                       {row.website || "—"}
                     </td>
-                    <td className="max-w-[160px] truncate px-3 py-2 text-slate-500">
+                    <td className="max-w-[160px] truncate px-3 py-2 text-admin-muted">
                       {row.address || "—"}
                     </td>
                   </tr>
@@ -348,7 +352,7 @@ export function BasicUploadWizard() {
                   <li className="text-rose-400">...ve {stats.error - 10} satır daha</li>
                 )}
               </ul>
-              <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+              <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-admin-body">
                 <input
                   type="checkbox"
                   checked={skipErrors}
@@ -367,7 +371,7 @@ export function BasicUploadWizard() {
                 setStep(1);
                 setParsedRows([]);
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-admin-line bg-white px-4 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
               <ArrowLeft className="h-4 w-4" />
               Geri
@@ -376,7 +380,7 @@ export function BasicUploadWizard() {
               type="button"
               onClick={handleUpload}
               disabled={!canUpload || uploadableCount === 0 || isPending}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className={adminButton({ variant: "primary" })}
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Yükle ({uploadableCount} satır)
@@ -387,8 +391,8 @@ export function BasicUploadWizard() {
 
       {/* ── ADIM 3 ── */}
       {step === 3 && uploadResult && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Yükleme Tamamlandı</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Yükleme tamamlandı</h2>
 
           <div className="mb-6 space-y-3">
             {uploadResult.added > 0 && (
@@ -403,9 +407,9 @@ export function BasicUploadWizard() {
               </div>
             )}
             {uploadResult.updated > 0 && (
-              <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                <AlertCircle className="h-5 w-5 shrink-0 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">
+              <div className="flex items-center gap-3 rounded-xl border border-admin-accent-soft bg-admin-tint px-4 py-3">
+                <AlertCircle className="h-5 w-5 shrink-0 text-admin-accent" />
+                <span className="text-sm font-medium text-admin-accent-deep">
                   {uploadResult.updated} okulun bilgileri güncellendi
                 </span>
               </div>
@@ -430,14 +434,14 @@ export function BasicUploadWizard() {
             {uploadResult.added === 0 &&
               uploadResult.updated === 0 &&
               uploadResult.errors.length === 0 && (
-                <p className="text-sm text-slate-500">Yüklenecek satır bulunamadı.</p>
+                <p className="text-sm text-admin-muted">Yüklenecek satır bulunamadı.</p>
               )}
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin"
-              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ variant: "primary" })}
             >
               Okul Listesine Git
             </Link>
@@ -451,9 +455,9 @@ export function BasicUploadWizard() {
                 setParseError(null);
                 setUploadError(null);
               }}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-admin-line bg-white px-5 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
-              Yeni Yükleme
+              Yeni yükleme
             </button>
           </div>
         </div>

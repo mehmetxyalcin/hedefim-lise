@@ -1,5 +1,6 @@
 "use client";
 
+import { adminButton } from "@/components/admin/ui/Button";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
@@ -205,7 +206,7 @@ export function ScoreUploadWizard() {
   }
 
   function ScoreCell({ value }: { value: number | null | undefined }) {
-    if (value === undefined) return <span className="text-slate-300">—</span>;
+    if (value === undefined) return <span className="text-admin-line-strong">—</span>;
     if (value === null) return <span className="font-bold text-rose-500">!</span>;
     return <span>{value}</span>;
   }
@@ -221,20 +222,20 @@ export function ScoreUploadWizard() {
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Dosya Yükle</h2>
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-            <span className="text-sm text-slate-600">
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Dosya yükle</h2>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-admin-line bg-admin-ground px-4 py-3">
+            <span className="text-sm text-admin-body">
               Şablonu indirip{" "}
-              <span className="font-semibold text-blue-700">Puan Bilgileri</span>{" "}
+              <span className="font-semibold text-admin-ink">Puan Bilgileri</span>{" "}
               sekmesini doldurun, ardından yükleyin.
             </span>
             <a
               href="/api/admin/okul-sablonu"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ size: "sm" })}
             >
               <Download className="h-4 w-4" />
-              Şablon İndir
+              Şablonu indir
             </a>
           </div>
           <UploadDropzone
@@ -250,8 +251,8 @@ export function ScoreUploadWizard() {
 
       {/* ── ADIM 2 ── */}
       {step === 2 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Önizleme ve Doğrulama</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-6 shadow-admin-card">
+          <h2 className="mb-4 text-xl font-bold text-admin-ink">Önizleme ve Doğrulama</h2>
 
           <div className="mb-4 flex flex-wrap gap-2">
             <Pill label="Toplam" count={parsedRows.length} color="slate" />
@@ -259,17 +260,17 @@ export function ScoreUploadWizard() {
             {errorRows.length > 0 && <Pill label="Hatalı" count={errorRows.length} color="red" />}
           </div>
 
-          <div className="mb-4 overflow-x-auto rounded-xl border border-slate-200">
+          <div className="mb-4 overflow-x-auto rounded-xl border border-admin-line">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                <tr className="border-b border-admin-line bg-admin-ground text-left">
                   {[
                     "Durum", "Kurum Kodu", "Okul Adı", "Meslek Alanı",
                     "OBP 25", "LGS 25", "%Dilim 25",
                     "OBP 24", "LGS 24", "%Dilim 24",
                     "OBP 23", "LGS 23", "%Dilim 23",
                   ].map((h) => (
-                    <th key={h} className="whitespace-nowrap px-3 py-2 text-xs font-semibold text-slate-600">
+                    <th key={h} className="whitespace-nowrap px-3 py-2 text-xs font-semibold text-admin-body">
                       {h}
                     </th>
                   ))}
@@ -281,35 +282,35 @@ export function ScoreUploadWizard() {
                   return (
                     <tr
                       key={row.rowIndex}
-                      className={`border-b border-slate-100 ${hasError ? "bg-rose-50" : ""}`}
+                      className={`border-b border-admin-line-soft ${hasError ? "bg-rose-50" : ""}`}
                     >
                       <td className="px-3 py-2 text-center text-base leading-none">
                         <span title={hasError ? row.errors.join("; ") : "Güncellenecek"}>
                           {hasError ? "🔴" : "🟡"}
                         </span>
                       </td>
-                      <td className="px-3 py-2 font-mono text-slate-700">{row.institution_code}</td>
-                      <td className="max-w-[180px] truncate px-3 py-2 text-slate-700">
+                      <td className="px-3 py-2 font-mono text-admin-body">{row.institution_code}</td>
+                      <td className="max-w-[180px] truncate px-3 py-2 text-admin-body">
                         {row.school_name || <span className="text-rose-500 text-xs">Bulunamadı</span>}
                       </td>
                       <td className="max-w-[160px] truncate px-3 py-2">
                         {!row.vocational_field_name ? (
-                          <span className="italic text-slate-400">Okul Geneli</span>
+                          <span className="italic text-admin-faint">Okul geneli</span>
                         ) : !row.vocational_field_found ? (
                           <span className="text-rose-500">🔴 {row.vocational_field_name} (bulunamadı)</span>
                         ) : (
-                          <span className="text-slate-700">{row.vocational_field_name}</span>
+                          <span className="text-admin-body">{row.vocational_field_name}</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.obp_2025} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.lgs_2025} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.percentile_2025} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.obp_2024} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.lgs_2024} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.percentile_2024} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.obp_2023} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.lgs_2023} /></td>
-                      <td className="px-3 py-2 text-center text-slate-600"><ScoreCell value={row.percentile_2023} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.obp_2025} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.lgs_2025} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.percentile_2025} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.obp_2024} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.lgs_2024} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.percentile_2024} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.obp_2023} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.lgs_2023} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.percentile_2023} /></td>
                     </tr>
                   );
                 })}
@@ -337,7 +338,7 @@ export function ScoreUploadWizard() {
             <button
               type="button"
               onClick={() => { setStep(1); setParsedRows([]); }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-admin-line bg-white px-4 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
               <ArrowLeft className="h-4 w-4" />
               Geri
@@ -346,7 +347,7 @@ export function ScoreUploadWizard() {
               type="button"
               onClick={handleUpload}
               disabled={validRows.length === 0 || isPending}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className={adminButton({ variant: "primary" })}
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Yükle ({validSchoolCount} okul)
@@ -357,8 +358,8 @@ export function ScoreUploadWizard() {
 
       {/* ── ADIM 3 ── */}
       {step === 3 && uploadResult && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Yükleme Tamamlandı</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Yükleme tamamlandı</h2>
 
           <div className="mb-6 space-y-3">
             {uploadResult.updated > 0 && (
@@ -387,14 +388,14 @@ export function ScoreUploadWizard() {
               </div>
             )}
             {uploadResult.updated === 0 && uploadResult.errors.length === 0 && (
-              <p className="text-sm text-slate-500">Güncellenecek kayıt bulunamadı.</p>
+              <p className="text-sm text-admin-muted">Güncellenecek kayıt bulunamadı.</p>
             )}
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin"
-              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ variant: "primary" })}
             >
               Okul Listesine Git
             </Link>
@@ -407,9 +408,9 @@ export function ScoreUploadWizard() {
                 setParseError(null);
                 setUploadError(null);
               }}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-admin-line bg-white px-5 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
-              Yeni Yükleme
+              Yeni yükleme
             </button>
           </div>
         </div>

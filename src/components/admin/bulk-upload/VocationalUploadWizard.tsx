@@ -1,5 +1,6 @@
 "use client";
 
+import { adminButton } from "@/components/admin/ui/Button";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
@@ -210,20 +211,20 @@ export function VocationalUploadWizard() {
 
       {/* ── ADIM 1 ── */}
       {step === 1 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Dosya Yükle</h2>
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-            <span className="text-sm text-slate-600">
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Dosya yükle</h2>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-admin-line bg-admin-ground px-4 py-3">
+            <span className="text-sm text-admin-body">
               Şablonu indirip{" "}
-              <span className="font-semibold text-blue-700">Meslek Alanları</span>{" "}
+              <span className="font-semibold text-admin-ink">Meslek Alanları</span>{" "}
               sekmesini doldurun, ardından yükleyin.
             </span>
             <a
               href="/api/admin/okul-sablonu"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ size: "sm" })}
             >
               <Download className="h-4 w-4" />
-              Şablon İndir
+              Şablonu indir
             </a>
           </div>
           <div className="mb-6 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -246,8 +247,8 @@ export function VocationalUploadWizard() {
 
       {/* ── ADIM 2 ── */}
       {step === 2 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Önizleme ve Doğrulama</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-6 shadow-admin-card">
+          <h2 className="mb-4 text-xl font-bold text-admin-ink">Önizleme ve Doğrulama</h2>
 
           <div className="mb-4 flex flex-wrap gap-2">
             <Pill label="Etkilenecek okul" count={validGroupCount} color="yellow" />
@@ -261,7 +262,7 @@ export function VocationalUploadWizard() {
               return (
                 <div
                   key={group.institution_code}
-                  className="overflow-hidden rounded-xl border border-slate-200"
+                  className="overflow-hidden rounded-xl border border-admin-line"
                 >
                   {/* Grup başlığı */}
                   <div
@@ -275,7 +276,7 @@ export function VocationalUploadWizard() {
                       {isError ? "🔴" : "🟡"}
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-sm font-semibold text-admin-ink">
                         {group.institution_code}
                         {group.school_name && ` — ${group.school_name}`}
                       </p>
@@ -300,7 +301,7 @@ export function VocationalUploadWizard() {
 
                   {/* Satırlar */}
                   {group.found && group.rows.length > 0 && (
-                    <div className="divide-y divide-slate-100 bg-white">
+                    <div className="divide-y divide-admin-line-soft bg-white">
                       {group.rows.map((row) => (
                         <div
                           key={row.rowIndex}
@@ -316,11 +317,11 @@ export function VocationalUploadWizard() {
                             {row.errors.length > 0 ? "✗" : "✓"}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <span className="font-medium text-slate-700">
+                            <span className="font-medium text-admin-body">
                               {row.vocational_field || "—"}
                             </span>
                             {row.branch && (
-                              <span className="ml-2 text-slate-400">└─ {row.branch}</span>
+                              <span className="ml-2 text-admin-faint">└─ {row.branch}</span>
                             )}
                             {row.errors.length > 0 && (
                               <p className="mt-0.5 text-xs text-rose-500">
@@ -339,7 +340,7 @@ export function VocationalUploadWizard() {
 
           {errorGroupCount > 0 && (
             <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-admin-body">
                 <input
                   type="checkbox"
                   checked={skipErrors}
@@ -358,7 +359,7 @@ export function VocationalUploadWizard() {
                 setStep(1);
                 setSchoolGroups([]);
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-admin-line bg-white px-4 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
               <ArrowLeft className="h-4 w-4" />
               Geri
@@ -367,7 +368,7 @@ export function VocationalUploadWizard() {
               type="button"
               onClick={handleUpload}
               disabled={uploadableCount === 0 || (errorGroupCount > 0 && !skipErrors) || isPending}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className={adminButton({ variant: "primary" })}
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Yükle ({uploadableCount} okul)
@@ -378,14 +379,14 @@ export function VocationalUploadWizard() {
 
       {/* ── ADIM 3 ── */}
       {step === 3 && uploadResult && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Yükleme Tamamlandı</h2>
+        <div className="rounded-xl border border-admin-line bg-white p-8 shadow-admin-card">
+          <h2 className="mb-6 text-xl font-bold text-admin-ink">Yükleme tamamlandı</h2>
 
           <div className="mb-6 space-y-3">
             {uploadResult.updated > 0 && (
-              <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">
+              <div className="flex items-center gap-3 rounded-xl border border-admin-accent-soft bg-admin-tint px-4 py-3">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-admin-accent" />
+                <span className="text-sm font-medium text-admin-accent-deep">
                   {uploadResult.updated} okulun meslek alanları güncellendi
                 </span>
               </div>
@@ -408,14 +409,14 @@ export function VocationalUploadWizard() {
               </div>
             )}
             {uploadResult.updated === 0 && uploadResult.errors.length === 0 && (
-              <p className="text-sm text-slate-500">Yüklenecek kayıt bulunamadı.</p>
+              <p className="text-sm text-admin-muted">Yüklenecek kayıt bulunamadı.</p>
             )}
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin"
-              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className={adminButton({ variant: "primary" })}
             >
               Okul Listesine Git
             </Link>
@@ -429,9 +430,9 @@ export function VocationalUploadWizard() {
                 setParseError(null);
                 setUploadError(null);
               }}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-admin-line bg-white px-5 py-2.5 text-sm font-semibold text-admin-body hover:bg-admin-ground"
             >
-              Yeni Yükleme
+              Yeni yükleme
             </button>
           </div>
         </div>

@@ -1,42 +1,33 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 // Toplu yükleme sihirbazlarının ortak parçaları: adım göstergesi, sayaç rozeti, dosya alanı.
 import { Upload } from "lucide-react";
 
 // ─── Shared sub-components ───────────────────────────────────────
 
 export function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
-  const steps = [
-    { id: 1 as const, label: "Dosya Yükle" },
-    { id: 2 as const, label: "Önizleme" },
-    { id: 3 as const, label: "Sonuç" },
-  ];
+  const steps = ["Dosya", "Önizleme", "Sonuç"];
   return (
-    <div className="flex items-center">
-      {steps.map((s, i) => (
-        <div key={s.id} className="flex items-center">
-          <div
-            className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-              s.id < step
-                ? "bg-emerald-500 text-white"
-                : s.id === step
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-200 text-slate-500"
-            }`}
+    <ol className="flex items-start gap-2" aria-label={`Adım ${step} / 3`}>
+      {steps.map((label, index) => {
+        const id = index + 1;
+        const state = id < step ? "done" : id === step ? "current" : "todo";
+        return (
+          <li
+            key={label}
+            className="flex flex-1 flex-col gap-1.5"
+            aria-current={state === "current" ? "step" : undefined}
           >
-            {s.id < step ? "✓" : s.id}
-          </div>
-          <span
-            className={`ml-2 text-sm font-medium ${
-              s.id === step ? "text-slate-900" : "text-slate-400"
-            }`}
-          >
-            {s.label}
-          </span>
-          {i < steps.length - 1 && <div className="mx-4 h-px w-8 bg-slate-200" />}
-        </div>
-      ))}
-    </div>
+            <span className={cn("h-1 rounded-full", state === "todo" ? "bg-admin-line" : "bg-admin-accent")} />
+            <span className={cn("text-xs", state === "current" ? "font-semibold text-admin-ink" : "text-admin-muted")}>
+              {id}. {label}
+              {state === "done" && <span className="sr-only"> (tamamlandı)</span>}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -50,13 +41,13 @@ export function Pill({
   color: "slate" | "green" | "yellow" | "red";
 }) {
   const colorMap = {
-    slate: "bg-slate-100 text-slate-700",
-    green: "bg-emerald-100 text-emerald-700",
-    yellow: "bg-amber-100 text-amber-700",
-    red: "bg-rose-100 text-rose-700",
+    slate: "bg-admin-line-soft text-admin-body",
+    green: "bg-emerald-50 text-emerald-800",
+    yellow: "bg-amber-50 text-amber-800",
+    red: "bg-rose-50 text-rose-800",
   };
   return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${colorMap[color]}`}>
+    <span className={`rounded-md px-2.5 py-1 text-xs font-semibold tabular-nums ${colorMap[color]}`}>
       {label}: {count}
     </span>
   );
@@ -82,10 +73,10 @@ export function UploadDropzone({
       <div
         role="button"
         tabIndex={0}
-        className={`cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-colors ${
+        className={`cursor-pointer rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
           isDragging
-            ? "border-blue-400 bg-blue-50"
-            : "border-slate-200 hover:border-blue-300 hover:bg-slate-50"
+            ? "border-admin-accent bg-admin-tint"
+            : "border-admin-line hover:border-admin-accent-soft hover:bg-admin-ground"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -101,11 +92,11 @@ export function UploadDropzone({
         onClick={() => fileInputRef.current?.click()}
         onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
       >
-        <Upload className="mx-auto mb-4 h-12 w-12 text-slate-400" />
-        <p className="mb-2 text-base font-semibold text-slate-700">
+        <Upload className="mx-auto mb-4 h-12 w-12 text-admin-faint" />
+        <p className="mb-2 text-base font-semibold text-admin-body">
           Dosyayı buraya sürükleyin veya tıklayın
         </p>
-        <p className="text-sm text-slate-400">{hint}</p>
+        <p className="text-sm text-admin-faint">{hint}</p>
         <input
           ref={fileInputRef}
           type="file"
