@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TrendingUp } from "lucide-react";
 import { SectionCard } from "@/components/ui/SectionCard";
+import { PROGRAM_ROW_LABELS, type SchoolProgram } from "@/lib/school-programs";
 
 type VocationalField = { id: number; name: string };
 
@@ -13,6 +14,7 @@ type SchoolScore = {
   lgs_score: number | null;
   percentile: number | null;
   vocational_field_id: number | null;
+  program: SchoolProgram | null;
   vocational_field?: VocationalField | null;
 };
 
@@ -52,7 +54,7 @@ export function SchoolScoreCard({ scores }: Props) {
   const activeYearScores = scores.filter((s) => s.year === activeYear);
 
   const isSingleSchoolWide =
-    activeYearScores.length === 1 && !activeYearScores[0].vocational_field_id;
+    activeYearScores.length === 1 && !activeYearScores[0].vocational_field_id && !activeYearScores[0].program;
 
   return (
     <SectionCard icon={TrendingUp} title="Puan Bilgileri">
@@ -134,7 +136,7 @@ export function SchoolScoreCard({ scores }: Props) {
             <thead>
               <tr className="border-b border-slate-200">
                 <th className="px-1 py-2 text-left text-xs font-medium text-slate-500">
-                  Meslek Alanı
+                  Program / Alan
                 </th>
                 <th className="px-1 py-2 text-right text-xs font-medium text-slate-500">OBP</th>
                 <th className="px-1 py-2 text-right text-xs font-medium text-slate-500">LGS</th>
@@ -147,7 +149,7 @@ export function SchoolScoreCard({ scores }: Props) {
               {activeYearScores.map((score) => (
                 <tr key={score.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="px-1 py-2.5 text-slate-700">
-                    {score.vocational_field?.name ?? (
+                    {score.program ? PROGRAM_ROW_LABELS[score.program] : score.vocational_field?.name ?? (
                       <span className="italic text-slate-400">Okul Geneli</span>
                     )}
                   </td>

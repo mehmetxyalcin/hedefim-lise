@@ -25,6 +25,7 @@ export function SchoolDetail({ school }: Props) {
     lgs_score: s.lgsScore,
     percentile: s.percentile,
     vocational_field_id: s.vocationalFieldId,
+    program: s.program,
     vocational_field: s.vocationalField ?? null,
   }));
 
