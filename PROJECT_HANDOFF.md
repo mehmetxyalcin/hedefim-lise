@@ -40,7 +40,7 @@ Görsel optimizasyonu `images.unoptimized: true` ile kapalı. Supabase public st
 
 | Yol | Giriş dosyası / davranış |
 | --- | --- |
-| `/` | `src/app/page.tsx`; aktif okul sayıları, son puan yılı, dağılımlar, öne çıkan okul |
+| `/` | `src/app/(site)/page.tsx` (genel sayfalar 23 Eylül'den beri `(site)` route group'unda; URL'ler aynı); aktif okul sayıları, son puan yılı, dağılımlar, öne çıkan okul |
 | `/okullar` | `src/app/okullar/page.tsx`; sunucuda sorgu/filtre/sayfalama; `components/schools/SchoolList.tsx` etkileşimleri |
 | `/okullar/[slug]` | `lib/supabase/schoolDetail.ts` → **`components/school/SchoolDetail.tsx`** |
 | `/alanlar` | Supabase meslek alanları → `components/vocational/VocationalAtlas.tsx` |
@@ -296,3 +296,18 @@ Tasarım: `docs/superpowers/specs/2026-09-22-yerlesim-turune-gore-puan-design.md
 - Alan filtresi merkezi değeri yalnız o alanın yüzdeliğinden hesaplar. Veride sınavlı programlar ayrı "(SINAVLI)" alanlarıdır ve yüzdelikler onlarda; sınavsız alan seçilince kartta OBP görünür.
 - Kart: Merkezi seçiliyse yüzdelik, Yerel seçiliyse OBP; seçim yoksa iki puanlı okulda iki satır ("Merkezi", "Yerel OBP"). Sayılar tr-TR.
 - Doğrulama (yerel, canlı veri): Merkezi 55, Yerel 126, tam yüzdelik aralığı 55, tam OBP aralığı 126, ikisi birlikte 26, `yerel_merkezi` 184. Fatma Aliye: iki satır %99,73 / 57,04; Merkezi %99,73; Yerel 57,04; alan 78 + Merkezi %72,95; alan 12 → OBP 57,04. Sıralamalar ve değeri olmayanların sonda kalması kontrol edildi. 44 test, lint 0, derleme başarılı; masaüstü ve 375px ekran görüntüsü.
+
+## 23. Yönetim paneli yeniden tasarımı — 23 Eylül 2026
+
+Tasarım: `docs/superpowers/specs/2026-09-23-admin-panel-redesign-design.md`; plan: `docs/superpowers/plans/2026-09-23-admin-panel-redesign.md`; yön özeti: `.impeccable/surfaces/src-app-admin-layout-tsx.md`. Dal: `feat/admin-panel-redesign` (main'e birleştirilmedi, push yapılmadı).
+
+- Genel sayfalar `src/app/(site)/` route group'unda; Navbar/Footer `(site)/layout.tsx` içinde. URL'ler aynı. `/admin` kendi kabuğunu kullanır (`components/admin/shell/AdminFrame.tsx`: gruplu, daraltılabilir yan menü + `/` kısayollu okul arama + kullanıcı menüsü). Daraltma tercihi `admin_sidebar` çerezinde.
+- Görsel dil yalnız `.admin` kapsamında: indigo `#4f46e5`, `admin-*` Tailwind renkleri (`globals.css` `@theme inline` + `.admin`), ortak parçalar `components/admin/ui/`. Genel site Exam Blue, ana sayfa `.landing` olarak kaldı.
+- Veri sağlığı kuralı `src/lib/school-health.ts`: görsel, açıklama (≥80), tesis, yabancı dil, son puan yılı, son kontenjan yılı, meslek lisesinde alan, telefon. Son yıllar veriden. Eski "eksik içerik" göstergesi (eski dizi sütunlarını okuyup her okulu eksik sayıyordu) kaldırıldı. Canlı veri (23 Eylül): eksik kayıt 66/184; en büyük eksik yabancı dil 41; 2025 puanı yok 29; 2026 kontenjanı yok 26.
+- `/admin` = okullar defteri: bağlantılı özet sayaçları, URL filtreleri (`ara`, `ilce`, `tur`, `durum`, `eksik`, `sirala`, `okul`) `history.replaceState` ile (sunucu turu yok), tıklanabilir pip başlık kodları, künye paneli (eksiklerden ilgili form sekmesine "Düzelt"), toplu işlem çubuğu. İlişkiler okul sorgusuna gömülü okunur (tesis ilişkisi 1.931 satırla 1000 satır sınırını aşıyor).
+- Okul formu: dikey sekme rayı + veri sağlığı özeti, yapışkan kaydet çubuğu, açıklama sayacı. `UnsavedChangesWarning` artık kayıt sonucunu (`admin-form-settled`) dinliyor: başarısız kayıttan sonra ayrılma uyarısı yeniden çalışıyor (önceden ilk kayıt denemesinden sonra hiç çalışmıyordu).
+- Onaysız silen düğmelere onay eklendi: puan, kontenjan, burs, proje (sekmeler), SSS, menü öğesi, footer ve sosyal bağlantı (`components/admin/ui/ConfirmButton.tsx`).
+- Mesajlar iki bölmeli (açmak durumu değiştirmez); SSS gruplu ve aranabilir; site ayarları üç ayrı menü sayfası; meslek alanlarında okul sayısı; toplu yükleme `components/admin/bulk-upload/` altında mod başına dosya (gövde birebir taşındı).
+- Bilinen sınır: `toggleSchoolStatus`/`deleteSchool`/`bulkUpdateSchoolStatus` `/admin?success=…` adresine yönlendirdiği için bu işlemlerden sonra defter filtreleri sıfırlanır (action sözleşmesi değiştirilmedi).
+- Server action, yetki, RLS ve veritabanı değişmedi. 58 test (yeni: `school-health`, `admin-ledger`, `admin-ledger-view`), lint 0, üretim derlemesi başarılı. Görsel kontrol: oturum yokken kabuk, defter, künye, okul formu, meslek alanları, toplu yükleme ve giriş ekranları anonim verili geçici (commit edilmemiş, silinmiş) bir rotada masaüstü/mobil görüntülendi; `.impeccable/review/`. Mesajlar, SSS ve site ayarları ekranları ile oturumlu genel tur kullanıcı girişiyle yapılmadı. Canlı veriye yazan işlem denenmedi.
+

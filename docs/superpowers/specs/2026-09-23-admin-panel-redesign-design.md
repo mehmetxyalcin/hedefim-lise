@@ -47,6 +47,7 @@ Token'lar `globals.css` içinde `.admin` sınıfına bağlı CSS değişkenleri 
 | Vurgu (indigo) | `#4f46e5`, hover `#4338ca`, tint `#eef2ff`, tint metni `#3730a3` |
 | Başarı / uyarı / tehlike | emerald `#059669`, amber `#b45309`, rose `#e11d48` (yalnız anlam taşırken) |
 
+- Uygulama notu (23 Eylül): soluk metin AA için `#656a80`'e koyulaştırıldı; ikincil gövde tonu `admin-body #3d4257`, eksik işareti `admin-missing #c2410c` eklendi.
 - Kartlar: beyaz, 12px köşe, `1px` çizgi + çok hafif gölge (`0 1px 2px rgb(30 34 53 / .04), 0 4px 12px rgb(30 34 53 / .04)`).
 - Tipografi: Inter, sabit rem ölçeği (12 / 13 / 14 / 16 / 20px); başlıklar 700. Sayılar `tabular-nums`, sayı sütunları sağa hizalı.
 - İndigo yalnız: etkin menü öğesi, seçili satır, birincil düğme, odak halkası, okunmamış rozeti. Ekran başına tek birincil (dolu indigo) düğme.
@@ -70,7 +71,7 @@ Token'lar `globals.css` içinde `.admin` sınıfına bağlı CSS değişkenleri 
   - Etkin öğe `usePathname` ile belirlenir (istemci alt bileşen). `/admin/okullar/*` → Okullar etkin.
   - `lg` altı: menü, üst bardaki hamburgerle soldan açılan çekmece (odak tuzağı, Esc ile kapanır, arka plan kaydırması kilitli).
 - **Üst bar:** "Okul ara ve düzenle…" hızlı arama (`/` kısayolu; Türkçe harf duyarlı eşleşme: `buildTurkishNameRegex` deseni istemcide `new RegExp(desen, "i")` ile kullanılır, ad ve ilçe üzerinde; ok tuşları + Enter düzenleme ekranını açar; `combobox`/`listbox` rolleri), sağda "Siteyi aç" (yeni sekme) ve avatar menüsü (e-posta, Çıkış → mevcut `signOutAdmin`).
-- **Sayfa başlığı kalıbı:** konum satırı ("İçerik / Okullar"), 20px/700 başlık, isteğe bağlı açıklama, sağda eylem yuvası. Eski "← Admin Paneli" bağlantıları kaldırılır.
+- **Sayfa başlığı kalıbı:** (uygulamada: bağlantısız konum satırı kaldırıldı; alt sayfalarda "← Okullar" geri bağlantısı) 20px/700 başlık, isteğe bağlı açıklama, sağda eylem yuvası. Eski "← Admin Paneli" bağlantıları kaldırılır.
 - **Giriş ekranı:** gri zeminde ortalanmış tek kart, "HL" işareti ve "Hedefim Lise · Yönetim", e-posta/şifre, tek indigo "Giriş yap". Action, `next` ve hata kutusu aynen.
 
 ## 4. Veri sağlığı kuralı (`src/lib/school-health.ts`)
@@ -99,7 +100,7 @@ Sabit sırayla sekiz kontrol:
 
 ## 5. Okullar defteri (`/admin`)
 
-- **Özet şeridi:** Yayında, Pasif, Tam kayıt (x/toplam), "{yıl} puanı yok", Okunmamış mesaj. Sayaçlar bağlantıdır: pasif → `?durum=pasif`, puan → `?eksik=puan`, mesaj → `/admin/mesajlar?durum=okunmamis`. Sıfır olan sayaç soluk.
+- **Özet şeridi:** Yayında, Pasif, Eksik kayıt (x/toplam), En büyük eksik (en çok okulda eksik olan kontrol), Okunmamış mesaj. (Bitiş incelemesiyle değişti: ilk sürüm "Tam kayıt" ve sabit "{yıl} puanı yok" sayacıydı.) Sayaçlar bağlantıdır: pasif → `?durum=pasif`, puan → `?eksik=puan`, mesaj → `/admin/mesajlar?durum=okunmamis`. Sıfır olan sayaç soluk.
 - **Filtreler** (URL'de): `ara`, `ilce`, `tur`, `durum` (`aktif`/`pasif`), `eksik` (sekiz koddan biri veya `herhangi`), `sirala` (ad A-Z, ad Z-A, son güncellenen, son eklenen, ilçe, tür, **en çok eksik**). Filtre değişimi `router.replace` ile, kaydırma korunarak. Etkin filtre sayısı ve "Sıfırla".
 - **Tablo:** seçim kutusu, Okul (ad; altında "ilçe · tür"), durum noktası + etiket, sekiz pip (başlıkta kısaltmalar ve açıklama lejantı), Güncel (göreli tarih; `title` içinde tam tarih). Başlık yapışkan; 184 satır tek sayfada. Satır tıklanabilir ve klavyeyle seçilebilir.
 - **Künye paneli** (`?okul=slug`): ad, ilçe · tür, durum; eksikler listesi ve her eksik için ilgili sekmeye **Düzelt →** (`/admin/okullar/{slug}/duzenle?tab=…`); tamam/gerekmez özeti; birincil **Düzenle**; ikincil **Sitede aç** (yalnız aktifken) ve **Pasifleştir/Aktifleştir**; en altta kırmızı metin düğmesi **Okulu sil**. `xl` ve üstünde tablonun sağında sütun; altında sağdan açılan çekmece (Esc, odak yönetimi, kapanınca odak satıra döner).
