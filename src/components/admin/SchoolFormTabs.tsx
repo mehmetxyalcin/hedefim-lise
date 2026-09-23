@@ -194,7 +194,7 @@ export function SchoolFormTabs({
   const current = activeState();
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
       <SchoolTabRail
         tabs={TABS}
         activeTab={activeTab}

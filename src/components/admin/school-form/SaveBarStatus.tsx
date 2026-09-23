@@ -34,5 +34,9 @@ export function SaveBarStatus({ success }: { success: string | null }) {
     );
   }
 
-  return <p className="text-sm text-admin-muted">Kaydettiğinizde sitedeki sayfalar da güncellenir.</p>;
+  return (
+    <p className="hidden text-sm text-admin-muted sm:block">
+      Kaydettiğinizde sitedeki sayfalar da güncellenir.
+    </p>
+  );
 }

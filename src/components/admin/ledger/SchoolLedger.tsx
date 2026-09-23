@@ -96,7 +96,7 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
   }
 
   return (
-    <div className={selected ? "grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start" : undefined}>
+    <div className={selected ? "grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start" : undefined}>
       <div className="min-w-0">
         <LedgerFilters
           key={filters.ara}

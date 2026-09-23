@@ -121,7 +121,7 @@ export default async function AdminMesajlarPage({ searchParams }: PageProps) {
   return (
     <AdminPage>
       <PageHeader title="Mesajlar" description={`${all.length} mesaj · ${unread} okunmamış`} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start">
         <section
           aria-label="Mesaj listesi"
           className={cn(adminCard, "overflow-hidden", selected && "hidden lg:block")}
