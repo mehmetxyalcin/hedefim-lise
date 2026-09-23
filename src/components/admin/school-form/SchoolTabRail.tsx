@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { Lock } from "lucide-react";
 import { missingTabs, type SchoolHealth } from "@/lib/school-health";
 import { cn } from "@/lib/cn";
@@ -16,6 +19,12 @@ type Props = {
 // Sekmeler düz <a href>: UnsavedChangesWarning bağlantı tıklamalarını yakalar.
 export function SchoolTabRail({ tabs, activeTab, hrefFor, health, lockedTabs }: Props) {
   const gaps: Set<string> = health ? missingTabs(health) : new Set();
+  const activeRef = useRef<HTMLAnchorElement>(null);
+
+  // Dar ekranda sekmeler yatay kayar: etkin sekme görünür alana gelsin.
+  useEffect(() => {
+    activeRef.current?.scrollIntoView?.({ block: "nearest", inline: "center" });
+  }, [activeTab]);
 
   return (
     <nav
@@ -65,7 +74,12 @@ export function SchoolTabRail({ tabs, activeTab, hrefFor, health, lockedTabs }: 
                   {body}
                 </span>
               ) : (
-                <a href={hrefFor(tab.id)} aria-current={active ? "page" : undefined} className={cn(classes, adminFocus)}>
+                <a
+                  ref={active ? activeRef : undefined}
+                  href={hrefFor(tab.id)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(classes, adminFocus)}
+                >
                   {body}
                 </a>
               )}

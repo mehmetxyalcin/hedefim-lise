@@ -8,7 +8,7 @@ import { Card } from "@/components/admin/ui/Card";
 import { adminInput } from "@/components/admin/ui/styles";
 import { ConfirmButton } from "@/components/admin/ui/ConfirmButton";
 import { adminButton } from "@/components/admin/ui/Button";
-import { ChevronDown, ChevronUp, Eye, EyeOff, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, Trash2 } from "lucide-react";
 import { Badge } from "@/components/admin/ui/Badge";
 import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
 import { getAdminNavigationItems } from "@/lib/site-settings";
@@ -193,7 +193,7 @@ function ReadRow({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Görünürlük toggle */}
         <form action={toggleNavigationItemVisibility}>
           <input type="hidden" name="id" value={item.id} />
@@ -212,7 +212,8 @@ function ReadRow({
             ) : (
               <Eye aria-hidden="true" className="h-4 w-4" />
             )}
-            {item.is_visible ? "Gizle" : "Göster"}
+            <span className="hidden sm:inline">{item.is_visible ? "Gizle" : "Göster"}</span>
+            <span className="sr-only sm:hidden">{item.is_visible ? "Gizle" : "Göster"}</span>
           </button>
         </form>
 
@@ -256,9 +257,9 @@ function ReadRow({
           <ConfirmButton
             message={`"${item.label}" menü öğesini silmek istediğinize emin misiniz?`}
             aria-label={`${item.label} öğesini sil`}
-            className={adminButton({ variant: "danger", size: "sm" })}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-admin-muted hover:bg-rose-50 hover:text-rose-700 focus-visible:text-rose-700"
           >
-            <X aria-hidden="true" className="h-4 w-4" />
+            <Trash2 aria-hidden="true" className="h-4 w-4" />
           </ConfirmButton>
         </form>
       </div>
@@ -360,7 +361,11 @@ export default async function NavigationPage({ searchParams }: PageProps) {
                 <option value="_blank">Yeni sekme</option>
               </select>
             </label>
-            <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" variant="secondary" />
+            <AdminSubmitButton
+              label="Ekle"
+              pendingLabel="Ekleniyor…"
+              variant={editingId ? "secondary" : "primary"}
+            />
           </form>
         </FormSection>
     </AdminPage>

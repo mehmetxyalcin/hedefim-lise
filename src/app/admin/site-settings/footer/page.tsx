@@ -6,8 +6,7 @@ import { FlashBanner } from "@/components/admin/ui/FlashBanner";
 import { Card } from "@/components/admin/ui/Card";
 import { adminInput } from "@/components/admin/ui/styles";
 import { ConfirmButton } from "@/components/admin/ui/ConfirmButton";
-import { adminButton } from "@/components/admin/ui/Button";
-import { X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
 import {
   getAdminFooterLinks,
@@ -253,9 +252,9 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                             <ConfirmButton
             message={`"${link.label}" bağlantısını silmek istediğinize emin misiniz?`}
                                                             aria-label={`${link.label} linkini sil`}
-                              className={adminButton({ variant: "danger", size: "sm" })}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-admin-muted hover:bg-rose-50 hover:text-rose-700 focus-visible:text-rose-700"
                             >
-                              <X aria-hidden="true" className="h-4 w-4" />
+                              <Trash2 aria-hidden="true" className="h-4 w-4" />
                             </ConfirmButton>
                           </form>
                         </div>
@@ -347,9 +346,9 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                         <ConfirmButton
             message={`${link.platform} bağlantısını silmek istediğinize emin misiniz?`}
                                                     aria-label={`${link.platform} linkini sil`}
-                          className={adminButton({ variant: "danger", size: "sm" })}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-admin-muted hover:bg-rose-50 hover:text-rose-700 focus-visible:text-rose-700"
                         >
-                          <X aria-hidden="true" className="h-4 w-4" />
+                          <Trash2 aria-hidden="true" className="h-4 w-4" />
                         </ConfirmButton>
                       </form>
                     </div>

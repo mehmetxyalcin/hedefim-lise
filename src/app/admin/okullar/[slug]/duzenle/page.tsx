@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ExternalLink } from "lucide-react";
 import { permanentRedirect } from "next/navigation";
 import { SchoolFormTabs } from "@/components/admin/SchoolFormTabs";
@@ -40,6 +41,12 @@ import {
   mapSchoolScholarship,
   mapSchoolProject,
 } from "@/lib/supabase/public";
+
+
+export const metadata: Metadata = {
+  title: "Okulu düzenle | Yönetim",
+  robots: { index: false, follow: false },
+};
 
 type Props = {
   params: Promise<{ slug: string }>;

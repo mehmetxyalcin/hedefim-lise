@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { SchoolFormTabs } from "@/components/admin/SchoolFormTabs";
 import {
   createSchool,
@@ -25,6 +26,12 @@ import { AdminPage } from "@/components/admin/ui/AdminPage";
 import { PageHeader } from "@/components/admin/ui/PageHeader";
 import { FlashBanner } from "@/components/admin/ui/FlashBanner";
 import { mapVocationalField, mapFacility, mapVocationalBranch } from "@/lib/supabase/public";
+
+
+export const metadata: Metadata = {
+  title: "Yeni okul | Yönetim",
+  robots: { index: false, follow: false },
+};
 
 type Props = {
   searchParams?: Promise<{ error?: string; success?: string }>;

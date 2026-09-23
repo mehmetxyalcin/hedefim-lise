@@ -94,11 +94,11 @@ export default async function AdminFaqPage({ searchParams }: PageProps) {
       />
       <FlashBanner success={params?.success} error={params?.error} />
 
-      <details className={cn(adminCard, "group mb-6")}>
+      <details className="group mb-6 open:rounded-xl open:border open:border-admin-line open:bg-white open:shadow-admin-card">
         <summary
           className={cn(
             adminButton({ variant: "primary" }),
-            "m-4 w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden",
+            "w-fit cursor-pointer list-none group-open:m-4 [&::-webkit-details-marker]:hidden",
           )}
         >
           <Plus aria-hidden="true" className="h-4 w-4" />
