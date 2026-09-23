@@ -69,9 +69,9 @@ export function LedgerSummary({ data }: { data: LedgerSummaryData }) {
       {data.topGap && (
         <Stat
           href={`/admin?eksik=${data.topGap.id}`}
-          label={`En büyük eksik: ${data.topGap.label.toLocaleLowerCase("tr-TR")}`}
+          label="En büyük eksik"
           value={data.topGap.count}
-          suffix="okul"
+          suffix={`okul · ${data.topGap.label.toLocaleLowerCase("tr-TR")}`}
           attention
         />
       )}

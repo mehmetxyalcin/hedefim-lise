@@ -51,7 +51,7 @@ export function HealthCodes({ id }: { id: HealthCheckId }) {
 
 export function HealthLegend() {
   return (
-    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-admin-muted">
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-admin-muted">
       <span className="inline-flex items-center gap-1.5">
         <Pip status="ok" size="sm" />
         tamam
@@ -64,8 +64,9 @@ export function HealthLegend() {
         <Pip status="na" size="sm" />
         gerekmez
       </span>
+      {/* Kod açıklamaları yalnız kod başlıklarının göründüğü genişlikte. */}
       {HEALTH_CHECKS.map((check) => (
-        <span key={check.id} className="inline-flex items-center gap-1">
+        <span key={check.id} className="hidden items-center gap-1 md:inline-flex">
           <span className="inline-flex w-3 justify-center font-semibold text-admin-body">
             <HealthCodes id={check.id} />
           </span>
