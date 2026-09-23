@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 import { adminInput } from "@/components/admin/ui/styles";
+import { MULTI_PROGRAM_TYPE, PROGRAM_LABELS, SCHOOL_PROGRAMS, type SchoolProgram } from "@/lib/school-programs";
 
 type SmartSchoolBasicFieldsProps = {
   initialColor?: string;
@@ -13,6 +14,7 @@ type SmartSchoolBasicFieldsProps = {
   initialName?: string;
   initialSlug?: string;
   initialType?: string;
+  initialPrograms?: SchoolProgram[];
 };
 
 const inputClassName = adminInput;
@@ -61,6 +63,7 @@ export function SmartSchoolBasicFields({
   initialName = "",
   initialSlug = "",
   initialType = "",
+  initialPrograms = [],
 }: SmartSchoolBasicFieldsProps) {
   const [name, setName] = useState(initialName);
   const [slug, setSlug] = useState(initialSlug);
@@ -194,6 +197,29 @@ export function SmartSchoolBasicFields({
           </span>
         )}
       </label>
+
+      {type === MULTI_PROGRAM_TYPE && (
+        <fieldset className="block md:col-span-2">
+          <legend className="mb-2 block text-sm font-semibold text-admin-body">Programlar</legend>
+          <div className="flex flex-wrap gap-4">
+            {SCHOOL_PROGRAMS.map((program) => (
+              <label key={program} className="inline-flex items-center gap-2 text-sm text-admin-body">
+                <input
+                  type="checkbox"
+                  name="programs"
+                  value={program}
+                  defaultChecked={initialPrograms.includes(program)}
+                  className="h-4 w-4 rounded border-admin-line-strong"
+                />
+                {program === "meslek" ? "Anadolu Meslek Programı" : PROGRAM_LABELS[program]}
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-admin-muted">
+            Okul, işaretlenen programın tür filtresinde de listelenir.
+          </p>
+        </fieldset>
+      )}
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-admin-body">İlçe</span>

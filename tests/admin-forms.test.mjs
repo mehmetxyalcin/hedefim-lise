@@ -65,8 +65,24 @@ test('invalid requests reach no database or storage calls through real school ac
 });
 test('school score verifies selected field belongs to that school before insertion', async () => {
   const {calls,api}=actions('src/app/admin/okullar/actions.ts');
-  await assert.rejects(api.upsertSchoolScore(form({school_id:'1',year:'2025',vocational_field_id:'2',obp_score:'80'})),/bu okula bağlı değil/);
+  await assert.rejects(api.upsertSchoolScore(form({school_id:'1',year:'2025',scope:'field:2',obp_score:'80'})),/bu okula bağlı değil/);
   assert.equal(calls.some(c=>c[0]==='insert'),false);
+});
+test('program score requires the school to offer that program and rejects unknown scopes', async () => {
+  const {calls,api}=actions('src/app/admin/okullar/actions.ts',()=>({data:{programs:['anadolu_lisesi']},error:null}));
+  await assert.rejects(api.upsertSchoolScore(form({school_id:'1',year:'2026',scope:'program:meslek',obp_score:'52'})),/tanımlı değil/);
+  await assert.rejects(api.upsertSchoolScore(form({school_id:'1',year:'2026',scope:'program:fen',obp_score:'52'})),/REDIRECT:/);
+  assert.equal(calls.some(c=>c[0]==='insert'),false);
+});
+test('program score writes the program and no field', async () => {
+  const {calls,api}=actions('src/app/admin/okullar/actions.ts',calls=>({data:calls.some(c=>c[0]==='insert')?{slug:'ornek'}:{programs:['anadolu_lisesi','meslek'],slug:'ornek'},error:null}));
+  await assert.rejects(api.upsertSchoolScore(form({school_id:'1',year:'2026',scope:'program:meslek',obp_score:'52'})),/REDIRECT:.*success=/);
+  const insert=calls.find(c=>c[0]==='insert')[1];
+  assert.equal(insert.program,'meslek');assert.equal(insert.vocational_field_id,null);
+});
+test('school form keeps programs only for multi-program schools', () => {
+  assert.equal(validate(form({...validBasic,programs:['anadolu_lisesi','meslek']}),school.createSchool),null);
+  assert.ok(validate(form({...validBasic,programs:['fen']}),school.createSchool));
 });
 test('valid contact saves preserve blank optional values and report success only after write', async () => {
   const {calls,api}=actions('src/app/admin/okullar/actions.ts',()=>({data:{id:1,slug:'ornek'},error:null}));

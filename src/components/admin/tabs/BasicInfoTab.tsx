@@ -24,6 +24,7 @@ export function BasicInfoTab({ school }: Props) {
           initialName={school?.name}
           initialSlug={school?.slug}
           initialType={school?.type}
+          initialPrograms={school?.programs}
         />
       </section>
 

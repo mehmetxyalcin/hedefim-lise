@@ -1,5 +1,6 @@
 import { DISTRICTS } from '@/data/districts';
 import { SCHOOL_TYPES } from '@/data/schoolTypes';
+import { SCHOOL_PROGRAMS } from '@/lib/school-programs';
 
 export type FieldRule = {
   label: string;
@@ -32,6 +33,7 @@ const basic: FormRules = {
   placement_type: choice('Yerleştirme türü', ['yerel', 'merkezi', 'yerel_merkezi']),
   education_type: choice('Eğitim şekli', ['normal', 'ikili']),
   boarding_type: choice('Pansiyon', ['yok', 'kiz', 'erkek', 'kiz_erkek']),
+  programs: { ...choice('Program', SCHOOL_PROGRAMS), multiple: true },
   school_hours_start: { label: 'Başlangıç saati', kind: 'time' },
   school_hours_end: { label: 'Bitiş saati', kind: 'time' },
   school_hours_note: text('Saat açıklaması'), features: text('Özellikler'), languages: text('Diller'),
@@ -51,7 +53,7 @@ export const schoolFormRules: Record<string, FormRules> = {
   bulkUpdateSchoolStatus: { ids: { ...integer('Okul'), multiple: true }, is_active: choice('Yayın durumu', ['true', 'false'], true) },
   updateSchoolContact: { ...schoolId, ...contact },
   updateSchoolOtherInfo: { ...schoolId, other_info: text('Diğer bilgiler') },
-  upsertSchoolScore: { ...schoolId, year: integer('Yıl', true, 2000, 2100), id: uuid('Puan kaydı', false), vocational_field_id: integer('Meslek alanı', false), obp_score: number('OBP', 100), lgs_score: number('LGS', 500), percentile: number('Yüzdelik', 100) },
+  upsertSchoolScore: { ...schoolId, year: integer('Yıl', true, 2000, 2100), id: uuid('Puan kaydı', false), scope: text('Puan kapsamı', false, 100), obp_score: number('OBP', 100), lgs_score: number('LGS', 500), percentile: number('Yüzdelik', 100) },
   deleteSchoolScore: child,
   upsertSchoolQuota: { ...schoolId, year: integer('Yıl', true, 2000, 2100), id: uuid('Kontenjan kaydı', false), sinavli_count: integer('Sınavlı kontenjan', false, 0, 100000), sinavsiz_count: integer('Sınavsız kontenjan', false, 0, 100000) },
   deleteSchoolQuota: child,

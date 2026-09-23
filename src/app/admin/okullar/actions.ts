@@ -6,6 +6,7 @@ import { validateAdminForm, schoolFormRules } from "@/lib/admin-form-validation"
 import { requireAdmin } from "@/lib/admin-auth";
 import { safeAdminReturn, withFlash } from "@/lib/admin-return";
 import { parseImportNumber } from "@/lib/import-validation";
+import { parseScoreScope, programsForSave } from "@/lib/school-programs";
 
 export type ActionResult = { success: boolean; message: string };
 
@@ -244,6 +245,7 @@ export async function createSchool(_prevState: unknown, formData: FormData): Pro
     projects: toArray(formData.get("projects")),
     languages: toArray(formData.get("languages")),
     is_active: toBoolean(formData.get("is_active")),
+    programs: programsForSave(type, formData.getAll("programs")),
     placement_type: String(formData.get("placement_type") ?? "yerel"),
     education_type: String(formData.get("education_type") ?? "normal"),
     boarding_type: String(formData.get("boarding_type") ?? "yok"),
@@ -342,6 +344,7 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
     features: toArray(formData.get("features")),
     languages: toArray(formData.get("languages")),
     is_active: toBoolean(formData.get("is_active")),
+    programs: programsForSave(type, formData.getAll("programs")),
     placement_type: String(formData.get("placement_type") ?? "yerel"),
     education_type: String(formData.get("education_type") ?? "normal"),
     boarding_type: String(formData.get("boarding_type") ?? "yok"),
@@ -632,8 +635,9 @@ export async function upsertSchoolScore(formData: FormData) {
   if (!Number.isInteger(schoolId) || schoolId <= 0 || !Number.isInteger(year) || year < 2000 || year > 2100) redirect("/admin");
 
   const id = String(formData.get("id") ?? "").trim() || null;
-  const rawFieldId = String(formData.get("vocational_field_id") ?? "").trim();
-  const vocationalFieldId = rawFieldId ? Number(rawFieldId) : null;
+  const scope = parseScoreScope(String(formData.get("scope") ?? "").trim());
+  if (!scope) redirect(`/admin?error=${encodeURIComponent("Puan kapsamı geçersiz; sayfayı yenileyip tekrar deneyin.")}`);
+  const vocationalFieldId = scope.fieldId;
 
   const toOptionalNumeric = (key: string) => {
     const value = parseImportNumber(formData.get(key), key === "lgs_score" ? 500 : 100);
@@ -645,6 +649,7 @@ export async function upsertSchoolScore(formData: FormData) {
     school_id: schoolId,
     year,
     vocational_field_id: vocationalFieldId,
+    program: scope.program,
     obp_score: toOptionalNumeric("obp_score"),
     lgs_score: toOptionalNumeric("lgs_score"),
     percentile: toOptionalNumeric("percentile"),
@@ -658,6 +663,14 @@ export async function upsertSchoolScore(formData: FormData) {
       .select("vocational_field_id").eq("school_id", schoolId)
       .eq("vocational_field_id", vocationalFieldId).maybeSingle();
     if (fieldError || !field) redirect(`/admin?error=${encodeURIComponent("Seçilen meslek alanı bu okula bağlı değil veya doğrulanamadı. Meslek alanlarını kontrol edin.")}`);
+  }
+  if (scope.program !== null) {
+    const { data: schoolRow, error: programError } = await supabase.from("schools")
+      .select("programs").eq("id", schoolId).maybeSingle();
+    const programs = (schoolRow?.programs ?? []) as string[];
+    if (programError || !programs.includes(scope.program)) {
+      redirect(`/admin?error=${encodeURIComponent("Seçilen program bu okula tanımlı değil. Önce Temel bilgiler sekmesinde programı işaretleyin.")}`);
+    }
   }
 
   let error;

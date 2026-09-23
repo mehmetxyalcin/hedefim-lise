@@ -246,6 +246,7 @@ export function SchoolFormTabs({
             scores={scores}
             quotas={quotas}
             schoolVocationalFields={schoolVocationalFields}
+            schoolPrograms={school.programs ?? []}
             upsertScore={upsertScore}
             upsertQuota={upsertQuota}
             deleteScore={deleteScore}

@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
 import type { SchoolScore, SchoolQuota } from "@/types/schoolDetail";
 import { adminInput } from "@/components/admin/ui/styles";
+import { PROGRAM_LABELS, scoreScopeValue, type SchoolProgram } from "@/lib/school-programs";
 
 const inputCls = adminInput;
 
@@ -15,14 +16,15 @@ type Props = {
   scores: SchoolScore[];
   quotas: SchoolQuota[];
   schoolVocationalFields: VocationalFieldOption[];
+  schoolPrograms: SchoolProgram[];
   upsertScore: (formData: FormData) => void | Promise<void>;
   upsertQuota: (formData: FormData) => void | Promise<void>;
   deleteScore: (formData: FormData) => void | Promise<void>;
   deleteQuota: (formData: FormData) => void | Promise<void>;
 };
 
-// Puanlar 2025/2024/2023 olarak kalır; sadece kontenjan yıl aralığı değişir.
-const YEARS = [2025, 2024, 2023];
+// 2026'dan geriye dört puan yılı; kontenjan üç yıl.
+const YEARS = [2026, 2025, 2024, 2023];
 const QUOTA_YEARS = [2026, 2025, 2024];
 
 export function ScoresTab({
@@ -30,6 +32,7 @@ export function ScoresTab({
   scores,
   quotas,
   schoolVocationalFields,
+  schoolPrograms,
   upsertScore,
   upsertQuota,
   deleteScore,
@@ -46,8 +49,8 @@ export function ScoresTab({
     return quotas.find((q) => q.year === year);
   }
 
-  function usedFieldIdsForYear(year: number): Set<number | null> {
-    return new Set(scoresForYear(year).map((s) => s.vocationalFieldId));
+  function usedScopesForYear(year: number): Set<string> {
+    return new Set(scoresForYear(year).map((s) => scoreScopeValue(s.vocationalFieldId, s.program)));
   }
 
   return (
@@ -64,12 +67,15 @@ export function ScoresTab({
         <div className="space-y-4">
           {YEARS.map((year) => {
             const yearScores = scoresForYear(year);
-            const usedFieldIds = usedFieldIdsForYear(year);
+            const usedScopes = usedScopesForYear(year);
             const isAddingNew = editingScoreId === `new-${year}`;
             const availableFields = schoolVocationalFields.filter(
-              (f) => !usedFieldIds.has(f.id),
+              (f) => !usedScopes.has(scoreScopeValue(f.id, null)),
             );
-            const canAddSchoolWide = !usedFieldIds.has(null);
+            const availablePrograms = schoolPrograms.filter(
+              (p) => !usedScopes.has(scoreScopeValue(null, p)),
+            );
+            const canAddSchoolWide = !usedScopes.has("");
 
             return (
               <div
@@ -96,6 +102,7 @@ export function ScoresTab({
                     {yearScores.map((score) => {
                       const isEditingThis = editingScoreId === score.id;
                       const fieldName =
+                        (score.program ? `${PROGRAM_LABELS[score.program]} programı` : null) ??
                         score.vocationalField?.name ??
                         (score.vocationalFieldId !== null
                           ? schoolVocationalFields.find((f) => f.id === score.vocationalFieldId)
@@ -182,13 +189,13 @@ export function ScoresTab({
                               <input type="hidden" name="id" value={score.id} />
                               <input
                                 type="hidden"
-                                name="vocational_field_id"
-                                value={score.vocationalFieldId ?? ""}
+                                name="scope"
+                                value={scoreScopeValue(score.vocationalFieldId, score.program)}
                               />
 
                               <div>
                                 <span className="mb-1 block text-xs font-semibold text-admin-body">
-                                  Meslek alanı
+                                  Kapsam
                                 </span>
                                 <p className="rounded-xl border border-admin-line bg-admin-ground px-3 py-2 text-sm text-admin-body">
                                   {fieldName ?? "Okul geneli"}
@@ -275,19 +282,24 @@ export function ScoresTab({
 
                     <label className="block">
                       <span className="mb-1 block text-xs font-semibold text-admin-body">
-                        Meslek alanı
+                        Kapsam
                       </span>
-                      <select name="vocational_field_id" className={inputCls}>
+                      <select name="scope" className={inputCls}>
                         {canAddSchoolWide && <option value="">Okul geneli</option>}
+                        {availablePrograms.map((p) => (
+                          <option key={p} value={scoreScopeValue(null, p)}>
+                            {PROGRAM_LABELS[p]} programı
+                          </option>
+                        ))}
                         {availableFields.map((f) => (
-                          <option key={f.id} value={f.id}>
+                          <option key={f.id} value={scoreScopeValue(f.id, null)}>
                             {f.title}
                           </option>
                         ))}
                       </select>
-                      {!canAddSchoolWide && availableFields.length === 0 && (
+                      {!canAddSchoolWide && availableFields.length === 0 && availablePrograms.length === 0 && (
                         <p className="mt-1 text-xs text-amber-600">
-                          Bu yıl için tüm alanların puanı girilmiş.
+                          Bu yıl için tüm kapsamların puanı girilmiş.
                         </p>
                       )}
                     </label>

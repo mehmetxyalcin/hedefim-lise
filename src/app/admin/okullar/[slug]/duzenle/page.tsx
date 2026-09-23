@@ -128,7 +128,7 @@ export default async function AdminEditSchoolPage({ params, searchParams }: Prop
   {
     const { data: scoresWithField, error: scoresErr } = await supabase
       .from("school_scores")
-      .select("id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id")
+      .select("id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id, program")
       .eq("school_id", sd.id);
     if (!scoresErr) {
       scoresRaw = scoresWithField ?? [];
