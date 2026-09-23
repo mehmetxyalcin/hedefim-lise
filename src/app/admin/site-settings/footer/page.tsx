@@ -228,6 +228,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                         <AdminSubmitButton
                           label="Başlığı kaydet"
                           pendingLabel="Kaydediliyor…"
+                          variant="secondary"
                         />
                       </form>
                     ) : (
@@ -313,7 +314,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                       />
                     </label>
                   </div>
-                  <AdminSubmitButton label="Bağlantı ekle" pendingLabel="Ekleniyor…" />
+                  <AdminSubmitButton label="Bağlantı ekle" pendingLabel="Ekleniyor…" variant="secondary" />
                 </form>
               </div>
             </div>
@@ -392,7 +393,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                       />
                     </label>
                   </div>
-                  <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
+                  <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" variant="secondary" />
                 </form>
               </div>
             </div>

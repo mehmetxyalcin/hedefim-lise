@@ -384,9 +384,9 @@ export function VocationalUploadWizard() {
 
           <div className="mb-6 space-y-3">
             {uploadResult.updated > 0 && (
-              <div className="flex items-center gap-3 rounded-xl border border-admin-accent-soft bg-admin-tint px-4 py-3">
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-admin-accent" />
-                <span className="text-sm font-medium text-admin-accent-deep">
+              <div className="flex items-center gap-3 rounded-xl border border-admin-line bg-admin-ground px-4 py-3">
+                <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-emerald-600" />
+                <span className="text-sm font-medium text-admin-body">
                   {uploadResult.updated} okulun meslek alanları güncellendi
                 </span>
               </div>

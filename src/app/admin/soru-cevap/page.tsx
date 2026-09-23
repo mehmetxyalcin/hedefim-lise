@@ -256,7 +256,7 @@ export default async function AdminFaqPage({ searchParams }: PageProps) {
                           <input name="is_published" type="checkbox" defaultChecked={faq.isPublished} className="h-4 w-4" />
                           Yayında
                         </label>
-                        <AdminSubmitButton label="Değişiklikleri kaydet" />
+                        <AdminSubmitButton label="Değişiklikleri kaydet" variant="secondary" />
                       </div>
                     </form>
 

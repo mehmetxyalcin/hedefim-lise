@@ -360,7 +360,7 @@ export default async function NavigationPage({ searchParams }: PageProps) {
                 <option value="_blank">Yeni sekme</option>
               </select>
             </label>
-            <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" />
+            <AdminSubmitButton label="Ekle" pendingLabel="Ekleniyor…" variant="secondary" />
           </form>
         </FormSection>
     </AdminPage>
