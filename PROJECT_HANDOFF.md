@@ -311,3 +311,12 @@ Tasarım: `docs/superpowers/specs/2026-09-23-admin-panel-redesign-design.md`; pl
 - Aktif/pasif ve silme sonrası dönüş: `toggleSchoolStatus`, `bulkUpdateSchoolStatus` ve `deleteSchool` formdaki `return_to` alanını `src/lib/admin-return.ts` ile doğrular (yalnız `/admin?…`; başka adres `/admin`'e düşer) ve bildirimi o adrese ekler. Defter filtreleri ve açık künye paneli korunur; silmede `okul` parametresi atılır. `return_to` yoksa davranış eskisi gibidir.
 - Yetki, RLS ve veritabanı değişmedi; server action'larda yalnız yukarıdaki üç action'ın dönüş adresi değişti. 63 test (yeni: `school-health`, `admin-ledger`, `admin-ledger-view`, `admin-return` ve dönüş adresi action testleri), lint 0, üretim derlemesi başarılı. Ekranlar önce oturumsuz, anonim verili geçici bir rotada (commit edilmedi, silindi), sonra kullanıcının kendi girişiyle oturumlu olarak masaüstü/mobil gezildi; `.impeccable/review/`. Canlı veriye yazan işlem (kaydet, sil, aktif/pasif) denenmedi.
 
+## 24. Çok programlı liselerde program bazında puan — 23 Eylül 2026
+
+Tasarım: `docs/superpowers/specs/2026-09-23-cok-programli-lise-programlari-design.md`; plan: `docs/superpowers/plans/2026-09-23-cok-programli-lise-programlari.md`.
+
+- 2026 OBP (okul geneli) 106 okul için yüklendi (kaynak `okul_yerlestirme_puanlari_2026.xlsx`; Excel "Okul kodu" sistem kurum koduyla uyuşmadığından eşleme ilçe + ad ile yapıldı). Son yıl 2026 olduğu için 2026 yüzdelikleri yüklenene kadar merkezi değerler listede görünmez.
+- `schools.programs` ve `school_scores.program` (017). 9 ÇPAL'ın 2026 OBP'leri program satırlarına bölündü (018). Tarsus Adalet ÇPAL'ın programları yönetimden seçilmeli.
+- Kural `src/lib/school-programs.ts` + `school-scores.ts`; `/okullar` tür filtresi ÇPAL'ları programına göre kapsar; kart iki program satırı; detay tablosunda program satırları.
+- Yönetim: okul formunda Programlar, puan sekmesinde 2026 ve Kapsam seçimi, toplu yüklemede Program ve 2026 sütunları.
+
