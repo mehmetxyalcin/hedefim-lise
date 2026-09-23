@@ -1,3 +1,5 @@
+import type { SchoolProgram } from "@/lib/school-programs";
+
 export type Facility = {
   id: string;
   name: string;
@@ -27,6 +29,7 @@ export type SchoolScore = {
   lgsScore: number | null;
   percentile: number | null;
   vocationalFieldId: number | null;
+  program: SchoolProgram | null;
   vocationalField?: { id: number; name: string } | null;
 };
 

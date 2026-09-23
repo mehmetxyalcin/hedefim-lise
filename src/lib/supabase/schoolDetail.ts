@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isSchoolProgram } from "@/lib/school-programs";
 import type {
   SchoolWithDetails,
   Facility,
@@ -97,6 +98,7 @@ function mapRawToSchoolWithDetails(row: any): SchoolWithDetails {
       lgsScore: (s.lgs_score as number | null) ?? null,
       percentile: (s.percentile as number | null) ?? null,
       vocationalFieldId: (s.vocational_field_id as number | null) ?? null,
+      program: isSchoolProgram(s.program) ? s.program : null,
       vocationalField: s.vocational_field
         ? { id: s.vocational_field.id as number, name: s.vocational_field.title as string }
         : null,

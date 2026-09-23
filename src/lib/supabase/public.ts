@@ -1,5 +1,6 @@
 import type { School, SchoolScoreRaw } from "@/types/school";
 import type { VocationalField } from "@/types/vocationalField";
+import { isSchoolProgram } from "@/lib/school-programs";
 import type {
   Facility,
   SchoolProject,
@@ -49,6 +50,7 @@ type SchoolRow = {
   }>;
   school_scores?: SchoolScoreRow[] | null;
   institution_code?: string | null;
+  programs?: string[] | null;
 };
 
 type VocationalFieldRow = {
@@ -86,6 +88,7 @@ type SchoolScoreRow = {
   lgs_score: number | null;
   percentile: number | null;
   vocational_field_id?: number | null;
+  program?: string | null;
 };
 
 type SchoolQuotaRow = {
@@ -176,9 +179,11 @@ export function mapSchool(row: SchoolRow): School {
         lgs_score: s.lgs_score,
         percentile: s.percentile,
         vocational_field_id: s.vocational_field_id ?? null,
+        program: isSchoolProgram(s.program) ? s.program : null,
       }),
     ),
     institutionCode: row.institution_code ?? null,
+    programs: (row.programs ?? []).filter(isSchoolProgram),
   };
 }
 
@@ -208,6 +213,7 @@ export function mapSchoolScore(row: SchoolScoreRow): SchoolScore {
     lgsScore: row.lgs_score,
     percentile: row.percentile,
     vocationalFieldId: row.vocational_field_id ?? null,
+    program: isSchoolProgram(row.program) ? row.program : null,
   };
 }
 

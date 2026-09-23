@@ -20,10 +20,11 @@ import {
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
 import type { School } from "@/types/school";
-import type { Placement, PlacementValues } from "@/lib/school-scores";
+import type { Placement, PlacementValues, ProgramOBPs } from "@/lib/school-scores";
 import type { VocationalField } from "@/types/vocationalField";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Badge } from "@/components/ui/Badge";
+import { PROGRAM_LABELS } from "@/lib/school-programs";
 
 const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -39,6 +40,8 @@ type Props = {
   scoreYear: number | null;
   /** Okul ID → ortak kuralla hesaplanmış değerler (lib/school-scores). */
   scoreValues: Record<number, PlacementValues>;
+  /** Okul ID → ÇPAL program bazlı OBP'ler (lib/school-scores). */
+  programValues?: Record<number, ProgramOBPs>;
   vocationalFields: VocationalField[];
   totalCount: number;
   startItem: number;
@@ -62,16 +65,31 @@ type Props = {
 const formatScore = (v: number) =>
   v.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-function ScoreBox({ values, placement, year }: { values: PlacementValues | undefined; placement: Placement | null; year: number | null }) {
+function ScoreBox({ values, programs, placement, year }: { values: PlacementValues | undefined; programs: ProgramOBPs | undefined; placement: Placement | null; year: number | null }) {
   const merkezi = values?.merkezi ?? null;
   const yerel = values?.yerel ?? null;
-  const single =
-    placement === "merkezi" ? (merkezi != null ? { label: "Yüzdelik Dilim", value: `%${formatScore(merkezi)}` } : null)
+  const al = programs?.anadolu_lisesi ?? null;
+  const mp = programs?.meslek ?? null;
+  // İki programlı ÇPAL: tür filtresi yoksa ve merkezi gösterilmiyorsa iki OBP satırı.
+  const programRows =
+    al != null && mp != null && placement !== "merkezi" && (placement === "yerel" || merkezi == null)
+      ? [
+          { label: PROGRAM_LABELS.anadolu_lisesi, value: formatScore(al) },
+          { label: PROGRAM_LABELS.meslek, value: formatScore(mp) },
+        ]
+      : null;
+  const single = programRows ? null
+    : placement === "merkezi" ? (merkezi != null ? { label: "Yüzdelik Dilim", value: `%${formatScore(merkezi)}` } : null)
     : placement === "yerel" ? (yerel != null ? { label: "OBP Puanı", value: formatScore(yerel) } : null)
     : merkezi != null && yerel == null ? { label: "Yüzdelik Dilim", value: `%${formatScore(merkezi)}` }
     : yerel != null && merkezi == null ? { label: "OBP Puanı", value: formatScore(yerel) }
     : null;
-  const both = placement === null && merkezi != null && yerel != null;
+  const rows = programRows ?? (placement === null && merkezi != null && yerel != null
+    ? [
+        { label: "Merkezi", value: `%${formatScore(merkezi)}` },
+        { label: "Yerel OBP", value: formatScore(yerel) },
+      ]
+    : null);
 
   return (
     <div className="relative mb-4 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/40">
@@ -80,21 +98,19 @@ function ScoreBox({ values, placement, year }: { values: PlacementValues | undef
           <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">{single.label}</span>
           <span className="text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{single.value}</span>
         </>
-      ) : both ? (
+      ) : rows ? (
         <dl className="w-full space-y-1.5">
-          <div className="flex items-baseline justify-between gap-2">
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Merkezi</dt>
-            <dd className="text-lg font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">%{formatScore(merkezi)}</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Yerel OBP</dt>
-            <dd className="text-lg font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{formatScore(yerel)}</dd>
-          </div>
+          {rows.map((row) => (
+            <div key={row.label} className="flex items-baseline justify-between gap-2">
+              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{row.label}</dt>
+              <dd className="text-lg font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{row.value}</dd>
+            </div>
+          ))}
         </dl>
       ) : (
         <span className="text-xs text-slate-400">Veri yok</span>
       )}
-      {(single || both) && year != null && <span className="mt-1 text-[10px] text-slate-400">{year}</span>}
+      {(single || rows) && year != null && <span className="mt-1 text-[10px] text-slate-400">{year}</span>}
     </div>
   );
 }
@@ -112,6 +128,7 @@ export function SchoolList({
   activePlacement,
   scoreYear,
   scoreValues,
+  programValues = {},
   vocationalFields,
   totalCount,
   startItem,
@@ -520,7 +537,7 @@ export function SchoolList({
                 </div>
 
                 <div className="relative flex shrink-0 flex-col justify-between border-t border-slate-100 pt-5 sm:w-48 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
-                  <ScoreBox values={scoreValues[school.id]} placement={activePlacement} year={scoreYear} />
+                  <ScoreBox values={scoreValues[school.id]} programs={programValues[school.id]} placement={activePlacement} year={scoreYear} />
                   <Link
                     href={`/okullar/${school.slug}`}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-blue-600/40"

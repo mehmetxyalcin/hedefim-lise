@@ -4,12 +4,15 @@ import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
 import { SchoolList } from "@/components/schools/SchoolList";
+import { programForType, typeFilterExpression } from "@/lib/school-programs";
 import {
   compareByScore,
   parsePlacement,
   placementValues,
+  programOBPs,
   valuesBySchool,
   type PlacementValues,
+  type ProgramOBPs,
   type ScoreSort,
 } from "@/lib/school-scores";
 import { Pagination } from "@/components/schools/Pagination";
@@ -66,6 +69,8 @@ export default async function OkullarPage({ searchParams }: Props) {
   const ara = (params.ara ?? "").trim();
   const ilce = params.ilce ?? "";
   const tur = params.tur ?? "";
+  // "Anadolu Lisesi" / "Anadolu Meslek Programı" seçiliyse ÇPAL'larda o programın OBP'si kullanılır.
+  const program = programForType(tur);
   const alan = (params.alan ?? "").trim(); // vocational field ID
   const fieldId = /^\d+$/.test(alan) ? Number(alan) : null;
   const yerlestirme = parsePlacement(params.yerlestirme);
@@ -120,12 +125,13 @@ export default async function OkullarPage({ searchParams }: Props) {
   if (needsScores && scoreYear != null) {
     const { data: rawScoreRows } = await supabase
       .from("school_scores")
-      .select("school_id, year, percentile, obp_score, vocational_field_id")
+      .select("school_id, year, percentile, obp_score, vocational_field_id, program")
       .eq("year", scoreYear);
     schoolValues = valuesBySchool(
       (rawScoreRows ?? []) as Parameters<typeof valuesBySchool>[0],
       scoreYear,
       fieldId,
+      program,
     );
   }
 
@@ -161,7 +167,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   }
 
   const SCHOOLS_SELECT =
-    "*, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id), school_vocational_fields(vocational_field_id)";
+    "*, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id, program), school_vocational_fields(vocational_field_id)";
 
   // Filtre burada son halini alır; sorgu yardımcısı yalnız bu sabiti okur.
   const idFilter = schoolIdFilter;
@@ -171,7 +177,10 @@ export default async function OkullarPage({ searchParams }: Props) {
   const applyFilters = (q: any): any => {
     if (ara) q = q.regexIMatch("name", buildTurkishNameRegex(ara));
     if (ilce) q = q.eq("district", ilce);
-    if (tur) q = q.eq("type", tur);
+    if (tur) {
+      const expression = typeFilterExpression(tur);
+      q = expression ? q.or(expression) : q.eq("type", tur);
+    }
     if (idFilter !== null) {
       q = q.in("id", idFilter.length > 0 ? idFilter : [-1]);
     }
@@ -257,8 +266,10 @@ export default async function OkullarPage({ searchParams }: Props) {
 
   const vocationalFields = (fieldsResult.data ?? []).map(mapVocationalField);
   const scoreValues: Record<number, PlacementValues> = {};
+  const programValues: Record<number, ProgramOBPs> = {};
   for (const school of schools) {
-    scoreValues[school.id] = placementValues(school.scores ?? [], scoreYear, fieldId);
+    scoreValues[school.id] = placementValues(school.scores ?? [], scoreYear, fieldId, program);
+    if (program == null) programValues[school.id] = programOBPs(school.scores ?? [], scoreYear);
   }
   const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
   const currentPage = Math.min(sayfa, totalPages);
@@ -357,6 +368,7 @@ export default async function OkullarPage({ searchParams }: Props) {
           activePlacement={yerlestirme}
           scoreYear={scoreYear}
           scoreValues={scoreValues}
+          programValues={programValues}
           initialLimit={limit}
           initialSiralama={siralama}
         />

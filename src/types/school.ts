@@ -1,3 +1,5 @@
+import type { SchoolProgram } from "@/lib/school-programs";
+
 export type SchoolScoreRaw = {
   id: string;
   school_id: number;
@@ -6,6 +8,7 @@ export type SchoolScoreRaw = {
   lgs_score: number | null;
   percentile: number | null;
   vocational_field_id?: number | null;
+  program?: SchoolProgram | null;
 };
 
 export type School = {
@@ -40,4 +43,5 @@ export type School = {
   otherInfo?: string | null;
   scores?: SchoolScoreRaw[];
   institutionCode?: string | null;
+  programs?: SchoolProgram[];
 };
