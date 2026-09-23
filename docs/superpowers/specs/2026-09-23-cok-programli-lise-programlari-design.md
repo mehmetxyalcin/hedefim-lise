@@ -20,7 +20,7 @@ Bugünkü tutarsızlıklar:
 
 ## 1. Veri modeli ve taşıma
 
-Tek migration.
+İki migration: `017_school_programs.sql` şema ve içe aktarma fonksiyonu (testlerde de yüklenir), `018_cpal_2026_program_scores.sql` canlıya özel veri taşıma (okul ID'lerine bağlı).
 
 **Şema**
 
