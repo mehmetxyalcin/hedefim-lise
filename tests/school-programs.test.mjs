@@ -11,7 +11,7 @@ const eq = (a, b) => assert.deepEqual(JSON.parse(JSON.stringify(a)), b);
 test('type maps to a program only for Anadolu Lisesi and Anadolu Meslek Programı', () => {
   assert.equal(programForType('Anadolu Lisesi'), 'anadolu_lisesi');
   assert.equal(programForType('Anadolu Meslek Programı'), 'meslek');
-  for (const t of ['Fen Lisesi', 'Çok Programlı Anadolu Lisesi', 'Anadolu Meslek ve Teknik Programı', '']) assert.equal(programForType(t), null);
+  for (const t of ['Fen Lisesi', 'Çok Programlı Anadolu Lisesi', 'Anadolu Meslek ve Teknik Programı', '', 'constructor', 'toString', '__proto__']) assert.equal(programForType(t), null);
   assert.equal(isSchoolProgram('meslek'), true);
   assert.equal(isSchoolProgram('fen'), false);
 });
@@ -21,6 +21,7 @@ test('type filter includes multi-program schools that offer the program', () => 
   assert.equal(typeFilterExpression('Anadolu Meslek Programı'),
     'type.eq."Anadolu Meslek Programı",and(type.eq."Çok Programlı Anadolu Lisesi",programs.cs.{meslek})');
   assert.equal(typeFilterExpression('Fen Lisesi'), null);
+  assert.equal(typeFilterExpression('constructor'), null);
 });
 test('Excel program labels: blank is school-wide, unknown is invalid', () => {
   assert.equal(parseProgramLabel(''), null);

@@ -4,7 +4,7 @@ import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
 import { SchoolList } from "@/components/schools/SchoolList";
-import { programForType, typeFilterExpression } from "@/lib/school-programs";
+import { MULTI_PROGRAM_TYPE, programForType, typeFilterExpression } from "@/lib/school-programs";
 import {
   compareByScore,
   parsePlacement,
@@ -269,7 +269,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   const programValues: Record<number, ProgramOBPs> = {};
   for (const school of schools) {
     scoreValues[school.id] = placementValues(school.scores ?? [], scoreYear, fieldId, program);
-    if (program == null) programValues[school.id] = programOBPs(school.scores ?? [], scoreYear);
+    if (program == null && school.type === MULTI_PROGRAM_TYPE) programValues[school.id] = programOBPs(school.scores ?? [], scoreYear);
   }
   const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
   const currentPage = Math.min(sayfa, totalPages);

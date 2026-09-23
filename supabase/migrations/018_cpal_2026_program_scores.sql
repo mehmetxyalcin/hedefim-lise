@@ -11,6 +11,7 @@ UPDATE public.schools SET programs = '{anadolu_lisesi}'
 
 DELETE FROM public.school_scores
   WHERE year = 2026 AND program IS NULL AND vocational_field_id IS NULL
+    AND lgs_score IS NULL AND percentile IS NULL
     AND school_id IN (37, 43, 62, 95, 96, 119, 120, 153, 154);
 
 INSERT INTO public.school_scores (school_id, year, program, obp_score) VALUES

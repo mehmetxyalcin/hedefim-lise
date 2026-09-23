@@ -2,6 +2,8 @@
 -- Yalnız ekleme yapar; önceki uygulama sürümü program satırlarını okul geneli
 -- gibi okuyup en düşük OBP'yi alır. Uygulama yayınından ÖNCE uygulanır.
 
+BEGIN;
+
 ALTER TABLE public.schools ADD COLUMN IF NOT EXISTS programs text[] NOT NULL DEFAULT '{}';
 ALTER TABLE public.schools DROP CONSTRAINT IF EXISTS schools_programs_check;
 ALTER TABLE public.schools ADD CONSTRAINT schools_programs_check
@@ -263,3 +265,5 @@ $$;
 
 REVOKE ALL ON FUNCTION public.admin_import_school(text, jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_import_school(text, jsonb) TO authenticated;
+
+COMMIT;

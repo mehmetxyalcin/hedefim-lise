@@ -29,7 +29,7 @@ export function isSchoolProgram(value: unknown): value is SchoolProgram {
 }
 
 export function programForType(type: string): SchoolProgram | null {
-  return TYPE_PROGRAMS[type] ?? null;
+  return Object.hasOwn(TYPE_PROGRAMS, type) ? TYPE_PROGRAMS[type] : null;
 }
 
 /** PostgREST `or` ifadesi: türün kendisi veya o programı olan ÇPAL. Eşleme yoksa null. */

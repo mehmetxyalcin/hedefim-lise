@@ -5,7 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AdminSubmitButton } from "@/components/admin/ui/AdminSubmitButton";
 import type { SchoolScore, SchoolQuota } from "@/types/schoolDetail";
 import { adminInput } from "@/components/admin/ui/styles";
-import { PROGRAM_LABELS, scoreScopeValue, type SchoolProgram } from "@/lib/school-programs";
+import { PROGRAM_ROW_LABELS, scoreScopeValue, type SchoolProgram } from "@/lib/school-programs";
 
 const inputCls = adminInput;
 
@@ -102,7 +102,7 @@ export function ScoresTab({
                     {yearScores.map((score) => {
                       const isEditingThis = editingScoreId === score.id;
                       const fieldName =
-                        (score.program ? `${PROGRAM_LABELS[score.program]} programı` : null) ??
+                        (score.program ? PROGRAM_ROW_LABELS[score.program] : null) ??
                         score.vocationalField?.name ??
                         (score.vocationalFieldId !== null
                           ? schoolVocationalFields.find((f) => f.id === score.vocationalFieldId)
@@ -288,7 +288,7 @@ export function ScoresTab({
                         {canAddSchoolWide && <option value="">Okul geneli</option>}
                         {availablePrograms.map((p) => (
                           <option key={p} value={scoreScopeValue(null, p)}>
-                            {PROGRAM_LABELS[p]} programı
+                            {PROGRAM_ROW_LABELS[p]}
                           </option>
                         ))}
                         {availableFields.map((f) => (
