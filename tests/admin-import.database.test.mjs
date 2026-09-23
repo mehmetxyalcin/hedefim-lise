@@ -40,6 +40,7 @@ before(async () => {
     revoke insert,update,delete on profiles from authenticated;
     insert into profiles values ('${admin}','admin@example.test','admin'),('${member}','member@example.test','member');`);
   await db.exec(readFileSync(sqlFile,'utf8'));
+  await db.exec(readFileSync('supabase/migrations/017_school_programs.sql','utf8'));
 });
 after(() => db.close());
 beforeEach(async () => {
@@ -112,6 +113,28 @@ test('duplicate base or score records are rejected before they can give misleadi
   await assert.rejects(save('basic',[row({name:'A'}),row({name:'B'})]),/birden fazla/);
   await assert.rejects(save('scores',[row({obp_2025:90}),row({obp_2025:91})]),/birden fazla/);
   assert.equal(Number((await db.query('select obp_score from school_scores')).rows[0].obp_score),85);
+});
+test('multi-program school keeps one row per program and accepts 2026',async()=>{
+  await db.exec("update schools set type='Çok Programlı Anadolu Lisesi', programs='{anadolu_lisesi,meslek}' where id=1");
+  const result=await save('scores',[row({program:'anadolu_lisesi',obp_2026:53.8694}),row({program:'meslek',obp_2026:52.0819})]);
+  assert.equal(result.operation,'updated');
+  assert.deepEqual((await db.query("select program, obp_score::text as obp from school_scores where year=2026 order by program")).rows,
+    [{program:'anadolu_lisesi',obp:'53.869'},{program:'meslek',obp:'52.082'}]);
+  await save('scores',[row({program:'meslek',obp_2026:50})]);
+  assert.equal((await db.query("select count(*)::int as n from school_scores where year=2026")).rows[0].n,2);
+  assert.equal(Number((await db.query("select obp_score from school_scores where year=2026 and program='meslek'")).rows[0].obp_score),50);
+});
+test('program rows are rejected for unknown programs, missing school programs or together with a field',async()=>{
+  await assert.rejects(save('scores',[row({program:'fen',obp_2026:50})]),/Geçersiz program/);
+  await assert.rejects(save('scores',[row({program:'meslek',obp_2026:50})]),/tanımlı değil/);
+  await db.exec("update schools set programs='{meslek}' where id=1");
+  await assert.rejects(save('scores',[row({program:'meslek',vocational_field:'Bilişim Teknolojileri',obp_2026:50})]),/aynı satırda/);
+  assert.equal((await db.query("select count(*)::int as n from school_scores where year=2026")).rows[0].n,0);
+});
+test('schema rejects unknown program values and program rows tied to a field',async()=>{
+  await assert.rejects(db.exec("update schools set programs='{fen}' where id=1"),/schools_programs_check/);
+  await assert.rejects(db.exec("insert into school_scores(school_id,year,program,obp_score) values(1,2026,'fen',50)"),/school_scores_program_check/);
+  await assert.rejects(db.exec("insert into school_scores(school_id,year,vocational_field_id,program,obp_score) values(1,2026,1,'meslek',50)"),/school_scores_program_field_check/);
 });
 async function replace(fields, branches = null, facilities = null) {
   return db.transaction(async tx => {
