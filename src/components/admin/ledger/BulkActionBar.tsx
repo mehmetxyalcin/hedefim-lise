@@ -9,13 +9,22 @@ export function BulkActionBar({
   ids,
   onClear,
   action,
+  returnTo,
 }: {
   ids: number[];
   onClear: () => void;
   action: Action;
+  returnTo: string;
 }) {
   if (ids.length === 0) return null;
-  const hidden = ids.map((id) => <input key={id} type="hidden" name="ids" value={id} />);
+  const hidden = (
+    <>
+      {ids.map((id) => (
+        <input key={id} type="hidden" name="ids" value={id} />
+      ))}
+      <input type="hidden" name="return_to" value={returnTo} />
+    </>
+  );
 
   return (
     <div

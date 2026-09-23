@@ -62,6 +62,8 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
     return [...checked].filter((id) => known.has(id));
   }, [checked, rows]);
   const checkedSet = useMemo(() => new Set(checkedIds), [checkedIds]);
+  // İşlemden sonra aynı görünüme dönülsün diye formlara verilen adres.
+  const returnTo = `${pathname}${ledgerSearch(filters, { okul: selectedSlug })}`;
 
   // Filtreler istemcide uygulanır; URL yalnız paylaşım ve geri tuşu için.
   // Native replaceState, Next yönlendiricisiyle eşleşir ve sunucu turu yapmaz.
@@ -155,7 +157,12 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
             onFilterMissing={(id) => navigate({ ...filters, eksik: id }, selectedSlug)}
           />
         )}
-        <BulkActionBar ids={checkedIds} onClear={() => setChecked(new Set())} action={bulkStatusAction} />
+        <BulkActionBar
+          ids={checkedIds}
+          onClear={() => setChecked(new Set())}
+          action={bulkStatusAction}
+          returnTo={returnTo}
+        />
       </div>
       {selected && (
         <SchoolDetailPanel
@@ -163,6 +170,7 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
           onClose={close}
           toggleStatusAction={toggleStatusAction}
           deleteAction={deleteAction}
+          returnTo={returnTo}
         />
       )}
     </div>

@@ -120,3 +120,22 @@ test('create and update stay on the tabbed form when the slug belongs to another
     assert.equal(calls.some(c=>c[0]==='insert'||c[0]==='update'),false,name);
   }
 });
+test('status and delete actions return to the ledger view they came from', async () => {
+  const school = () => ({data:{id:1,slug:'ornek'},error:null});
+  const {api}=actions('src/app/admin/okullar/actions.ts',school);
+  await assert.rejects(api.toggleSchoolStatus(form({id:'1',is_active:'false',return_to:'/admin?eksik=puan&okul=ornek'})),
+    {message:'REDIRECT:/admin?eksik=puan&okul=ornek&success=Okul pasif hale getirildi.'});
+  await assert.rejects(api.toggleSchoolStatus(form({id:'1',is_active:'true',return_to:'https://evil.example/admin?x=1'})),
+    {message:'REDIRECT:/admin?success=Okul aktif hale getirildi.'});
+  await assert.rejects(api.deleteSchool(form({id:'1',return_to:'/admin?ilce=Mut&okul=ornek'})),
+    {message:'REDIRECT:/admin?ilce=Mut&success=Okul başarıyla silindi.'});
+  const bulk=actions('src/app/admin/okullar/actions.ts',()=>({data:[{id:1,slug:'ornek'}],error:null})).api;
+  await assert.rejects(bulk.bulkUpdateSchoolStatus(form({ids:['1'],is_active:'true',return_to:'/admin?durum=pasif'})),
+    {message:'REDIRECT:/admin?durum=pasif&success=1 okul aktif hale getirildi.'});
+});
+test('status action errors also return to the ledger view', async () => {
+  const {calls,api}=actions('src/app/admin/okullar/actions.ts');
+  await assert.rejects(api.toggleSchoolStatus(form({id:'abc',is_active:'false',return_to:'/admin?eksik=puan'})),
+    /^Error: REDIRECT:\/admin\?eksik=puan&error=/);
+  assert.equal(calls.length,0);
+});

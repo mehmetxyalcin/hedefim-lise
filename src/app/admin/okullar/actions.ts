@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateAdminForm, schoolFormRules } from "@/lib/admin-form-validation";
 import { requireAdmin } from "@/lib/admin-auth";
+import { safeAdminReturn, withFlash } from "@/lib/admin-return";
 import { parseImportNumber } from "@/lib/import-validation";
 
 export type ActionResult = { success: boolean; message: string };
@@ -381,18 +382,19 @@ export async function updateSchool(_prevState: unknown, formData: FormData): Pro
 
 export async function deleteSchool(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
+  const returnTo = safeAdminReturn(formData.get("return_to"), ["okul"]);
 
   if (!profile) {
     redirect("/admin");
   }
 
   const validationError = validateAdminForm(formData, schoolFormRules.deleteSchool);
-  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+  if (validationError) redirect(withFlash(returnTo, "error", validationError));
 
   const id = Number(formData.get("id"));
 
   if (!Number.isInteger(id) || id <= 0) {
-    redirect(`/admin?error=${encodeURIComponent("Geçersiz okul kaydi.")}`);
+    redirect(withFlash(returnTo, "error", "Geçersiz okul kaydi."));
   }
 
   const { data: school, error: schoolError } = await supabase
@@ -402,7 +404,7 @@ export async function deleteSchool(formData: FormData) {
     .maybeSingle();
 
   if (schoolError || !school) {
-    redirect(`/admin?error=${encodeURIComponent("Okul bulunamadı.")}`);
+    redirect(withFlash(returnTo, "error", "Okul bulunamadı."));
   }
 
   // One DELETE statement: FK cascades are atomic. If the database cannot
@@ -410,7 +412,7 @@ export async function deleteSchool(formData: FormData) {
   const { error: deleteError } = await supabase.from("schools")
     .delete().eq("id", id).select("id").single();
   if (deleteError) {
-    redirect(`/admin?error=${encodeURIComponent(deleteError.message)}`);
+    redirect(withFlash(returnTo, "error", deleteError.message));
   }
 
   revalidatePath("/admin");
@@ -418,24 +420,25 @@ export async function deleteSchool(formData: FormData) {
   revalidatePath("/alanlar");
   revalidatePath("/sitemap.xml");
   revalidatePath(`/okullar/${school.slug}`);
-  redirectToAdminWithSuccess("Okul başarıyla silindi.");
+  redirect(withFlash(returnTo, "success", "Okul başarıyla silindi."));
 }
 
 export async function toggleSchoolStatus(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
+  const returnTo = safeAdminReturn(formData.get("return_to"));
 
   if (!profile) {
     redirect("/admin");
   }
 
   const validationError = validateAdminForm(formData, schoolFormRules.toggleSchoolStatus);
-  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+  if (validationError) redirect(withFlash(returnTo, "error", validationError));
 
   const id = Number(formData.get("id"));
   const nextStatus = formData.get("is_active") === "true";
 
   if (!Number.isInteger(id) || id <= 0) {
-    redirect(`/admin?error=${encodeURIComponent("Geçersiz okul kaydi.")}`);
+    redirect(withFlash(returnTo, "error", "Geçersiz okul kaydi."));
   }
 
   const { data: school, error: schoolError } = await supabase
@@ -445,7 +448,7 @@ export async function toggleSchoolStatus(formData: FormData) {
     .maybeSingle();
 
   if (schoolError || !school) {
-    redirect(`/admin?error=${encodeURIComponent("Okul bulunamadı.")}`);
+    redirect(withFlash(returnTo, "error", "Okul bulunamadı."));
   }
 
   const { error } = await supabase
@@ -454,7 +457,7 @@ export async function toggleSchoolStatus(formData: FormData) {
     .eq("id", id).select("id").single();
 
   if (error) {
-    redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+    redirect(withFlash(returnTo, "error", error.message));
   }
 
   revalidatePath("/admin");
@@ -462,26 +465,27 @@ export async function toggleSchoolStatus(formData: FormData) {
   revalidatePath("/alanlar");
   revalidatePath("/sitemap.xml");
   revalidatePath(`/okullar/${school.slug}`);
-  redirectToAdminWithSuccess(
+  redirect(withFlash(returnTo, "success",
     nextStatus ? "Okul aktif hale getirildi." : "Okul pasif hale getirildi.",
-  );
+  ));
 }
 
 export async function bulkUpdateSchoolStatus(formData: FormData) {
   const { supabase, profile } = await requireAdmin();
+  const returnTo = safeAdminReturn(formData.get("return_to"));
 
   if (!profile) {
     redirect("/admin");
   }
 
   const validationError = validateAdminForm(formData, schoolFormRules.bulkUpdateSchoolStatus);
-  if (validationError) redirect(`/admin?error=${encodeURIComponent(validationError)}`);
+  if (validationError) redirect(withFlash(returnTo, "error", validationError));
 
   const ids = toNumberArray(formData.getAll("ids"));
   const nextStatus = formData.get("is_active") === "true";
 
   if (ids.length === 0) {
-    redirect(`/admin?error=${encodeURIComponent("İşlem için okul seçin.")}`);
+    redirect(withFlash(returnTo, "error", "İşlem için okul seçin."));
   }
 
   const { data: schools, error: schoolsError } = await supabase
@@ -490,19 +494,17 @@ export async function bulkUpdateSchoolStatus(formData: FormData) {
     .in("id", ids);
 
   if (schoolsError) {
-    redirect(`/admin?error=${encodeURIComponent(schoolsError.message)}`);
+    redirect(withFlash(returnTo, "error", schoolsError.message));
   }
 
   if ((schools ?? []).length === 0) {
-    redirect(`/admin?error=${encodeURIComponent("Seçilen okullar bulunamadı.")}`);
+    redirect(withFlash(returnTo, "error", "Seçilen okullar bulunamadı."));
   }
 
   const validIds = (schools ?? []).map((school) => school.id);
 
   if (validIds.length !== ids.length) {
-    redirect(
-      `/admin?error=${encodeURIComponent("Seçilen okullardan bazıları bulunamadı. Listeyi yenileyip tekrar deneyin.")}`,
-    );
+    redirect(withFlash(returnTo, "error", "Seçilen okullardan bazıları bulunamadı. Listeyi yenileyip tekrar deneyin."));
   }
 
   const { error } = await supabase
@@ -511,7 +513,7 @@ export async function bulkUpdateSchoolStatus(formData: FormData) {
     .in("id", validIds);
 
   if (error) {
-    redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+    redirect(withFlash(returnTo, "error", error.message));
   }
 
   revalidatePath("/admin");
@@ -522,9 +524,9 @@ export async function bulkUpdateSchoolStatus(formData: FormData) {
     revalidatePath(`/okullar/${school.slug}`);
   }
 
-  redirectToAdminWithSuccess(
+  redirect(withFlash(returnTo, "success",
     `${validIds.length} okul ${nextStatus ? "aktif" : "pasif"} hale getirildi.`,
-  );
+  ));
 }
 
 // ─────────────────────────────────────────────────────────────────

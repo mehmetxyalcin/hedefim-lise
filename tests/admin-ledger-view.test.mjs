@@ -62,5 +62,7 @@ test('missing filter and selected school come from the URL', async () => {
     const fixes = [...panel.querySelectorAll('a[href*="?tab="]')].map((a) => a.getAttribute('href'));
     assert.deepEqual(fixes, ['/admin/okullar/okul-2/duzenle?tab=puanlar', '/admin/okullar/okul-2/duzenle?tab=iletisim']);
     assert.match(panel.textContent, /2025 puanı yok/);
+    const returns = [...panel.querySelectorAll('input[name="return_to"]')].map((i) => i.value);
+    assert.deepEqual(returns, ['/admin?eksik=puan&okul=okul-2', '/admin?eksik=puan&okul=okul-2']);
   } finally { await act(async () => root.unmount()); dom.window.close(); }
 });

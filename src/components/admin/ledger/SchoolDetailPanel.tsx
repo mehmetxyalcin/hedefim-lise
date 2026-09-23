@@ -16,10 +16,12 @@ type Props = {
   onClose: () => void;
   toggleStatusAction: Action;
   deleteAction: Action;
+  // Defterin güncel adresi; action bu görünüme geri döner.
+  returnTo: string;
 };
 
 // Düzenleme bağlantıları düz <a>: tam sayfa geçişiyle form sekmesine iner.
-export function SchoolDetailPanel({ row, onClose, toggleStatusAction, deleteAction }: Props) {
+export function SchoolDetailPanel({ row, onClose, toggleStatusAction, deleteAction, returnTo }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const editHref = `/admin/okullar/${row.slug}/duzenle`;
   const missing = row.health.items.filter((item) => item.status === "missing");
@@ -153,6 +155,7 @@ export function SchoolDetailPanel({ row, onClose, toggleStatusAction, deleteActi
             >
               <input type="hidden" name="id" value={row.id} />
               <input type="hidden" name="is_active" value={String(!row.isActive)} />
+              <input type="hidden" name="return_to" value={returnTo} />
               <button type="submit" className={adminButton({ size: "sm", className: "w-full" })}>
                 {row.isActive ? (
                   <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
@@ -176,6 +179,7 @@ export function SchoolDetailPanel({ row, onClose, toggleStatusAction, deleteActi
             }}
           >
             <input type="hidden" name="id" value={row.id} />
+            <input type="hidden" name="return_to" value={returnTo} />
             <button type="submit" className={adminButton({ variant: "danger", size: "sm", className: "w-full" })}>
               <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
               Okulu sil
