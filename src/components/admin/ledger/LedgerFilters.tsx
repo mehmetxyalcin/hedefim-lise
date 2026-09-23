@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Search } from "lucide-react";
-import { HEALTH_CHECKS } from "@/lib/school-health";
+import { HEALTH_CHECKS, type HealthCheckId } from "@/lib/school-health";
 import {
   LEDGER_SORT_LABELS,
   countActiveFilters,
@@ -21,13 +21,28 @@ type Props = {
   types: string[];
   shown: number;
   total: number;
+  // Kontrol başına eksik okul sayısı; seçenekler aynı zamanda sıralama gibi okunur.
+  missingCounts: Record<HealthCheckId, number>;
+  incompleteCount: number;
+  // Künye paneli açıkken satır daralır: arama kendi satırına geçer.
+  compact: boolean;
   onChange: (next: Filters) => void;
 };
 
 // Mobilde satır başına iki kutu; geniş ekranda içeriğe göre, en fazla 11rem.
 const selectClass = cn(adminControl, "min-w-0 grow basis-[calc(50%-0.25rem)] sm:max-w-44 sm:grow-0 sm:basis-auto");
 
-export function LedgerFilters({ filters, districts, types, shown, total, onChange }: Props) {
+export function LedgerFilters({
+  filters,
+  districts,
+  types,
+  shown,
+  total,
+  missingCounts,
+  incompleteCount,
+  compact,
+  onChange,
+}: Props) {
   const [query, setQuery] = useState(filters.ara);
   const timer = useRef<number | undefined>(undefined);
   const active = countActiveFilters(filters);
@@ -41,7 +56,7 @@ export function LedgerFilters({ filters, districts, types, shown, total, onChang
   return (
     <div className="mb-4 space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <label className="relative w-full min-w-0 sm:w-auto sm:min-w-56 sm:flex-1">
+        <label className={cn("relative w-full min-w-0", !compact && "sm:w-auto sm:min-w-56 sm:flex-1")}>
           <span className="sr-only">Bu listede ara</span>
           <Search
             aria-hidden="true"
@@ -106,10 +121,10 @@ export function LedgerFilters({ filters, districts, types, shown, total, onChang
           )}
         >
           <option value="">Eksik: hepsi</option>
-          <option value="herhangi">Eksiği olan</option>
+          <option value="herhangi">Eksiği olan ({incompleteCount})</option>
           {HEALTH_CHECKS.map((check) => (
             <option key={check.id} value={check.id}>
-              Eksik: {check.label}
+              Eksik: {check.label} ({missingCounts[check.id]})
             </option>
           ))}
         </select>

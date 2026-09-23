@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { adminFocus } from "@/components/admin/ui/styles";
 
@@ -17,7 +17,19 @@ export function PageHeader({ trail, title, description, actions }: Props) {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {trail && trail.length > 0 && (
+        {trail && trail.length === 1 && (
+          <Link
+            href={trail[0].href}
+            className={cn(
+              "mb-1.5 inline-flex items-center gap-1 rounded text-[13px] text-admin-muted hover:text-admin-ink",
+              adminFocus,
+            )}
+          >
+            <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
+            {trail[0].label}
+          </Link>
+        )}
+        {trail && trail.length > 1 && (
           <nav aria-label="Konum" className="mb-1.5">
             <ol className="flex flex-wrap items-center gap-1 text-[13px] text-admin-muted">
               {trail.map((crumb) => (

@@ -5,10 +5,10 @@ import { adminFocus } from "@/components/admin/ui/styles";
 export type LedgerSummaryData = {
   active: number;
   passive: number;
-  complete: number;
+  incomplete: number;
   total: number;
-  scoreYear: number | null;
-  missingScore: number;
+  // En çok okulda eksik olan kontrol; hiç eksik yoksa null.
+  topGap: { id: string; label: string; count: number } | null;
   unread: number;
 };
 
@@ -61,16 +61,17 @@ export function LedgerSummary({ data }: { data: LedgerSummaryData }) {
       <Stat href="/admin?durum=pasif" label="Pasif" value={data.passive} />
       <Stat
         href="/admin?eksik=herhangi"
-        label="Tam kayıt"
-        value={data.complete}
+        label="Eksik kayıt"
+        value={data.incomplete}
         suffix={`/ ${data.total}`}
-        title="Eksiği olan okulları göster"
+        attention
       />
-      {data.scoreYear !== null && (
+      {data.topGap && (
         <Stat
-          href="/admin?eksik=puan"
-          label={`${data.scoreYear} puanı yok`}
-          value={data.missingScore}
+          href={`/admin?eksik=${data.topGap.id}`}
+          label={`En büyük eksik: ${data.topGap.label.toLocaleLowerCase("tr-TR")}`}
+          value={data.topGap.count}
+          suffix="okul"
           attention
         />
       )}
@@ -79,7 +80,7 @@ export function LedgerSummary({ data }: { data: LedgerSummaryData }) {
         label="Okunmamış mesaj"
         value={data.unread}
         // Beş sayaç 2 ve 3 sütunlu ızgarada boş hücre bırakmasın.
-        className={data.scoreYear !== null ? "col-span-2 lg:col-span-1" : undefined}
+        className={data.topGap ? "col-span-2 lg:col-span-1" : undefined}
       />
     </div>
   );

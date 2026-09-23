@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
 import { mapSchool } from "@/lib/supabase/public";
-import { countMissing, evaluateSchoolHealth, latestYear } from "@/lib/school-health";
+import { HEALTH_CHECKS, countMissing, evaluateSchoolHealth, latestYear } from "@/lib/school-health";
 import type { LedgerRow } from "@/lib/admin-ledger";
 import {
   bulkUpdateSchoolStatus,
@@ -102,6 +102,13 @@ export default async function AdminSchoolsPage({ searchParams }: AdminPageProps)
   });
 
   const active = rows.filter((row) => row.isActive).length;
+  const healths = rows.map((row) => row.health);
+  const gaps = HEALTH_CHECKS.map((check) => ({
+    id: check.id,
+    label: check.label,
+    count: countMissing(healths, check.id),
+  })).sort((first, second) => second.count - first.count);
+  const topGap = gaps[0] && gaps[0].count > 0 ? gaps[0] : null;
 
   return (
     <AdminPage>
@@ -120,13 +127,9 @@ export default async function AdminSchoolsPage({ searchParams }: AdminPageProps)
         data={{
           active,
           passive: rows.length - active,
-          complete: rows.filter((row) => row.health.complete).length,
+          incomplete: rows.filter((row) => !row.health.complete).length,
           total: rows.length,
-          scoreYear: years.scoreYear,
-          missingScore: countMissing(
-            rows.map((row) => row.health),
-            "puan",
-          ),
+          topGap,
           unread: unreadResult.count ?? 0,
         }}
       />

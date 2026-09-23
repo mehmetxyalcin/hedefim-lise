@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { HEALTH_CHECKS } from "@/lib/school-health";
+import { HEALTH_CHECKS, type HealthCheckId } from "@/lib/school-health";
 import { formatFullDate, formatRelativeDate, type LedgerRow } from "@/lib/admin-ledger";
 import { HealthCodes, HealthPips } from "@/components/admin/ui/HealthPips";
 import { cn } from "@/lib/cn";
@@ -15,6 +15,9 @@ type Props = {
   onOpen: (slug: string) => void;
   onToggleChecked: (id: number) => void;
   onToggleAll: () => void;
+  activeMissing: string | null;
+  missingCounts: Record<HealthCheckId, number>;
+  onFilterMissing: (id: HealthCheckId | null) => void;
 };
 
 export function LedgerTable({
@@ -25,6 +28,9 @@ export function LedgerTable({
   onOpen,
   onToggleChecked,
   onToggleAll,
+  activeMissing,
+  missingCounts,
+  onFilterMissing,
 }: Props) {
   const allRef = useRef<HTMLInputElement>(null);
   const checkedVisible = rows.filter((row) => checkedIds.has(row.id)).length;
@@ -53,15 +59,33 @@ export function LedgerTable({
             <th scope="col" className="bg-admin-ground/95 py-2.5 pr-3 font-semibold backdrop-blur">
               Okul
             </th>
-            <th scope="col" className="w-[124px] bg-admin-ground/95 py-2.5 pr-3 font-semibold backdrop-blur">
-              <span aria-hidden="true" className="inline-flex items-center gap-1 text-[11px] leading-none">
-                {HEALTH_CHECKS.map((check) => (
-                  <span key={check.id} className="flex w-2.5 justify-center">
-                    <HealthCodes id={check.id} />
-                  </span>
-                ))}
+            <th
+              scope="col"
+              className="hidden w-[124px] bg-admin-ground/95 py-2.5 pr-3 font-semibold backdrop-blur md:table-cell"
+            >
+              {/* Kodlar aynı zamanda filtre: tıklayınca o kontrolde eksik okullar kalır. */}
+              <span className="inline-flex items-center gap-1 text-[11px] leading-none">
+                {HEALTH_CHECKS.map((check) => {
+                  const active = activeMissing === check.id;
+                  return (
+                    <button
+                      key={check.id}
+                      type="button"
+                      onClick={() => onFilterMissing(active ? null : check.id)}
+                      aria-pressed={active}
+                      title={`${check.label}: ${missingCounts[check.id]} okulda eksik${active ? " (filtreyi kaldır)" : ""}`}
+                      aria-label={`${check.label} eksik olanları göster (${missingCounts[check.id]})`}
+                      className={cn(
+                        "flex h-5 w-2.5 items-center justify-center rounded-sm",
+                        active ? "bg-admin-tint text-admin-tint-ink" : "hover:text-admin-ink",
+                        adminFocus,
+                      )}
+                    >
+                      <HealthCodes id={check.id} />
+                    </button>
+                  );
+                })}
               </span>
-              <span className="sr-only">Veri sağlığı</span>
             </th>
             <th
               scope="col"
@@ -102,7 +126,7 @@ export function LedgerTable({
                       onOpen(row.slug);
                     }}
                     className={cn(
-                      "block max-w-full truncate rounded text-left font-semibold",
+                      "block max-w-full rounded text-left font-semibold md:truncate",
                       selected ? "text-admin-tint-ink" : "text-admin-ink",
                       adminFocus,
                     )}
@@ -120,8 +144,11 @@ export function LedgerTable({
                       {row.district} · {row.type}
                     </span>
                   </span>
+                  <span className="mt-1.5 block md:hidden">
+                    <HealthPips items={row.health.items} />
+                  </span>
                 </td>
-                <td className="py-2.5 pr-3">
+                <td className="hidden py-2.5 pr-3 md:table-cell">
                   <HealthPips items={row.health.items} />
                 </td>
                 <td

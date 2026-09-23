@@ -113,7 +113,7 @@ export function SchoolDetailPanel({ row, onClose, toggleStatusAction, deleteActi
         </div>
 
         <div className="space-y-2 border-t border-admin-line p-5">
-          <a href={editHref} className={adminButton({ variant: "primary", className: "w-full" })}>
+          <a href={editHref} className={adminButton({ className: "w-full" })}>
             <Pencil aria-hidden="true" className="h-4 w-4" />
             Düzenle
           </a>

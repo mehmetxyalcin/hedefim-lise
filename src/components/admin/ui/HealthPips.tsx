@@ -64,9 +64,14 @@ export function HealthLegend() {
         <Pip status="na" size="sm" />
         gerekmez
       </span>
-      <span>
-        {HEALTH_CHECKS.map((c) => `${c.short} ${c.label.toLocaleLowerCase("tr-TR")}`).join(" · ")}
-      </span>
+      {HEALTH_CHECKS.map((check) => (
+        <span key={check.id} className="inline-flex items-center gap-1">
+          <span className="inline-flex w-3 justify-center font-semibold text-admin-body">
+            <HealthCodes id={check.id} />
+          </span>
+          {check.label.toLocaleLowerCase("tr-TR")}
+        </span>
+      ))}
     </p>
   );
 }

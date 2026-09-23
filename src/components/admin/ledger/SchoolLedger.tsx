@@ -15,6 +15,7 @@ import { LedgerTable } from "@/components/admin/ledger/LedgerTable";
 import { SchoolDetailPanel } from "@/components/admin/ledger/SchoolDetailPanel";
 import { BulkActionBar } from "@/components/admin/ledger/BulkActionBar";
 import { HealthLegend } from "@/components/admin/ui/HealthPips";
+import { HEALTH_CHECKS, countMissing, type HealthCheckId } from "@/lib/school-health";
 import { EmptyState } from "@/components/admin/ui/EmptyState";
 import { AdminButton } from "@/components/admin/ui/Button";
 
@@ -48,6 +49,13 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
     [rows],
   );
   const visible = useMemo(() => applyLedgerFilters(rows, filters), [rows, filters]);
+  const missingCounts = useMemo(() => {
+    const healths = rows.map((row) => row.health);
+    return Object.fromEntries(
+      HEALTH_CHECKS.map((check) => [check.id, countMissing(healths, check.id)]),
+    ) as Record<HealthCheckId, number>;
+  }, [rows]);
+  const incompleteCount = useMemo(() => rows.filter((row) => !row.health.complete).length, [rows]);
   const selected = selectedSlug ? (rows.find((row) => row.slug === selectedSlug) ?? null) : null;
   const checkedIds = useMemo(() => {
     const known = new Set(rows.map((row) => row.id));
@@ -105,8 +113,14 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
           types={types}
           shown={visible.length}
           total={rows.length}
+          missingCounts={missingCounts}
+          incompleteCount={incompleteCount}
+          compact={Boolean(selected)}
           onChange={(next) => navigate(next, selectedSlug)}
         />
+        <div className="mb-3">
+          <HealthLegend />
+        </div>
         {visible.length === 0 ? (
           <div className="rounded-xl border border-admin-line bg-white shadow-admin-card">
             <EmptyState
@@ -136,11 +150,11 @@ export function SchoolLedger({ rows, nowIso, bulkStatusAction, toggleStatusActio
             }}
             onToggleChecked={toggle}
             onToggleAll={toggleAll}
+            activeMissing={filters.eksik}
+            missingCounts={missingCounts}
+            onFilterMissing={(id) => navigate({ ...filters, eksik: id }, selectedSlug)}
           />
         )}
-        <div className="mt-3">
-          <HealthLegend />
-        </div>
         <BulkActionBar ids={checkedIds} onClear={() => setChecked(new Set())} action={bulkStatusAction} />
       </div>
       {selected && (

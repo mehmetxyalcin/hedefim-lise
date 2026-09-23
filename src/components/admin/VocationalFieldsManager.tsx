@@ -165,14 +165,11 @@ export function VocationalFieldsManager({
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="divide-y divide-admin-line overflow-hidden rounded-xl border border-admin-line bg-white shadow-admin-card">
           {filteredFields.map((field) => {
             const isOpen = openFields.has(field.id);
             return (
-              <div
-                key={field.id}
-                className="overflow-hidden rounded-xl border border-admin-line bg-white shadow-admin-card"
-              >
+              <div key={field.id}>
                 {/* Alan başlığı */}
                 <div className="flex items-center gap-2 px-4 py-3">
                   <button
@@ -218,17 +215,18 @@ export function VocationalFieldsManager({
                         branchCount: field.vocational_branches.length,
                       })
                     }
-                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                    aria-label={`${field.title} alanını sil`}
+                    title="Sil"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-admin-muted hover:bg-rose-50 hover:text-rose-700 focus-visible:text-rose-700"
                   >
-                    <Trash2 className="h-3 w-3" />
-                    Sil
+                    <Trash2 aria-hidden="true" className="h-4 w-4" />
                   </button>
                 </div>
 
                 {/* Dallar (accordion içeriği) */}
                 {isOpen && (
-                  <div className="border-t border-admin-line-soft bg-admin-ground px-4 pb-3 pt-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-admin-faint">
+                  <div className="border-t border-admin-line-soft bg-admin-ground px-4 pt-3 pb-3">
+                    <p className="mb-2 text-xs font-semibold text-admin-muted">
                       Dallar
                     </p>
 
@@ -268,10 +266,11 @@ export function VocationalFieldsManager({
                                   fieldTitle: field.title,
                                 })
                               }
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                              aria-label={`${branch.name} dalını sil`}
+                              title="Sil"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded text-admin-muted hover:bg-rose-50 hover:text-rose-700 focus-visible:text-rose-700"
                             >
-                              <Trash2 className="h-3 w-3" />
-                              Sil
+                              <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
                             </button>
                           </li>
                         ))}

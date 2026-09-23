@@ -43,7 +43,7 @@ export function SchoolTabRail({ tabs, activeTab, hrefFor, health, lockedTabs }: 
                 <>
                   <span
                     aria-hidden="true"
-                    className="h-2 w-2 shrink-0 rounded-full border-[1.5px] border-admin-missing"
+                    className="h-2.5 w-2.5 shrink-0 rounded-[3px] border-[1.5px] border-admin-missing"
                   />
                   <span className="sr-only">(eksik var)</span>
                 </>

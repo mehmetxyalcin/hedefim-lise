@@ -214,7 +214,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                         className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end"
                       >
                         <label className="min-w-0 flex-1">
-                          <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-admin-faint">
+                          <span className="mb-1 block text-xs font-bold text-admin-faint">
                             Bölüm adı
                           </span>
                           <input
@@ -231,7 +231,7 @@ export default async function FooterSettingsPage({ searchParams }: PageProps) {
                         />
                       </form>
                     ) : (
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-admin-faint">
+                      <p className="mb-2 text-xs font-bold text-admin-faint">
                         {sectionLabel(section, partnersTitle)}
                       </p>
                     )}
