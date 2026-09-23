@@ -319,14 +319,14 @@ components:
 
 **Creative North Star: "Güvenilir Rehberlik Masası" (The Trusted Guidance Desk)**
 
-Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a **deep-navy chrome world** — the sticky navbar (`#0a0f1c`), the footer, and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı) — frames the product like a confident night sky you're navigating by, while the **body is a bright, orderly workspace** of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. Nothing shouts except the one place a decision happens.
+Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a **deep-navy chrome world** — the footer and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı) — frames the product like a confident night sky you're navigating by, while the **body is a bright, orderly workspace** of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. Nothing shouts except the one place a decision happens.
 
 > **Scope note (2026-08).** The landing route (`/`) no longer uses the old dark-navy `#071426` hero with cyan/amber aurora glows — that hero and its search panel were deleted. The landing now runs its own light, landing-scoped visual world documented in **Landing Surface World (Yön #3 — Yerleştirme Kılavuzu)** below. Everything else — okullar, school detail, alanlar, istatistikler, Navbar/Footer, and the `ui/` primitives — still runs the Exam Blue system this document describes. The admin (`/admin/**`) no longer does: it runs its own scoped world, documented in **Admin Surface World (Veri Sağlık Defteri)** below.
 
 The temperament is **reassuring and calm**: measured spacing, soft rounded surfaces, thin hairline borders, and shadows so light they read as breath rather than weight. Color is rationed — the blue is a signal, not a mood — and the semantic hues (emerald, rose, amber) appear only to mean something. This is an Operate system wearing a Persuade hero: the landing frame earns trust, then gets out of the way so filtering, comparing, and shortlisting stay effortless.
 
 **Key Characteristics:**
-- Dark, trustworthy chrome (navbar, footer, interior page headers) over a bright, scannable data body.
+- A light, hairline header over the page; dark, trustworthy chrome (footer, interior page headers) framing a bright, scannable data body.
 - One decisive accent (Exam Blue) rationed against a broad cool-slate neutral field.
 - Soft, "resting" surfaces — generous radii, hairline borders, whisper-light shadows.
 - Semantic color (emerald/rose/amber) used only to carry meaning, never decoration.
@@ -353,7 +353,7 @@ A disciplined cool palette: one confident blue signal over an extensive slate-ne
 - **Canvas** (#ffffff): Card and elevated-surface background.
 
 ### Chrome (the dark frame)
-- **Night Chrome** (#0a0f1c): The sticky navbar (~90% opacity with backdrop blur; white text, slate-300 links), the footer, and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı).
+- **Night Chrome** (#0a0f1c): The footer and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı).
 - **Night Hero** (#071426): **Retired.** This was the base of the old landing hero; the hero was deleted in the 2026-08 landing redesign and the value no longer appears in the codebase. Do not reintroduce it.
 - **Cyan Glow** (#22d3ee): Atmospheric accent for the *dark chrome world only* — soft blurs and eyebrow accents on the dark interior page headers (istatistikler, statistics dashboard, hakkında). It no longer appears on the landing.
 
@@ -367,7 +367,7 @@ A disciplined cool palette: one confident blue signal over an extensive slate-ne
 
 **The Meaning-Only Rule.** Emerald, rose, and amber never appear for decoration — each is a claim (good / destructive / caution). If a color isn't carrying meaning, it's slate.
 
-**The Two-Worlds Rule (amended 2026-08).** Cyan and glow treatments live *only* in the dark chrome world (navbar, footer, dark interior page headers). The light Exam Blue body is blue-and-slate; a cyan glow in a data card breaks the system. The old third member of this rule — the dark aurora hero — no longer exists: the landing is now its own light **document world** (see Landing Surface World), and neither cyan, aurora glows, nor Exam Blue may appear inside it.
+**The Two-Worlds Rule (amended 2026-08).** Cyan and glow treatments live *only* in the dark chrome world (footer, dark interior page headers). The light Exam Blue body is blue-and-slate; a cyan glow in a data card breaks the system. The old third member of this rule — the dark aurora hero — no longer exists: the landing is now its own light **document world** (see Landing Surface World), and neither cyan, aurora glows, nor Exam Blue may appear inside it.
 
 ## Typography
 
@@ -439,18 +439,19 @@ Soft, consistent, generously rounded. The radius vocabulary is tight: **12px (`r
 - **Focus:** Border → `Exam Blue Bright`, background → white, soft `ring-4 ring-blue-500/10`; icon tints toward blue.
 - **Select:** custom appearance-none with a rotated `ChevronRight` chevron.
 
-### Navigation
-- **Style:** Sticky, `Night Chrome` at ~90% with backdrop blur, hairline `white/5` bottom border, `h-20`.
-- **Logo mark:** gradient `blue-600 → blue-400` rounded-xl tile with a white icon and blue shadow.
-- **Links:** `slate-300`, `text-sm font-medium`, hover to white on `white/5`; the primary nav action is a translucent `white/10` pill.
-- **Mobile:** collapses to a sheet; the schools page adds a sticky filter/sort bar and bottom-sheets.
+### Navigation (light header, 2026-09)
+- **Style:** Sticky `<header>`, `white/85` with backdrop blur (content scrolls under it), hairline `slate-200/80` bottom border, `h-16` (64px; the `/okullar` mobile filter bar sticks at `top-16` beneath it). At rest it is flat; a scroll-driven animation (`.site-header` in `globals.css`) lowers a soft `0 6px 20px -12px` ink shadow over the first 96px of scroll where supported.
+- **Brand lockup:** logo (36px) + site title only, 17px/700, `-0.02em`, `Ink`. **No tagline** under the title ("Yolum Bilinçli Tercih" was removed from the header). The title is a `<span>`, not an `<h1>`; each page owns its own `h1`.
+- **Links (`lg`+):** left-aligned after the lockup, `text-sm font-medium slate-600`, hover `Ink` on `slate-100`. The current page (`aria-current="page"`, prefix match; `/` only exact) is `Ink` with a 2px Exam Blue bar sitting on the header's bottom hairline. "İletişim" is appended after the admin-managed items.
+- **Tercihlerim:** a right-aligned bordered pill (star + label + blue count badge); icon-only 40px circle with a corner badge below `sm`. Always in the bar, never hidden in the menu.
+- **Mobile (< `lg`):** a 40px menu button opens a full-height white panel under the header (absolute to the header, because its backdrop-filter traps `fixed`): 16px/600 rows with hairline dividers and a chevron, current page in blue tint. Escape and any route change close it; page scroll is locked while open.
 
 ### Hero Search — removed (2026-08)
 The old signature — a white `rounded-2xl` panel with `shadow-2xl` straddling the dark hero, cyan focus rings, "Okul Ara" submit — was deleted with the dark hero. The landing's decision control is now the **Percentile Scale** (`src/components/home/PercentileScale.tsx`), documented in Landing Surface World below. Do not rebuild the hero search.
 
 ## Landing Surface World (Yön #3 — Yerleştirme Kılavuzu)
 
-**Scope (critical):** This world exists **only inside the `.landing` wrapper** that `src/app/(site)/page.tsx` puts around the landing route (`/`). Its tokens are CSS custom properties defined on `.landing` in `globals.css`; they do not exist outside it. The Navbar and Footer that frame the landing remain incumbent Night Chrome. Every other page keeps the Exam Blue system above. The two palettes never mix on one surface: no Exam Blue, cyan, or aurora inside `.landing`; no teal/vermilion outside it.
+**Scope (critical):** This world exists **only inside the `.landing` wrapper** that `src/app/(site)/page.tsx` puts around the landing route (`/`). Its tokens are CSS custom properties defined on `.landing` in `globals.css`; they do not exist outside it. The light header and the Night Chrome footer that frame the landing stay in the Exam Blue system. Every other page keeps the Exam Blue system above. The two palettes never mix on one surface: no Exam Blue, cyan, or aurora inside `.landing`; no teal/vermilion outside it.
 
 **Creative North Star (landing): "Yerleştirme Kılavuzu" (The Placement Guide).** The landing is a confident data *document* — a printed statistics bulletin, not an edu-SaaS hero. Numbers run at poster scale; the percentile axis is the hero. The direction contract (seed 87596005) is embedded greppable in `layout.tsx`.
 
@@ -612,7 +613,7 @@ Two radii carry almost everything: **8px** (`rounded-lg`) for buttons, inputs, n
 - **Do** use the uppercase, bold, wide-tracked ≤11px label for category/meta text, and carry hierarchy with weight (700–800 heads).
 - **Do** keep radii in the 12 / 16–24px family and never mix radii within one component.
 - **Do** reserve emerald/rose/amber for genuine meaning (success / destructive / caution).
-- **Do** confine cyan and glow treatments to the dark chrome world (navbar, footer, dark interior page headers) only.
+- **Do** confine cyan and glow treatments to the dark chrome world (footer, dark interior page headers) only; the light header carries none.
 
 ### Don't:
 - **Don't** mix `gray-*` and `slate-*` neutrals; the system is `slate` — legacy `gray-*` classes (mobile sheets) are drift to migrate.

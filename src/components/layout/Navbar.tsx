@@ -2,8 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookOpen } from "lucide-react";
 import { getSiteSettings, getNavigationItems } from "@/lib/site-settings";
+import { DesktopNav } from "./DesktopNav";
 import { FavoritesNavIcon } from "./FavoritesNavIcon";
 import { MobileMenu } from "./MobileMenu";
+import type { HeaderLink } from "./nav-links";
 
 export async function Navbar() {
   const [settings, navItems] = await Promise.all([
@@ -11,70 +13,61 @@ export async function Navbar() {
     getNavigationItems(),
   ]);
 
+  const links: HeaderLink[] = [
+    ...navItems.map((item) => ({
+      key: item.id,
+      label: item.label,
+      href: item.href,
+      target: item.target,
+    })),
+    { key: "iletisim", label: "İletişim", href: "/iletisim" },
+  ];
+
   return (
-    <nav
-      className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1c]/90 text-white backdrop-blur-lg relative"
+    <header
+      className="site-header sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl backdrop-saturate-150"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div
-        className="container mx-auto max-w-7xl px-6"
+        className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:gap-8"
         style={{
-          paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
-          paddingRight: "max(1.5rem, env(safe-area-inset-right))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
         }}
       >
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="group flex shrink-0 items-center space-x-3">
-            {settings.logo_url ? (
-              <div className="relative h-11 w-11 shrink-0 overflow-hidden">
-                <Image
-                  src={settings.logo_url}
-                  alt={settings.logo_alt}
-                  fill
-                  sizes="44px"
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            ) : (
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 shadow-lg shadow-blue-600/20 transition-all group-hover:shadow-blue-600/40">
-                <BookOpen className="h-5 w-5 text-white" />
-              </div>
-            )}
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-white transition-colors group-hover:text-blue-100">
-                {settings.site_title}
-              </h1>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-blue-300/80">
-                Yolum Bilinçli Tercih
-              </p>
-            </div>
-          </Link>
+        <Link
+          href="/"
+          aria-label={`${settings.site_title} ana sayfa`}
+          className="-ml-1 flex shrink-0 items-center gap-2.5 rounded-lg p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        >
+          {settings.logo_url ? (
+            <span className="relative block h-9 w-9 shrink-0">
+              <Image
+                src={settings.logo_url}
+                alt=""
+                fill
+                sizes="36px"
+                className="object-contain"
+                priority
+              />
+            </span>
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+              <BookOpen aria-hidden className="h-[18px] w-[18px]" />
+            </span>
+          )}
+          <span className="text-[17px] leading-none font-bold tracking-[-0.02em] text-slate-900">
+            {settings.site_title}
+          </span>
+        </Link>
 
-          <div className="hidden items-center gap-1 xl:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                target={item.target}
-                rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-                className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-slate-300 transition-all hover:bg-white/5 hover:text-white"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              href="/iletisim"
-              className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-slate-300 transition-all hover:bg-white/5 hover:text-white"
-            >
-              İletişim
-            </Link>
-            <FavoritesNavIcon />
-          </div>
+        <DesktopNav links={links} />
 
-          <MobileMenu navItems={navItems} />
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <FavoritesNavIcon />
+          <MobileMenu links={links} />
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
