@@ -11,6 +11,7 @@ import type { ScoreRow, ScoreUploadResult } from "@/app/admin/okullar/toplu-yukl
 import { str, normalizeStr, parseScore, parsePercentile } from "@/components/admin/bulk-upload/parsers";
 import type { ScoreParsedRow } from "@/components/admin/bulk-upload/parsers";
 import { StepIndicator, Pill, UploadDropzone } from "@/components/admin/bulk-upload/shared";
+import { parseProgramLabel, PROGRAM_LABELS, PROGRAM_ROW_LABELS } from "@/lib/school-programs";
 
 // ─── ScoreUploadWizard ────────────────────────────────────────────
 
@@ -85,6 +86,10 @@ export function ScoreUploadWizard() {
         const institution_code = str(row["Kurum Kodu"]);
         const vocational_field_name = str(row["Meslek Alanı"]);
 
+        const program_label = str(row["Program"]);
+        const parsedProgram = parseProgramLabel(program_label);
+        const program = parsedProgram ?? null;
+
         // Meslek alanı çözümle
         let vocational_field_id: number | null = null;
         let vocational_field_found = true;
@@ -97,6 +102,9 @@ export function ScoreUploadWizard() {
           }
         }
 
+        const obp_2026 = parseScore(row["OBP 2026"], 100);
+        const lgs_2026 = parseScore(row["LGS 2026"], 500);
+        const percentile_2026 = parsePercentile(row["Yüzdelik 2026"]);
         const obp_2025 = parseScore(row["OBP 2025"], 100);
         const lgs_2025 = parseScore(row["LGS 2025"], 500);
         const percentile_2025 = parsePercentile(row["Yüzdelik 2025"]);
@@ -110,6 +118,11 @@ export function ScoreUploadWizard() {
         const errors: string[] = [];
         if (!institution_code) errors.push("Kurum Kodu zorunludur");
         if (!vocational_field_found) errors.push(`Meslek Alanı bulunamadı: "${vocational_field_name}"`);
+        if (parsedProgram === undefined) errors.push(`Program geçersiz: "${program_label}" (Anadolu Lisesi veya Meslek Programı yazın)`);
+        if (program && vocational_field_name) errors.push("Program ve Meslek Alanı aynı satırda doldurulamaz");
+        if (obp_2026 === null) errors.push("OBP 2026 geçersiz: pozitif sayı olmalı");
+        if (lgs_2026 === null) errors.push("LGS 2026 geçersiz: pozitif sayı olmalı");
+        if (percentile_2026 === null) errors.push("Yüzdelik 2026 geçersiz: 0-100 arasında olmalı");
         if (obp_2025 === null) errors.push("OBP 2025 geçersiz: pozitif sayı olmalı");
         if (lgs_2025 === null) errors.push("LGS 2025 geçersiz: pozitif sayı olmalı");
         if (percentile_2025 === null) errors.push("Yüzdelik 2025 geçersiz: 0-100 arasında olmalı");
@@ -122,7 +135,7 @@ export function ScoreUploadWizard() {
 
         const allEmpty =
           institution_code &&
-          [obp_2025, lgs_2025, percentile_2025, obp_2024, lgs_2024, percentile_2024, obp_2023, lgs_2023, percentile_2023].every(
+          [obp_2026, lgs_2026, percentile_2026, obp_2025, lgs_2025, percentile_2025, obp_2024, lgs_2024, percentile_2024, obp_2023, lgs_2023, percentile_2023].every(
             (v) => v === undefined,
           );
         if (allEmpty) errors.push("Tüm puan alanları boş");
@@ -133,6 +146,9 @@ export function ScoreUploadWizard() {
           vocational_field_name,
           vocational_field_id,
           vocational_field_found,
+          program_label,
+          program,
+          obp_2026, lgs_2026, percentile_2026,
           obp_2025, lgs_2025, percentile_2025,
           obp_2024, lgs_2024, percentile_2024,
           obp_2023, lgs_2023, percentile_2023,
@@ -140,13 +156,13 @@ export function ScoreUploadWizard() {
         };
       });
 
-      // Kurum Kodu + meslek alanı kombinasyonu tekrarı kontrol et
+      // Kurum Kodu + meslek alanı/program kombinasyonu tekrarı kontrol et
       const seenKeys = new Set<string>();
       for (const row of rawParsed) {
-        const key = `${row.institution_code}::${row.vocational_field_name.toLocaleLowerCase("tr-TR")}`;
+        const key = `${row.institution_code}::${row.vocational_field_name.toLocaleLowerCase("tr-TR")}::${row.program ?? ""}`;
         if (seenKeys.has(key)) {
           row.errors.push(
-            `Tekrar eden kombinasyon: "${row.institution_code}" + "${row.vocational_field_name || "Okul Geneli"}"`,
+            `Tekrar eden kombinasyon: "${row.institution_code}" + "${row.program ? PROGRAM_LABELS[row.program] : row.vocational_field_name || "Okul Geneli"}"`,
           );
         } else {
           seenKeys.add(key);
@@ -179,6 +195,10 @@ export function ScoreUploadWizard() {
     const rowsToUpload: ScoreRow[] = validRows.map((row) => {
       const r: ScoreRow = { institution_code: row.institution_code, source_row: row.rowIndex };
       if (row.vocational_field_name) r.vocational_field = row.vocational_field_name;
+      if (row.program) r.program = row.program;
+      if (typeof row.obp_2026 === "number") r.obp_2026 = row.obp_2026;
+      if (typeof row.lgs_2026 === "number") r.lgs_2026 = row.lgs_2026;
+      if (typeof row.percentile_2026 === "number") r.percentile_2026 = row.percentile_2026;
       if (typeof row.obp_2025 === "number") r.obp_2025 = row.obp_2025;
       if (typeof row.lgs_2025 === "number") r.lgs_2025 = row.lgs_2025;
       if (typeof row.percentile_2025 === "number") r.percentile_2025 = row.percentile_2025;
@@ -265,7 +285,8 @@ export function ScoreUploadWizard() {
               <thead>
                 <tr className="border-b border-admin-line bg-admin-ground text-left">
                   {[
-                    "Durum", "Kurum Kodu", "Okul Adı", "Meslek Alanı",
+                    "Durum", "Kurum Kodu", "Okul Adı", "Kapsam",
+                    "OBP 26", "LGS 26", "%Dilim 26",
                     "OBP 25", "LGS 25", "%Dilim 25",
                     "OBP 24", "LGS 24", "%Dilim 24",
                     "OBP 23", "LGS 23", "%Dilim 23",
@@ -295,7 +316,11 @@ export function ScoreUploadWizard() {
                         {row.school_name || <span className="text-rose-700 text-xs">Bulunamadı</span>}
                       </td>
                       <td className="max-w-[160px] truncate px-3 py-2">
-                        {!row.vocational_field_name ? (
+                        {row.program ? (
+                          <span className="text-admin-body">{PROGRAM_ROW_LABELS[row.program]}</span>
+                        ) : row.program_label && !row.vocational_field_name ? (
+                          <span className="text-rose-700">{row.program_label} (geçersiz)</span>
+                        ) : !row.vocational_field_name ? (
                           <span className="italic text-admin-faint">Okul geneli</span>
                         ) : !row.vocational_field_found ? (
                           <span className="text-rose-700">{row.vocational_field_name} (bulunamadı)</span>
@@ -303,6 +328,9 @@ export function ScoreUploadWizard() {
                           <span className="text-admin-body">{row.vocational_field_name}</span>
                         )}
                       </td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.obp_2026} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.lgs_2026} /></td>
+                      <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.percentile_2026} /></td>
                       <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.obp_2025} /></td>
                       <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.lgs_2025} /></td>
                       <td className="px-3 py-2 text-center text-admin-body"><ScoreCell value={row.percentile_2025} /></td>

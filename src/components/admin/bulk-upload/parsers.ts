@@ -2,6 +2,7 @@
 import { parseImportNumber } from "@/lib/import-validation";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
+import type { SchoolProgram } from "@/lib/school-programs";
 
 export const MAX_ROWS = 500;
 export const MAX_VOC_ROWS = 2000;
@@ -205,6 +206,11 @@ export type ScoreParsedRow = {
   vocational_field_name: string;
   vocational_field_id: number | null;
   vocational_field_found: boolean;
+  program_label: string;
+  program: SchoolProgram | null;
+  obp_2026: number | null | undefined;
+  lgs_2026: number | null | undefined;
+  percentile_2026: number | null | undefined;
   obp_2025: number | null | undefined;
   lgs_2025: number | null | undefined;
   percentile_2025: number | null | undefined;

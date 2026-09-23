@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/admin-auth";
 import { runSchoolImport } from "@/lib/admin-import";
+import type { SchoolProgram } from "@/lib/school-programs";
 
 export type UploadSchoolRow = {
   source_row?: number;
@@ -105,6 +106,10 @@ export type ScoreRow = {
   source_row?: number;
   institution_code: string;
   vocational_field?: string;
+  program?: SchoolProgram;
+  obp_2026?: number;
+  lgs_2026?: number;
+  percentile_2026?: number;
   obp_2025?: number;
   lgs_2025?: number;
   percentile_2025?: number;

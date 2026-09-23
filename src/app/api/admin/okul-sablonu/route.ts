@@ -87,19 +87,23 @@ export async function GET() {
   const scoreHeaders = [
     "Kurum Kodu",
     "Meslek Alanı",
+    "Program",
+    "OBP 2026", "LGS 2026", "Yüzdelik 2026",
     "OBP 2025", "LGS 2025", "Yüzdelik 2025",
     "OBP 2024", "LGS 2024", "Yüzdelik 2024",
     "OBP 2023", "LGS 2023", "Yüzdelik 2023",
   ];
   const scoreExamples = [
-    ["733521", "",                          85.50, 280.25, 65.00, 82.00, 260.00, 70.00, 80.00, 240.00, 72.00],
-    ["745231", "Tesisat Teknolojisi",       95.50, 380.25, 15.00, 92.00, 360.00, 18.50, 90.00, 340.00, 22.00],
-    ["745231", "Elektrik-Elektronik",       92.00, 360.00, 22.00, 90.00, 340.00, 25.00, 88.00, 320.00, 28.00],
+    ["733521", "",                    "",                85.20, 282.10, 64.00, 85.50, 280.25, 65.00, 82.00, 260.00, 70.00, 80.00, 240.00, 72.00],
+    ["745231", "Tesisat Teknolojisi", "",                95.10, 382.00, 14.50, 95.50, 380.25, 15.00, 92.00, 360.00, 18.50, 90.00, 340.00, 22.00],
+    ["751620", "",                    "Anadolu Lisesi",  53.87, "",     "",    "",    "",     "",    "",    "",     "",    "",    "",     ""],
+    ["751620", "",                    "Meslek Programı", 52.08, "",     "",    "",    "",     "",    "",    "",     "",    "",    "",     ""],
   ];
   const scoreNotes = [
     ["NOT: Kurum Kodu zorunludur, diğer alanlar opsiyoneldir"],
     ["NOT: Meslek Alanı boşsa okul geneli puanı olarak kaydedilir"],
     ["NOT: Meslek Alanı doluysa o alana özel puan kaydedilir (aynı okul için birden fazla satır olabilir)"],
+    ["NOT: Program yalnız çok programlı liseler içindir: Anadolu Lisesi veya Meslek Programı. Program doluysa Meslek Alanı boş kalmalıdır"],
     ["NOT: Sadece dolu alanlar güncellenir; boş bırakılanlar mevcut değeri korur"],
     ["NOT: Ondalık sayılar için nokta (.) kullanın"],
     ["NOT: OBP ve yüzdelik 0-100, LGS 0-500 arasında olmalıdır"],
@@ -108,6 +112,8 @@ export async function GET() {
   wsScore["!cols"] = [
     { wch: 15 },
     { wch: 35 },
+    { wch: 18 },
+    { wch: 12 }, { wch: 12 }, { wch: 15 },
     { wch: 12 }, { wch: 12 }, { wch: 15 },
     { wch: 12 }, { wch: 12 }, { wch: 15 },
     { wch: 12 }, { wch: 12 }, { wch: 15 },
