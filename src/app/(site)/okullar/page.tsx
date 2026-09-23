@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
 import { createClient } from "@/lib/supabase/server";
@@ -291,61 +290,20 @@ export default async function OkullarPage({ searchParams }: Props) {
     paginationSearchParams.obp_max = String(obpMax);
   }
 
-  // Bir aralığı temizlemek yalnızca O aralığı düşürmeli; diğer filtreler kalır.
-  const urlWithout = (...drop: string[]) => {
-    const qs = new URLSearchParams(paginationSearchParams);
-    for (const k of drop) qs.delete(k);
-    const s = qs.toString();
-    return `/okullar${s ? `?${s}` : ""}`;
-  };
-  const trFixed = (v: number) => v.toFixed(2).replace(".", ",");
-
   const startItem = totalCount === 0 ? 0 : offset + 1;
   const endItem = Math.min(offset + limit, totalCount);
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-10 pb-24">
+    <div className="min-h-screen bg-slate-50 pt-8 pb-24 md:pt-12">
       <div className="container mx-auto max-w-7xl px-6">
-        <div className="mb-8 max-w-3xl">
-          <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+        <header className="mb-8 max-w-2xl">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-[2.25rem] md:leading-tight">
             Sana Uygun Liseleri Keşfet
           </h1>
-          <p className="text-lg leading-relaxed text-slate-500">
+          <p className="mt-2 text-base leading-relaxed text-slate-500">
             İlçe, okul türü ve meslek alanlarına göre filtrele, en uygun eşleşmeleri hızla bul.
           </p>
-          {(hasYuzdelikRange || hasObpRange) && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {hasYuzdelikRange && (
-                <p className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
-                  Yüzdelik aralığı:{" "}
-                  <span className="tabular font-semibold">
-                    %{trFixed(yuzdelikMin!)} – %{trFixed(yuzdelikMax!)}
-                  </span>
-                  <Link
-                    href={urlWithout("yuzdelik_min", "yuzdelik_max")}
-                    className="font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-900"
-                  >
-                    temizle
-                  </Link>
-                </p>
-              )}
-              {hasObpRange && (
-                <p className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
-                  OBP aralığı:{" "}
-                  <span className="tabular font-semibold">
-                    {trFixed(obpMin!)} – {trFixed(obpMax!)}
-                  </span>
-                  <Link
-                    href={urlWithout("obp_min", "obp_max")}
-                    className="font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-900"
-                  >
-                    temizle
-                  </Link>
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+        </header>
 
         <SchoolList
           key={`${ara}-${ilce}-${tur}-${alan}-${yerlestirme}-${limit}-${siralama}-${yuzdelikMin}-${yuzdelikMax}-${obpMin}-${obpMax}`}

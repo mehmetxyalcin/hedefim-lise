@@ -1,18 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowDownWideNarrow,
-  ArrowRight,
   ArrowUpDown,
   Check,
-  CheckCircle2,
+  ChevronDown,
   ChevronRight,
-  Filter,
   MapPin,
-  Phone,
   Search,
   SlidersHorizontal,
   X,
@@ -23,8 +19,8 @@ import type { School } from "@/types/school";
 import type { Placement, PlacementValues, ProgramOBPs } from "@/lib/school-scores";
 import type { VocationalField } from "@/types/vocationalField";
 import { BottomSheet } from "@/components/ui/BottomSheet";
-import { Badge } from "@/components/ui/Badge";
 import { PROGRAM_LABELS } from "@/lib/school-programs";
+import { cn } from "@/lib/cn";
 
 const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -65,7 +61,14 @@ type Props = {
 const formatScore = (v: number) =>
   v.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-function ScoreBox({ values, programs, placement, year }: { values: PlacementValues | undefined; programs: ProgramOBPs | undefined; placement: Placement | null; year: number | null }) {
+type ScoreRow = { label: string; value: string };
+
+/** Satırın sağ sütunu: tek değer büyük, iki değer (merkezi+yerel ya da ÇPAL programları) iki satır. */
+function scoreRows(
+  values: PlacementValues | undefined,
+  programs: ProgramOBPs | undefined,
+  placement: Placement | null,
+): { single: ScoreRow | null; rows: ScoreRow[] | null } {
   const merkezi = values?.merkezi ?? null;
   const yerel = values?.yerel ?? null;
   const al = programs?.anadolu_lisesi ?? null;
@@ -79,10 +82,10 @@ function ScoreBox({ values, programs, placement, year }: { values: PlacementValu
         ]
       : null;
   const single = programRows ? null
-    : placement === "merkezi" ? (merkezi != null ? { label: "Yüzdelik Dilim", value: `%${formatScore(merkezi)}` } : null)
-    : placement === "yerel" ? (yerel != null ? { label: "OBP Puanı", value: formatScore(yerel) } : null)
-    : merkezi != null && yerel == null ? { label: "Yüzdelik Dilim", value: `%${formatScore(merkezi)}` }
-    : yerel != null && merkezi == null ? { label: "OBP Puanı", value: formatScore(yerel) }
+    : placement === "merkezi" ? (merkezi != null ? { label: "Yüzdelik dilim", value: `%${formatScore(merkezi)}` } : null)
+    : placement === "yerel" ? (yerel != null ? { label: "OBP puanı", value: formatScore(yerel) } : null)
+    : merkezi != null && yerel == null ? { label: "Yüzdelik dilim", value: `%${formatScore(merkezi)}` }
+    : yerel != null && merkezi == null ? { label: "OBP puanı", value: formatScore(yerel) }
     : null;
   const rows = programRows ?? (placement === null && merkezi != null && yerel != null
     ? [
@@ -90,27 +93,36 @@ function ScoreBox({ values, programs, placement, year }: { values: PlacementValu
         { label: "Yerel OBP", value: formatScore(yerel) },
       ]
     : null);
+  return { single, rows };
+}
 
+function ScoreCell({ values, programs, placement }: { values: PlacementValues | undefined; programs: ProgramOBPs | undefined; placement: Placement | null }) {
+  const { single, rows } = scoreRows(values, programs, placement);
+
+  if (single) {
+    return (
+      <div className="text-right">
+        <div className="tabular text-lg leading-tight font-bold text-slate-900">{single.value}</div>
+        <div className="mt-0.5 text-xs text-slate-500">{single.label}</div>
+      </div>
+    );
+  }
+  if (rows) {
+    return (
+      <dl className="space-y-1">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-baseline justify-end gap-2.5">
+            <dt className="text-xs whitespace-nowrap text-slate-500">{row.label}</dt>
+            <dd className="tabular w-[4.25rem] text-right text-sm font-bold text-slate-900">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
   return (
-    <div className="relative mb-4 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50/40">
-      {single ? (
-        <>
-          <span className="mt-1 mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">{single.label}</span>
-          <span className="text-3xl font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{single.value}</span>
-        </>
-      ) : rows ? (
-        <dl className="w-full space-y-1.5">
-          {rows.map((row) => (
-            <div key={row.label} className="flex items-baseline justify-between gap-2">
-              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{row.label}</dt>
-              <dd className="text-lg font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{row.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <span className="text-xs text-slate-400">Veri yok</span>
-      )}
-      {(single || rows) && year != null && <span className="mt-1 text-[10px] text-slate-400">{year}</span>}
+    <div className="text-right text-sm text-slate-400">
+      <span aria-hidden="true">—</span>
+      <span className="sr-only">Puan verisi yok</span>
     </div>
   );
 }
@@ -123,6 +135,59 @@ const SORT_OPTIONS = [
   { value: "obp_asc", label: "OBP: Düşükten Yükseğe" },
 ] as const;
 
+const trFixed = (v: number) => v.toFixed(2).replace(".", ",");
+
+const fieldLabel = "mb-1.5 block text-xs font-semibold text-slate-600";
+const controlBase =
+  "h-10 w-full rounded-lg border border-slate-200 bg-white text-sm text-slate-800 shadow-sm shadow-slate-900/[0.03] outline-none transition-colors hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+
+function SelectField({
+  id,
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className={fieldLabel}>{label}</label>
+      <div className="relative">
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={cn(controlBase, "cursor-pointer appearance-none truncate pr-9 pl-3")}
+        >
+          {children}
+        </select>
+        <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+      </div>
+    </div>
+  );
+}
+
+function FilterChip({ children, onRemove, label }: { children: React.ReactNode; onRemove: () => void; label: string }) {
+  return (
+    <span className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-blue-100 bg-blue-50 pr-1 pl-3 text-xs font-medium text-blue-800">
+      {children}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`${label} filtresini kaldır`}
+        className="flex h-5 w-5 items-center justify-center rounded-full text-blue-600 transition-colors hover:bg-blue-100 hover:text-blue-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </span>
+  );
+}
+
 export function SchoolList({
   schools,
   activePlacement,
@@ -133,7 +198,6 @@ export function SchoolList({
   totalCount,
   startItem,
   endItem,
-  currentPage,
   totalPages,
   initialSearch = "",
   initialIlce = "",
@@ -148,6 +212,7 @@ export function SchoolList({
   obpMax = null,
 }: Props) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const [search, setSearch] = useState(initialSearch);
   const [ilce, setIlce] = useState(initialIlce);
@@ -161,19 +226,26 @@ export function SchoolList({
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [fieldSearch, setFieldSearch] = useState("");
 
+  const hasYuzdelikRange = yuzdelikMin != null && yuzdelikMax != null;
+  const hasObpRange = obpMin != null && obpMax != null;
+
+  function go(url: string) {
+    startTransition(() => router.push(url));
+  }
+
   // Puan aralıkları yan paneldeki filtre değişimlerinde düşmemeli.
-  function keepRanges(params: URLSearchParams) {
-    if (yuzdelikMin != null && yuzdelikMax != null) {
+  function keepRanges(params: URLSearchParams, drop: "yuzdelik" | "obp" | null = null) {
+    if (hasYuzdelikRange && drop !== "yuzdelik") {
       params.set("yuzdelik_min", String(yuzdelikMin));
       params.set("yuzdelik_max", String(yuzdelikMax));
     }
-    if (obpMin != null && obpMax != null) {
+    if (hasObpRange && drop !== "obp") {
       params.set("obp_min", String(obpMin));
       params.set("obp_max", String(obpMax));
     }
   }
 
-  function buildSearchUrl(overrides: Record<string, string> = {}): string {
+  function buildSearchUrl(overrides: Record<string, string> = {}, dropRange: "yuzdelik" | "obp" | null = null): string {
     const params = new URLSearchParams();
     const s = (overrides.ara ?? search).trim();
     const _ilce = overrides.ilce ?? ilce;
@@ -189,14 +261,23 @@ export function SchoolList({
     if (_placement) params.set("yerlestirme", _placement);
     if (_limit !== 20) params.set("limit", String(_limit));
     if (_siralama !== "isim_asc") params.set("siralama", _siralama);
-    keepRanges(params);
+    keepRanges(params, dropRange);
     const qs = params.toString();
     return `/okullar${qs ? `?${qs}` : ""}`;
   }
 
   function handleSearch() {
-    router.push(buildSearchUrl());
+    go(buildSearchUrl());
     setIsFilterOpen(false);
+  }
+
+  /** Masaüstü panelinde seçimler anında uygulanır (arama kutusu hariç: Enter / Ara). */
+  function applyNow(key: "ilce" | "tur" | "alan" | "yerlestirme", value: string) {
+    if (key === "ilce") setIlce(value);
+    if (key === "tur") setTur(value);
+    if (key === "alan") setAlan(value);
+    if (key === "yerlestirme") setPlacement(value);
+    go(buildSearchUrl({ [key]: value }));
   }
 
   function handleLimitChange(newLimit: number) {
@@ -210,7 +291,7 @@ export function SchoolList({
     if (siralama !== "isim_asc") params.set("siralama", siralama);
     keepRanges(params);
     const qs = params.toString();
-    router.push(`/okullar${qs ? `?${qs}` : ""}`);
+    go(`/okullar${qs ? `?${qs}` : ""}`);
   }
 
   function handleSortChange(value: string) {
@@ -226,7 +307,7 @@ export function SchoolList({
     keepRanges(params);
     params.set("sayfa", "1");
     const qs = params.toString();
-    router.push(`/okullar${qs ? `?${qs}` : ""}`);
+    go(`/okullar${qs ? `?${qs}` : ""}`);
     setIsSortOpen(false);
   }
 
@@ -237,7 +318,7 @@ export function SchoolList({
     setLimit(20);
     setAlan("");
     setPlacement("");
-    router.push("/okullar");
+    go("/okullar");
     setIsFilterOpen(false);
   }
 
@@ -247,16 +328,13 @@ export function SchoolList({
     Number(Boolean(initialTur)) +
     Number(Boolean(initialAlan)) +
     Number(Boolean(initialPlacement)) +
-    Number(initialLimit !== 20) +
-    Number(yuzdelikMin != null && yuzdelikMax != null) +
-    Number(obpMin != null && obpMax != null);
+    Number(hasYuzdelikRange) +
+    Number(hasObpRange);
 
   const hasActiveFilters =
     Boolean(search.trim() || ilce || tur || alan || placement || limit !== 20) ||
-    (yuzdelikMin != null && yuzdelikMax != null) ||
-    (obpMin != null && obpMax != null);
-
-  const filteredSchools = useMemo(() => schools.filter(() => true), [schools]);
+    hasYuzdelikRange ||
+    hasObpRange;
 
   const activeSortLabel =
     SORT_OPTIONS.find((o) => o.value === siralama)?.label ?? SORT_OPTIONS[0].label;
@@ -264,95 +342,142 @@ export function SchoolList({
   const filteredVocFields = useMemo(
     () =>
       vocationalFields.filter((f) =>
-        f.title.toLowerCase().includes(fieldSearch.toLowerCase()),
+        f.title.toLocaleLowerCase("tr-TR").includes(fieldSearch.toLocaleLowerCase("tr-TR")),
       ),
     [vocationalFields, fieldSearch],
   );
 
-  // ── Desktop sidebar content ─────────────────────────────────────────────────
+  const alanTitle = vocationalFields.find((f) => String(f.id) === initialAlan)?.title;
+
+  // ── Uygulanmış filtreler (URL'deki hâl) ────────────────────────────────────
+  const activeChips = activeFilterCount > 0 && (
+    <>
+      {initialSearch && (
+        <FilterChip label="Arama" onRemove={() => { setSearch(""); go(buildSearchUrl({ ara: "" })); }}>
+          &ldquo;{initialSearch}&rdquo;
+        </FilterChip>
+      )}
+      {initialIlce && (
+        <FilterChip label="İlçe" onRemove={() => { setIlce(""); go(buildSearchUrl({ ilce: "" })); }}>
+          {initialIlce}
+        </FilterChip>
+      )}
+      {initialTur && (
+        <FilterChip label="Okul türü" onRemove={() => { setTur(""); go(buildSearchUrl({ tur: "" })); }}>
+          {initialTur}
+        </FilterChip>
+      )}
+      {initialAlan && (
+        <FilterChip label="Meslek alanı" onRemove={() => { setAlan(""); go(buildSearchUrl({ alan: "" })); }}>
+          {alanTitle ?? "Meslek alanı"}
+        </FilterChip>
+      )}
+      {initialPlacement && (
+        <FilterChip label="Yerleştirme" onRemove={() => { setPlacement(""); go(buildSearchUrl({ yerlestirme: "" })); }}>
+          {PLACEMENT_OPTIONS.find((p) => p.value === initialPlacement)?.label ?? initialPlacement} yerleştirme
+        </FilterChip>
+      )}
+      {hasYuzdelikRange && (
+        <FilterChip label="Yüzdelik aralığı" onRemove={() => go(buildSearchUrl({}, "yuzdelik"))}>
+          Yüzdelik <span className="tabular font-semibold">%{trFixed(yuzdelikMin!)} – %{trFixed(yuzdelikMax!)}</span>
+        </FilterChip>
+      )}
+      {hasObpRange && (
+        <FilterChip label="OBP aralığı" onRemove={() => go(buildSearchUrl({}, "obp"))}>
+          OBP <span className="tabular font-semibold">{trFixed(obpMin!)} – {trFixed(obpMax!)}</span>
+        </FilterChip>
+      )}
+    </>
+  );
+
+  // ── Masaüstü filtre paneli ─────────────────────────────────────────────────
   const sidebarContent = (
-    <div className="flex h-full w-full flex-col overflow-y-auto rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-      <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-5">
-        <div className="flex items-center gap-2">
-          <Filter className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-bold tracking-tight text-slate-900">Detaylı Filtre</h2>
-          {activeFilterCount > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold text-white">
-              {activeFilterCount}
-            </span>
-          )}
-        </div>
+    <div>
+      <div className="mb-5 flex h-7 items-center justify-between">
+        <h2 className="text-sm font-bold text-slate-900">Filtreler</h2>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="rounded text-xs font-semibold text-slate-500 underline-offset-2 transition-colors hover:text-rose-600 hover:underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+          >
+            Tümünü temizle
+          </button>
+        )}
       </div>
 
-      <div className="flex-grow space-y-5">
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Okul Ara</label>
+      <div className="space-y-5">
+        <form
+          role="search"
+          onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+        >
+          <label htmlFor="okul-ara" className={fieldLabel}>Okul adı</label>
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
-              type="text"
-              placeholder="Okul adı ara..."
+              id="okul-ara"
+              type="search"
+              placeholder="Örn. Fen Lisesi"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
-              className="w-full rounded-lg border border-slate-200 py-2 pr-8 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className={cn(controlBase, "pr-14 pl-9 placeholder:text-slate-400 [&::-webkit-search-cancel-button]:hidden")}
             />
-            {search && (
-              <button onClick={() => setSearch("")} className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600">×</button>
-            )}
+            <button
+              type="submit"
+              className="absolute top-1/2 right-1.5 h-7 -translate-y-1/2 rounded-md bg-slate-100 px-2.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-blue-600 hover:text-white focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+            >
+              Ara
+            </button>
           </div>
-        </div>
+        </form>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700">İlçe</label>
-          <select value={ilce} onChange={(e) => setIlce(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-            <option value="">Tüm İlçeler</option>
-            {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
-        </div>
+        <SelectField id="filtre-ilce" label="İlçe" value={ilce} onChange={(v) => applyNow("ilce", v)}>
+          <option value="">Tüm ilçeler</option>
+          {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+        </SelectField>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Okul Türü</label>
-          <select value={tur} onChange={(e) => setTur(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-            <option value="">Tüm Türler</option>
-            {SCHOOL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
+        <SelectField id="filtre-tur" label="Okul türü" value={tur} onChange={(v) => applyNow("tur", v)}>
+          <option value="">Tüm türler</option>
+          {SCHOOL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </SelectField>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Meslek Alanı</label>
-          <select value={alan} onChange={(e) => setAlan(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-            <option value="">Tüm Meslek Alanları</option>
-            {vocationalFields.map((f) => <option key={f.id} value={String(f.id)}>{f.title}</option>)}
-          </select>
-        </div>
+        <SelectField id="filtre-alan" label="Meslek alanı" value={alan} onChange={(v) => applyNow("alan", v)}>
+          <option value="">Tüm meslek alanları</option>
+          {vocationalFields.map((f) => <option key={f.id} value={String(f.id)}>{f.title}</option>)}
+        </SelectField>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700">Yerleştirme Türü</label>
-          <select value={placement} onChange={(e) => setPlacement(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-            <option value="">Tümü</option>
-            {PLACEMENT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label} Yerleştirme</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="mt-6 space-y-2 border-t border-slate-100 pt-6">
-        <button onClick={handleSearch} className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
-          <Search className="h-4 w-4" />
-          Ara
-        </button>
-        {hasActiveFilters && (
-          <button onClick={clearFilters} className="w-full rounded-lg bg-slate-100 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-200">
-            Filtreleri Temizle
-          </button>
-        )}
+        <fieldset>
+          <legend className={fieldLabel}>Yerleştirme türü</legend>
+          <div className="grid grid-cols-3 gap-1 rounded-lg bg-slate-200/60 p-1">
+            {[{ value: "", label: "Tümü" }, ...PLACEMENT_OPTIONS].map((opt) => {
+              const selected = placement === opt.value;
+              return (
+                <button
+                  key={opt.value || "tumu"}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => applyNow("yerlestirme", opt.value)}
+                  className={cn(
+                    "h-8 rounded-md text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none",
+                    selected
+                      ? "bg-white text-slate-900 shadow-sm shadow-slate-900/10"
+                      : "text-slate-600 hover:text-slate-900",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+            Merkezi: LGS yüzdelik dilimi. Yerel: OBP puanı.
+          </p>
+        </fieldset>
       </div>
     </div>
   );
 
-  // ── Mobile filter sheet footer ──────────────────────────────────────────────
+  // ── Mobil filtre sayfası alt çubuğu ────────────────────────────────────────
   const filterFooter = (
     <div className="flex gap-3">
       <button
@@ -370,19 +495,21 @@ export function SchoolList({
     </div>
   );
 
+  const scoreHeader = scoreYear != null ? `${scoreYear} puanı` : "Puan";
+
   return (
     <>
       {/* ── Mobil sticky filtre çubuğu ─────────────────────────────────────── */}
-      <div className="sticky top-16 z-30 mb-4 border-b border-slate-200 bg-white px-0 py-3 lg:hidden">
+      <div className="sticky top-16 z-30 -mx-6 mb-4 border-b border-slate-200 bg-slate-50/95 px-6 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-900/[0.03] transition-colors hover:bg-slate-50"
           >
-            <SlidersHorizontal className="h-4 w-4" />
+            <SlidersHorizontal className="h-4 w-4 text-slate-500" />
             Filtrele
             {activeFilterCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[11px] font-bold text-white">
                 {activeFilterCount}
               </span>
             )}
@@ -390,181 +517,156 @@ export function SchoolList({
 
           <button
             onClick={() => setIsSortOpen(true)}
-            className="ml-auto flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="ml-auto flex h-10 min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-900/[0.03] transition-colors hover:bg-slate-50"
           >
-            <ArrowUpDown className="h-4 w-4" />
-            <span className="max-w-[140px] truncate">{activeSortLabel}</span>
+            <ArrowUpDown className="h-4 w-4 shrink-0 text-slate-500" />
+            <span className="truncate">{activeSortLabel}</span>
           </button>
         </div>
 
-        {/* Aktif filtre chip'leri */}
         {activeFilterCount > 0 && (
-          <div className="hide-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1">
-            {initialSearch && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
-                &ldquo;{initialSearch}&rdquo;
-                <button onClick={() => { setSearch(""); router.push(buildSearchUrl({ ara: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </span>
-            )}
-            {initialIlce && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
-                {initialIlce}
-                <button onClick={() => { setIlce(""); router.push(buildSearchUrl({ ilce: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </span>
-            )}
-            {initialTur && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
-                {initialTur}
-                <button onClick={() => { setTur(""); router.push(buildSearchUrl({ tur: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </span>
-            )}
-            {initialPlacement && (
-              <span className="flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700">
-                {PLACEMENT_OPTIONS.find((p) => p.value === initialPlacement)?.label ?? initialPlacement}
-                <button onClick={() => { setPlacement(""); router.push(buildSearchUrl({ yerlestirme: "" })); }} className="-mr-1 shrink-0 rounded-full p-1 text-blue-600 transition-colors hover:bg-blue-200/70">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </span>
-            )}
+          <div className="hide-scrollbar mt-2.5 flex gap-2 overflow-x-auto">
+            {activeChips}
           </div>
         )}
       </div>
 
-      {/* ── Ana grid: sidebar + (çubuk + kartlar) ─────────────────────────── */}
-      <div className="relative flex flex-col items-start gap-8 lg:flex-row">
-        {/* Masaüstü sidebar */}
-        <div className="hidden w-[300px] shrink-0 lg:sticky lg:top-24 lg:block lg:self-start">
+      {/* ── Ana ızgara: filtre paneli + sonuçlar ───────────────────────────── */}
+      <div className="lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start lg:gap-10 xl:gap-12">
+        <aside aria-label="Filtreler" className="hidden lg:sticky lg:top-24 lg:block">
           {sidebarContent}
-        </div>
+        </aside>
 
-        {/* Sonuç sütunu: meta çubuğu + okul kartları */}
-        <div className="min-w-0 flex-1">
-          {/* Tek doğru meta çubuğu: gerçek toplam + aralık + sayfa başına + sıralama */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <p className="text-sm text-slate-500">
-                {totalCount === 0 ? (
-                  "Sonuç bulunamadı."
-                ) : (
-                  <>
-                    <span className="font-bold text-slate-900">{totalCount}</span> okul
-                    {totalPages > 1 && (
-                      <span className="text-slate-400">
-                        {" "}· {startItem}–{endItem} arası · Sayfa {currentPage}/{totalPages}
-                      </span>
-                    )}
-                  </>
-                )}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <span className="whitespace-nowrap text-xs text-slate-500">Sayfa başına:</span>
+        <section aria-label="Okul listesi" className="min-w-0">
+          {/* Sonuç çubuğu: toplam + sıralama + sayfa başına */}
+          <div className="mb-3 flex min-h-10 flex-wrap items-center justify-between gap-x-6 gap-y-2">
+            <p className="text-sm text-slate-600" aria-live="polite">
+              {totalCount === 0 ? (
+                "Sonuç bulunamadı."
+              ) : (
+                <>
+                  <span className="tabular font-bold text-slate-900">{totalCount}</span> okul
+                  {totalPages > 1 && (
+                    <span className="tabular text-slate-500">
+                      {" "}· {startItem}–{endItem} gösteriliyor
+                    </span>
+                  )}
+                </>
+              )}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                <span className="hidden sm:inline">Sayfa başına</span>
+                <span className="sr-only sm:hidden">Sayfa başına</span>
+                <span className="relative">
+                  <select
+                    value={limit}
+                    onChange={(e) => { setLimit(Number(e.target.value)); handleLimitChange(Number(e.target.value)); }}
+                    className="tabular h-9 cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white pr-7 pl-2.5 text-sm font-semibold text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  >
+                    {LIMIT_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                </span>
+              </label>
+
+              {/* Masaüstü sıralama (mobilde alt sayfadan) */}
+              <label className="relative hidden lg:block">
+                <span className="sr-only">Sıralama</span>
+                <ArrowUpDown className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 <select
-                  value={limit}
-                  onChange={(e) => handleLimitChange(Number(e.target.value))}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  value={siralama}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="h-9 cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white pr-8 pl-8 text-sm font-semibold text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 >
-                  {LIMIT_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
                 </select>
-              </div>
-            </div>
-
-            {/* Masaüstü sıralama select (mobilde sıralama alt-sayfadan) */}
-            <div className="group relative hidden lg:block">
-              <ArrowDownWideNarrow className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <select
-                value={siralama}
-                onChange={(e) => handleSortChange(e.target.value)}
-                className="cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-10 pl-10 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              <ChevronRight className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 rotate-90 text-slate-400" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              </label>
             </div>
           </div>
 
-          <div className="grid gap-5">
-            {filteredSchools.map((school) => (
-              <div
-                key={school.id}
-                className="group relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 sm:flex-row sm:p-6"
-              >
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <Badge tone="blue">{school.type}</Badge>
-                    <Badge tone="slate">
-                      <MapPin className="h-3 w-3" />
-                      {school.district}
-                    </Badge>
-                    {school.phone && (
-                      <a
-                        href={`tel:${school.phone}`}
-                        className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={`${school.name} telefonu: ${school.phone}`}
+          {activeFilterCount > 0 && (
+            <div className="mb-4 hidden flex-wrap gap-2 lg:flex">{activeChips}</div>
+          )}
+
+          <div
+            aria-busy={isPending}
+            className={cn(
+              "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03] transition-opacity duration-200",
+              isPending && "opacity-60",
+            )}
+          >
+            {schools.length > 0 && (
+              <>
+                <div className="hidden grid-cols-[minmax(0,1fr)_12rem_1rem] items-center gap-x-6 border-b border-slate-200 bg-slate-50/70 px-5 py-2.5 text-xs font-semibold text-slate-500 sm:grid">
+                  <span>Okul</span>
+                  <span className="text-right">{scoreHeader}</span>
+                  <span aria-hidden="true" />
+                </div>
+
+                <ul className="divide-y divide-slate-100">
+                  {schools.map((school) => (
+                    <li key={school.id}>
+                      <Link
+                        href={`/okullar/${school.slug}`}
+                        className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-4 transition-colors hover:bg-slate-50 focus-visible:bg-blue-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset sm:grid-cols-[minmax(0,1fr)_12rem_1rem] sm:gap-x-6 sm:px-5"
                       >
-                        <Phone className="h-3 w-3" />
-                        {school.phone}
-                      </a>
-                    )}
-                  </div>
+                        <div className="min-w-0">
+                          <h3 className="text-[15px] leading-snug font-bold text-slate-900 transition-colors group-hover:text-blue-700 sm:text-base">
+                            {school.name}
+                          </h3>
+                          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-slate-500">
+                            <span>{school.type}</span>
+                            <span aria-hidden="true" className="text-slate-300">·</span>
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                              {school.district}
+                            </span>
+                            {school.features.slice(0, 3).map((feature) => (
+                              <span key={feature} className="inline-flex items-center gap-2">
+                                <span aria-hidden="true" className="text-slate-300">·</span>
+                                {feature}
+                              </span>
+                            ))}
+                          </p>
+                        </div>
 
-                  <Link href={`/okullar/${school.slug}`}>
-                    <h3 className="mb-2 line-clamp-1 text-xl font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 group-hover:text-blue-600 sm:text-2xl">
-                      {school.name}
-                    </h3>
-                  </Link>
+                        <ScoreCell values={scoreValues[school.id]} programs={programValues[school.id]} placement={activePlacement} />
 
-                  <p className="mb-4 max-w-2xl pr-4 text-sm leading-relaxed text-slate-500 line-clamp-2">
-                    {school.description}
-                  </p>
+                        <ChevronRight
+                          aria-hidden="true"
+                          className="hidden h-4 w-4 text-slate-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-blue-600 sm:block"
+                        />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
 
-                  <div className="mt-auto flex flex-wrap gap-2">
-                    {school.features.slice(0, 3).map((feature) => (
-                      <span key={feature} className="flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1.5 text-[11px] font-semibold text-slate-600">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-slate-400" />
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
+            {schools.length === 0 && (
+              <div className="flex flex-col items-center px-6 py-20 text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                  <Search className="h-5 w-5 text-slate-400" />
                 </div>
-
-                <div className="relative flex shrink-0 flex-col justify-between border-t border-slate-100 pt-5 sm:w-48 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
-                  <ScoreBox values={scoreValues[school.id]} programs={programValues[school.id]} placement={activePlacement} year={scoreYear} />
-                  <Link
-                    href={`/okullar/${school.slug}`}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-blue-600/40"
-                  >
-                    Detaylı İncele
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-
-            {filteredSchools.length === 0 && (
-              <div className="flex flex-col items-center rounded-3xl border border-slate-200 bg-white py-24 text-center shadow-sm">
-                <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full border border-slate-100 bg-slate-50">
-                  <Search className="h-8 w-8 text-slate-300" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold tracking-tight text-slate-900">Sonuç Bulunamadı</h3>
-                <p className="mb-8 max-w-md text-slate-500">
-                  Seçtiğiniz kombinasyona uygun bir okul kaydı bulunamadı. Lütfen filtrelerinizi esnetmeyi deneyin.
+                <h3 className="mb-2 text-base font-bold text-slate-900">Bu filtrelerle okul bulunamadı</h3>
+                <p className="mb-6 max-w-sm text-sm leading-relaxed text-slate-500">
+                  Bir filtreyi kaldırmayı ya da ilçe veya okul türünü genişletmeyi deneyin.
                 </p>
-                <button onClick={clearFilters} className="rounded-xl border border-slate-200 bg-white px-6 py-3 font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50">
-                  Tüm Filtreleri Temizle
+                <button
+                  onClick={clearFilters}
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                >
+                  Tüm filtreleri temizle
                 </button>
               </div>
             )}
           </div>
-        </div>
+        </section>
       </div>
 
       {/* ── Filtre Bottom Sheet ────────────────────────────────────────────── */}
@@ -575,33 +677,36 @@ export function SchoolList({
         footer={filterFooter}
       >
         {/* Arama */}
-        <div className="mb-5">
-          <p className="mb-2 text-sm font-semibold text-slate-700">Okul Ara</p>
+        <div className="mb-6">
+          <p className="mb-2 text-sm font-semibold text-slate-700">Okul adı</p>
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
-              type="text"
-              placeholder="Okul adı ara..."
+              type="search"
+              placeholder="Örn. Fen Lisesi"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 py-2.5 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
+              className="h-11 w-full rounded-lg border border-slate-200 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             />
           </div>
         </div>
 
         {/* İlçe */}
-        <div className="mb-5">
-          <p className="mb-3 text-sm font-semibold text-slate-700">İlçe</p>
+        <div className="mb-6">
+          <p className="mb-2.5 text-sm font-semibold text-slate-700">İlçe</p>
           <div className="grid grid-cols-3 gap-2">
             {DISTRICTS.map((d) => (
               <button
                 key={d}
+                aria-pressed={ilce === d}
                 onClick={() => setIlce(ilce === d ? "" : d)}
-                className={`rounded-xl border px-2 py-2 text-center text-sm font-medium transition-colors ${
+                className={cn(
+                  "rounded-lg border px-2 py-2 text-center text-sm font-medium transition-colors",
                   ilce === d
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
-                }`}
+                    ? "border-blue-300 bg-blue-50 text-blue-800"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                )}
               >
                 {d}
               </button>
@@ -610,18 +715,20 @@ export function SchoolList({
         </div>
 
         {/* Okul Türü */}
-        <div className="mb-5">
-          <p className="mb-3 text-sm font-semibold text-slate-700">Okul Türü</p>
+        <div className="mb-6">
+          <p className="mb-2.5 text-sm font-semibold text-slate-700">Okul türü</p>
           <div className="space-y-2">
             {SCHOOL_TYPES.map((t) => (
               <button
                 key={t}
+                aria-pressed={tur === t}
                 onClick={() => setTur(tur === t ? "" : t)}
-                className={`flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-colors ${
+                className={cn(
+                  "flex w-full items-center justify-between rounded-lg border px-4 py-2.5 text-left text-sm font-medium transition-colors",
                   tur === t
-                    ? "border-blue-300 bg-blue-50 text-blue-700"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-200"
-                }`}
+                    ? "border-blue-300 bg-blue-50 text-blue-800"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                )}
               >
                 {t}
                 {tur === t && <Check className="h-4 w-4 text-blue-600" />}
@@ -631,18 +738,20 @@ export function SchoolList({
         </div>
 
         {/* Yerleştirme */}
-        <div className="mb-5">
-          <p className="mb-3 text-sm font-semibold text-slate-700">Yerleştirme Türü</p>
-          <div className="grid grid-cols-3 gap-2">
-            {PLACEMENT_OPTIONS.map((opt) => (
+        <div className="mb-6">
+          <p className="mb-2.5 text-sm font-semibold text-slate-700">Yerleştirme türü</p>
+          <div className="grid grid-cols-3 gap-1 rounded-lg bg-slate-100 p-1">
+            {[{ value: "", label: "Tümü" }, ...PLACEMENT_OPTIONS].map((opt) => (
               <button
-                key={opt.value}
-                onClick={() => setPlacement(placement === opt.value ? "" : opt.value)}
-                className={`rounded-xl border py-2 text-sm font-medium transition-colors ${
+                key={opt.value || "tumu"}
+                aria-pressed={placement === opt.value}
+                onClick={() => setPlacement(opt.value)}
+                className={cn(
+                  "h-9 rounded-md text-sm font-semibold transition-all",
                   placement === opt.value
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
-                }`}
+                    ? "bg-white text-slate-900 shadow-sm shadow-slate-900/10"
+                    : "text-slate-600",
+                )}
               >
                 {opt.label}
               </button>
@@ -652,7 +761,7 @@ export function SchoolList({
 
         {/* Meslek Alanı */}
         <div>
-          <p className="mb-3 text-sm font-semibold text-slate-700">Meslek Alanı</p>
+          <p className="mb-2.5 text-sm font-semibold text-slate-700">Meslek alanı</p>
           <div className="relative mb-2">
             <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -660,28 +769,30 @@ export function SchoolList({
               placeholder="Alan ara..."
               value={fieldSearch}
               onChange={(e) => setFieldSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 py-2 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="h-10 w-full rounded-lg border border-slate-200 pr-4 pl-9 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             />
           </div>
-          <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-100 p-2">
+          <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 p-1.5">
             <button
               onClick={() => setAlan("")}
-              className={`mb-1 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                alan === "" ? "bg-blue-50 text-blue-700" : "text-slate-500 hover:bg-slate-50"
-              }`}
+              className={cn(
+                "mb-0.5 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors",
+                alan === "" ? "bg-blue-50 font-medium text-blue-800" : "text-slate-500 hover:bg-slate-50",
+              )}
             >
-              Tüm Meslek Alanları
+              Tüm meslek alanları
               {alan === "" && <Check className="h-4 w-4 shrink-0 text-blue-600" />}
             </button>
             {filteredVocFields.map((f) => (
               <button
                 key={f.id}
                 onClick={() => setAlan(alan === String(f.id) ? "" : String(f.id))}
-                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                className={cn(
+                  "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors",
                   alan === String(f.id)
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-slate-700 hover:bg-slate-50"
-                }`}
+                    ? "bg-blue-50 font-medium text-blue-800"
+                    : "text-slate-700 hover:bg-slate-50",
+                )}
               >
                 {f.title}
                 {alan === String(f.id) && <Check className="h-4 w-4 shrink-0 text-blue-600" />}
@@ -702,11 +813,12 @@ export function SchoolList({
             <button
               key={opt.value}
               onClick={() => handleSortChange(opt.value)}
-              className={`flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-sm transition-colors ${
+              className={cn(
+                "flex w-full items-center justify-between rounded-lg px-4 py-3.5 text-sm transition-colors",
                 siralama === opt.value
-                  ? "bg-blue-50 font-semibold text-blue-700"
-                  : "text-slate-700 hover:bg-slate-50"
-              }`}
+                  ? "bg-blue-50 font-semibold text-blue-800"
+                  : "text-slate-700 hover:bg-slate-50",
+              )}
             >
               {opt.label}
               {siralama === opt.value && <Check className="h-5 w-5 text-blue-600" />}

@@ -49,17 +49,17 @@ export function Pagination({ currentPage, totalPages, searchParams }: Props) {
   const nextHref = currentPage < totalPages ? buildHref(currentPage + 1, searchParams) : null;
 
   return (
-    <div className="mt-8 flex items-center justify-center gap-1">
+    <div className="mt-6 flex items-center justify-center gap-1">
       {prevHref ? (
         <Link
           href={prevHref}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 sm:h-10 sm:w-10"
+          className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 sm:h-10 sm:w-10"
           aria-label="Önceki sayfa"
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
       ) : (
-        <span className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300 sm:h-10 sm:w-10">
+        <span className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300 sm:h-10 sm:w-10">
           <ChevronLeft className="h-4 w-4" />
         </span>
       )}
@@ -77,10 +77,10 @@ export function Pagination({ currentPage, totalPages, searchParams }: Props) {
             <Link
               key={page}
               href={buildHref(page, searchParams)}
-              className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold transition-colors ${
+              className={`flex h-10 w-10 items-center justify-center rounded-lg tabular text-sm font-semibold transition-colors ${
                 page === currentPage
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-200 bg-white text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50"
               }`}
               aria-current={page === currentPage ? "page" : undefined}
             >
@@ -97,13 +97,13 @@ export function Pagination({ currentPage, totalPages, searchParams }: Props) {
       {nextHref ? (
         <Link
           href={nextHref}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 sm:h-10 sm:w-10"
+          className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 sm:h-10 sm:w-10"
           aria-label="Sonraki sayfa"
         >
           <ChevronRight className="h-4 w-4" />
         </Link>
       ) : (
-        <span className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300 sm:h-10 sm:w-10">
+        <span className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300 sm:h-10 sm:w-10">
           <ChevronRight className="h-4 w-4" />
         </span>
       )}
