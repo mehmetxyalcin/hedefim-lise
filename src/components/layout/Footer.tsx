@@ -105,14 +105,9 @@ export async function Footer() {
                   <BookOpen className="h-5 w-5 text-white" />
                 </div>
               )}
-              <div>
-                <span className="block text-xl font-bold tracking-tight text-white">
-                  {siteSettings.site_title}
-                </span>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-blue-300/80">
-                  Yolum Bilinçli Tercih
-                </span>
-              </div>
+              <span className="text-xl font-bold tracking-tight text-white">
+                {siteSettings.site_title}
+              </span>
             </div>
 
             {footerSettings.about_text && (
