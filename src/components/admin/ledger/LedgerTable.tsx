@@ -54,7 +54,7 @@ export function LedgerTable({
               Okul
             </th>
             <th scope="col" className="w-[124px] bg-admin-ground/95 py-2.5 pr-3 font-semibold backdrop-blur">
-              <span aria-hidden="true" className="inline-flex items-center gap-1 text-[10px] leading-none">
+              <span aria-hidden="true" className="inline-flex items-center gap-1 text-[11px] leading-none">
                 {HEALTH_CHECKS.map((check) => (
                   <span key={check.id} className="flex w-2.5 justify-center">
                     <HealthCodes id={check.id} />
