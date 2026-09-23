@@ -36,14 +36,6 @@ function getPercentileTextColor(p: number) {
   return "text-blue-600";
 }
 
-function getPercentileLabel(p: number) {
-  if (p <= 20) return "Çok yüksek başarı gerekiyor";
-  if (p <= 40) return "Yüksek başarı gerekiyor";
-  if (p <= 60) return "Orta düzey başarı gerekiyor";
-  if (p <= 80) return "Düşük-orta başarı gerekiyor";
-  return "Geniş kontenjan";
-}
-
 export function SchoolScoreCard({ scores }: Props) {
   // Hook'lar koşulsuz çağrılmalı: yıl listesini ve state'i erken return'den önce kur.
   const years = [...new Set((scores ?? []).map((s) => s.year))].sort((a, b) => b - a);
@@ -97,9 +89,6 @@ export function SchoolScoreCard({ scores }: Props) {
                       style={{ width: `${active.percentile}%` }}
                     />
                   </div>
-                  <p className="mt-1.5 text-xs text-slate-400">
-                    {getPercentileLabel(active.percentile)}
-                  </p>
                 </div>
               )}
               {active.obp_score != null && (
