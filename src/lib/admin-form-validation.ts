@@ -120,7 +120,16 @@ export function validateAdminForm(form: FormData, rules: FormRules): string | nu
 const link = { ...text('Bağlantı', true, 2048), kind: 'link' as const };
 const navigation = { label: text('Etiket', true, 300), href: link, target: choice('Açılma şekli', ['_self', '_blank']) };
 const faq = { question: text('Soru', true, 3000), answer: text('Yanıt', true), category: text('Kategori', true, 300), sort_order: integer('Sıra', false, 0, 2147483647), source_page: integer('Kaynak sayfa', false, 1, 2147483647), is_published: choice('Yayın durumu', ['on']) };
+const blogPost: FormRules = {
+  id: uuid('Kayıt', false), title: text('Başlık', true, 200), slug: text('Adres (slug)', false, 120),
+  excerpt: text('Özet', true, 300), body: text('Yazı metni', true, 100000), category: text('Kategori', true, 60),
+  highlight: text('Kapak vurgusu', false, 24), author_name: text('Yazar', false, 100),
+  cover_file: { ...upload, label: 'Kapak görseli' }, current_cover: url('Mevcut kapak'), cover_image_alt: text('Kapak açıklaması', false, 300),
+  remove_cover: choice('Kapağı kaldır', ['on']), status: choice('Yayın durumu', ['taslak', 'yayinda'], true),
+  published_at: text('Yayın tarihi', false, 16),
+};
 export const contentFormRules: Record<string, FormRules> = {
+  saveBlogPost: blogPost, deleteBlogPost: { id: uuid('Kayıt') },
   createFaq: faq, updateFaq: { ...faq, id: uuid('Kayıt') }, deleteFaq: { id: uuid('Kayıt') },
   updateSiteSettings: { site_title: text('Site başlığı', true, 300), logo_alt: text('Logo alt metni', true, 300), current_logo_url: url('Logo adresi'), logo_file: { ...upload, max: 2 * 1024 * 1024 } },
   createNavigationItem: navigation, updateNavigationItem: { ...navigation, id: uuid('Kayıt'), is_visible: choice('Görünürlük', ['on']) },

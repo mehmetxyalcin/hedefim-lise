@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-23T00:00:00.000Z",
+  "generatedAt": "2026-09-24T00:00:00.000Z",
   "title": "Design System: Hedefim Lise",
   "extensions": {
     "colorMeta": {
@@ -303,6 +303,81 @@
           "#eef0f6",
           "#f4f5fa"
         ]
+      },
+      "blog-lemon": {
+        "role": "primary",
+        "displayName": "Blog Lemon Spot (.blog scope only)",
+        "canonical": "#f4c534",
+        "tonalRamp": [
+          "#3d3000",
+          "#5c4a00",
+          "#8a6d00",
+          "#c29a12",
+          "#f4c534",
+          "#f7d566",
+          "#fae59a",
+          "#fdf6d8"
+        ]
+      },
+      "blog-lemon-soft": {
+        "role": "primary",
+        "displayName": "Blog Highlighter (.blog scope only)",
+        "canonical": "#fae59a",
+        "tonalRamp": [
+          "#3d3000",
+          "#8a6d00",
+          "#c29a12",
+          "#f4c534",
+          "#f7d566",
+          "#fae59a",
+          "#fcefc0",
+          "#fdf6d8"
+        ]
+      },
+      "blog-ink": {
+        "role": "neutral",
+        "displayName": "Blog Chapter Ink (.blog scope only)",
+        "canonical": "#14161a",
+        "tonalRamp": [
+          "#14161a",
+          "#33373e",
+          "#5a5f68",
+          "#80858d",
+          "#a8aca9",
+          "#dadbd4",
+          "#eeefea",
+          "#ffffff"
+        ]
+      },
+      "blog-sheet": {
+        "role": "neutral",
+        "displayName": "Blog Second Paper (.blog scope only)",
+        "canonical": "#eeefea",
+        "tonalRamp": [
+          "#14161a",
+          "#33373e",
+          "#5a5f68",
+          "#80858d",
+          "#a8aca9",
+          "#dadbd4",
+          "#eeefea",
+          "#ffffff"
+        ]
+      },
+      "blog-paper": {
+        "role": "neutral",
+        "displayName": "Blog White Paper (.blog scope only)",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#14161a",
+          "#33373e",
+          "#5a5f68",
+          "#80858d",
+          "#a8aca9",
+          "#dadbd4",
+          "#eeefea",
+          "#ffffff"
+        ]
       }
     },
     "typographyMeta": {
@@ -365,6 +440,34 @@
       "admin-code": {
         "displayName": "Admin Pip Code (11px)",
         "purpose": "Only the G A T D P K M codes above the pip column (telefon is a phone icon)."
+      },
+      "blog-display": {
+        "displayName": "Blog Monumental Title",
+        "purpose": ".blog only: the index \"Blog\" at 4 / 5.5 / 6rem, 800, line-height 0.85, at the -0.04em tracking floor."
+      },
+      "blog-headline": {
+        "displayName": "Blog Article Title",
+        "purpose": ".blog only: article h1 at 2.25 / 3 / 3.75rem, 800, -0.035em."
+      },
+      "blog-title": {
+        "displayName": "Blog Section Heading",
+        "purpose": ".blog only: article h2 (1.625 / 1.875rem) and section heads (1.375 / 1.5rem) on an ink rule, 700, -0.02em."
+      },
+      "blog-body": {
+        "displayName": "Blog Reading Body",
+        "purpose": ".blog only: Literata with optical sizing, 1.125 / 1.1875rem, line-height 1.75, in a 68ch column."
+      },
+      "blog-meta": {
+        "displayName": "Blog Meta",
+        "purpose": ".blog only: Schibsted 0.875rem, category 600 ink, tabular date and read time in muted."
+      },
+      "blog-label": {
+        "displayName": "Blog Margin Label",
+        "purpose": ".blog only: uppercase 0.06em for the \"Bu yazıda\" / \"Paylaş\" margin labels and callout labels; never above a headline."
+      },
+      "blog-plate-figure": {
+        "displayName": "Blog Plate Figure",
+        "purpose": ".blog only: the giant key figure on a plate, container-sized (cqw/cqh) and stepped by length; 800, -0.04em."
       }
     },
     "shadows": [
@@ -419,6 +522,21 @@
         "name": "admin-duration-sidebar",
         "value": "200ms",
         "purpose": ".admin only: sidebar width 240px <-> 72px. prefers-reduced-motion sets every transition and animation inside .admin to 0ms."
+      },
+      {
+        "name": "blog-plate-in",
+        "value": "700ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both; clip-path inset(0 0 42% 0) -> inset(0)",
+        "purpose": ".blog only: the one motion moment; the featured plate figure unrolls from the top on the index lead and article hero. 0ms under reduced motion."
+      },
+      {
+        "name": "blog-link-hover",
+        "value": "background-color 160ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": ".blog only: Lemon Soft wash on link hover."
+      },
+      {
+        "name": "blog-toc-marker",
+        "value": "all 200ms ease-out",
+        "purpose": ".blog only: TOC square morphs into the 16x3 ink bar for the active section."
       }
     ],
     "breakpoints": [
@@ -437,6 +555,11 @@
       {
         "name": "xl",
         "value": "1280px"
+      },
+      {
+        "name": "blog-plate-figure-tab",
+        "value": "260px (container width)",
+        "purpose": ".blog only: below this plate width the figure tab on a photo plate is hidden."
       }
     ],
     "adminLayout": {
@@ -458,6 +581,14 @@
       },
       "ledgerDetailPanel": "360px docked column at xl; slide-over (max 384px) below xl",
       "schoolFormTabRail": "220px sticky rail at lg; horizontal strip below lg"
+    },
+    "blogLayout": {
+      "container": "1240px",
+      "grid": "12 columns, 48px gutter at lg",
+      "lead": "plate 7 cols + text 5 cols",
+      "postSet": "5-col plate entry + 7-col text rows with square thumbnails (88px, 144px from sm)",
+      "contentsRow": "8.5rem tabular date | title + dotted leader + category | 3.5rem right-aligned tabular read time",
+      "article": "3-col sticky margin (top-28) + 7-col body at 68ch"
     }
   },
   "components": [
@@ -620,6 +751,54 @@
       "description": ".admin only: linked counters in one bordered strip (1px line gaps); each filters the ledger. Gap counters in missing-orange, zero values faint, figures tabular.",
       "html": "<div class=\"ds-adm-stats\"><a href=\"#\"><span>Yayında</span><b>184</b></a><a href=\"#\"><span>Pasif</span><b class=\"z\">0</b></a><a href=\"#\"><span>Eksik kayıt</span><b class=\"g\">66<small>/ 184</small></b></a></div>",
       "css": ".ds-adm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;background:#e6e8f0;border:1px solid #e6e8f0;border-radius:12px;box-shadow:0 1px 2px rgb(30 34 53 / .04),0 4px 12px rgb(30 34 53 / .04);font-family:Inter,system-ui,sans-serif;max-width:480px;} .ds-adm-stats a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;background:#fff;text-decoration:none;transition:background-color .15s;} .ds-adm-stats a:hover{background:#f4f5fa;} .ds-adm-stats a:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #4f46e5;} .ds-adm-stats span{font-size:12px;color:#5b6178;} .ds-adm-stats b{font-size:20px;font-weight:700;color:#1e2235;font-variant-numeric:tabular-nums;} .ds-adm-stats b.g{color:#c2410c;} .ds-adm-stats b.z{color:#656a80;} .ds-adm-stats small{margin-left:4px;font-size:12px;font-weight:500;color:#5b6178;}"
+    },
+    {
+      "name": "Blog Plate",
+      "kind": "custom",
+      "refersTo": "blog-plate-ink",
+      "description": ".blog only: the chapter plate, one flood colour (lemon for the newest post only, ink or paper for categories), ruled texture, giant key figure; no running head or eyebrow.",
+      "html": "<div class=\"ds-blog-plates\"><div class=\"ds-blog-plate l\"><p>%1,5</p></div><div class=\"ds-blog-plate i\"><p>OBP</p></div><div class=\"ds-blog-plate p\"><p>2026</p></div></div>",
+      "css": ".ds-blog-plates{display:grid;grid-template-columns:repeat(3,160px);gap:12px}.ds-blog-plate{position:relative;aspect-ratio:4/3;border-radius:4px;overflow:hidden;container-type:size;background-image:repeating-linear-gradient(180deg,transparent 0 27px,color-mix(in srgb,currentColor 9%,transparent) 27px 28px)}.ds-blog-plate p{position:absolute;left:6%;right:6%;bottom:7%;margin:0;font-family:\"Schibsted Grotesk\",system-ui,sans-serif;font-weight:800;font-size:min(24cqw,50cqh);line-height:.85;letter-spacing:-0.04em}.ds-blog-plate.l{background-color:#f4c534;color:#14161a}.ds-blog-plate.i{background-color:#14161a;color:#fff}.ds-blog-plate.i p{color:#f4c534}.ds-blog-plate.p{background-color:#eeefea;color:#14161a}"
+    },
+    {
+      "name": "Blog Primary Button",
+      "kind": "button",
+      "refersTo": "blog-button-primary",
+      "description": ".blog only: ink fill, white Schibsted 600; hover turns lemon with ink text.",
+      "html": "<a href=\"#\" class=\"ds-blog-btn\">Yazıyı oku <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></a>",
+      "css": ".ds-blog-btn{display:inline-flex;align-items:center;gap:8px;border-radius:4px;background:#14161a;color:#fff;padding:12px 20px;font-family:\"Schibsted Grotesk\",system-ui,sans-serif;font-size:.9375rem;font-weight:600;text-decoration:none;transition:background-color 150ms,color 150ms}.ds-blog-btn:hover{background:#f4c534;color:#14161a}.ds-blog-btn:focus-visible{outline:2px solid #14161a;outline-offset:3px}"
+    },
+    {
+      "name": "Blog Band CTA",
+      "kind": "button",
+      "refersTo": "blog-button-band",
+      "description": ".blog only: lemon CTA on the ink band; hover white.",
+      "html": "<div class=\"ds-blog-band\"><a href=\"#\" class=\"ds-blog-band-btn\">Okulları karşılaştır</a></div>",
+      "css": ".ds-blog-band{background:#14161a;border-radius:4px;padding:40px}.ds-blog-band-btn{display:inline-flex;border-radius:4px;background:#f4c534;color:#14161a;padding:12px 20px;font-family:\"Schibsted Grotesk\",system-ui,sans-serif;font-size:.9375rem;font-weight:600;text-decoration:none;transition:background-color 150ms}.ds-blog-band-btn:hover{background:#fff}.ds-blog-band-btn:focus-visible{outline:2px solid #fff;outline-offset:3px}"
+    },
+    {
+      "name": "Blog Category Tabs",
+      "kind": "nav",
+      "refersTo": "blog-tab-active",
+      "description": ".blog only: one hairline row; active tab is a lemon fill with the count in lemon ink.",
+      "html": "<ul class=\"ds-blog-tabs\"><li><a href=\"#\" aria-current=\"page\">Tümü <span>12</span></a></li><li><a href=\"#\">Yerleştirme <span>4</span></a></li><li><a href=\"#\">Okul seçimi <span>3</span></a></li></ul>",
+      "css": ".ds-blog-tabs{display:flex;gap:4px;list-style:none;margin:0;padding:12px 0;border-top:1px solid #14161a;border-bottom:1px solid #14161a;font-family:\"Schibsted Grotesk\",system-ui,sans-serif}.ds-blog-tabs a{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:4px;font-size:.9375rem;color:#33373e;text-decoration:none;transition:background-color 150ms}.ds-blog-tabs a span{font-size:.8125rem;color:#5a5f68;font-variant-numeric:tabular-nums}.ds-blog-tabs a:hover{background:#eeefea;color:#14161a}.ds-blog-tabs a[aria-current]{background:#f4c534;color:#14161a;font-weight:600}.ds-blog-tabs a[aria-current] span{color:#3d3000}.ds-blog-tabs a:focus-visible{outline:2px solid #14161a;outline-offset:3px}"
+    },
+    {
+      "name": "Blog Contents Row",
+      "kind": "custom",
+      "refersTo": null,
+      "description": ".blog only: İçindekiler row; tabular date column, title, dotted leader, category, right-aligned tabular read time.",
+      "html": "<ol class=\"ds-blog-toc-rows\"><li><time>12 Eyl 2026</time><span class=\"t\"><a href=\"#\">Yüzdelik dilim nasıl okunur?</a><i></i><em>Yerleştirme</em></span><b>6 dk</b></li><li><time>3 Eyl 2026</time><span class=\"t\"><a href=\"#\">Nakil başvurusu adım adım</a><i></i><em>Nakil işlemleri</em></span><b>11 dk</b></li></ol>",
+      "css": ".ds-blog-toc-rows{list-style:none;margin:0;padding:0;border-top:1px solid #dadbd4;font-family:\"Schibsted Grotesk\",system-ui,sans-serif}.ds-blog-toc-rows li{display:grid;grid-template-columns:8.5rem minmax(0,1fr) 3.5rem;column-gap:32px;align-items:baseline;padding:20px 0;border-bottom:1px solid #dadbd4}.ds-blog-toc-rows time{font-size:.875rem;color:#5a5f68;font-variant-numeric:tabular-nums}.ds-blog-toc-rows .t{display:flex;align-items:baseline;gap:12px;min-width:0}.ds-blog-toc-rows a{font-size:1.1875rem;font-weight:600;color:#14161a;text-decoration:none;text-decoration-color:#f4c534;text-decoration-thickness:3px;text-underline-offset:4px}.ds-blog-toc-rows a:hover{text-decoration-line:underline}.ds-blog-toc-rows i{flex:1 1 2rem;min-width:2rem;border-bottom:2px dotted #dadbd4;transform:translateY(-0.3em)}.ds-blog-toc-rows em{font-style:normal;font-size:.875rem;color:#5a5f68;white-space:nowrap}.ds-blog-toc-rows b{text-align:right;font-size:.9375rem;font-weight:600;color:#14161a;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Blog Article TOC",
+      "kind": "nav",
+      "refersTo": "blog-toc-marker-active",
+      "description": ".blog only: \"Bu yazıda\" margin; the active section is marked by shape (6px square becomes a 16x3 ink bar), not colour.",
+      "html": "<nav class=\"ds-blog-toc\"><p>Bu yazıda</p><div class=\"bar\"><div></div></div><ol><li><a href=\"#\"><s></s>Yüzdelik dilim nedir?</a></li><li><a href=\"#\" aria-current=\"location\"><s></s>Puanlar nasıl hesaplanır?</a></li><li><a href=\"#\"><s></s>Sık yapılan hatalar</a></li></ol></nav>",
+      "css": ".ds-blog-toc{width:240px;font-family:\"Schibsted Grotesk\",system-ui,sans-serif}.ds-blog-toc>p{margin:0 0 12px;font-size:.8125rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#14161a}.ds-blog-toc .bar{height:3px;background:#dadbd4;border-radius:9999px;overflow:hidden;margin-bottom:16px}.ds-blog-toc .bar div{height:100%;width:45%;background:#14161a}.ds-blog-toc ol{list-style:none;margin:0;padding:0}.ds-blog-toc a{display:flex;align-items:center;gap:12px;padding:6px 8px 6px 0;font-size:.9375rem;color:#5a5f68;text-decoration:none;transition:color 150ms}.ds-blog-toc a:hover{color:#14161a}.ds-blog-toc s{display:block;width:6px;height:6px;flex-shrink:0;background:#dadbd4;border-radius:1px;transition:all 200ms ease-out}.ds-blog-toc a:hover s{background:#14161a}.ds-blog-toc a[aria-current]{color:#14161a;font-weight:600}.ds-blog-toc a[aria-current] s{width:16px;height:3px;background:#14161a}.ds-blog-toc a:focus-visible{outline:2px solid #14161a;outline-offset:3px}"
     }
   ],
   "narrative": {
@@ -724,6 +903,31 @@
         "name": "The One-Vocabulary Rule (admin)",
         "body": "The whole admin uses the same three words for data state: tamam / eksik / gerekmez, and the same pair for publish state: Yayında / Pasif. The legend above the ledger defines both the states and the eight codes (codes only at md and up, where the code header is visible).",
         "section": "components"
+      },
+      {
+        "name": "The Newest-Post Rule (blog)",
+        "body": "Lemon is never a category tone. Categories take ink or paper only (plateTone() in src/lib/blog.ts: fixed for known categories, hashed across ink/paper for new ones). The lemon plate belongs to exactly one post, the blog's newest (all[0]), and it stays lemon on the index, on its own page and in every related list, so readers learn to spot it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fill-Not-Text Rule (blog)",
+        "body": "Lemon appears as a flood, a stroke or a marker. On white it never carries words; on ink it may carry the plate figure or an icon.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tracking-Floor Rule (blog)",
+        "body": "No blog type is tracked tighter than -0.04em; only the monumental title and plate figures reach it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule (blog)",
+        "body": "Every date, count, read time, page number, ordered-list number and table cell is tabular, so columns align down the contents page.",
+        "section": "typography"
+      },
+      {
+        "name": "The One-Monument Rule (blog)",
+        "body": "One face does the monumental work: the grotesk. Literata never sets a head or a figure.",
+        "section": "typography"
       }
     ],
     "dos": [
@@ -739,7 +943,12 @@
       "Do give each screen exactly one filled indigo primary; all other actions are secondary, ghost, or danger.",
       "Do make destructive actions quiet: danger-variant text or icon buttons (never a filled red button) behind a confirmation (ConfirmButton or a window.confirm on submit) that names the record and the consequence.",
       "Do carry state with shape plus text (filled / outlined / dash, dot + word) and the one state vocabulary.",
-      "Do set counted figures in tabular numerals, and keep labels in sentence case."
+      "Do set counted figures in tabular numerals, and keep labels in sentence case.",
+      "Do keep every blog value on the blog-* utilities and compose BlogFrame, Plate, PostMeta, PostSet and ContentsRow rather than restyling.",
+      "Do give each plate one flood colour, and give lemon only to the newest post's plate and the empty state; categories get ink or paper.",
+      "Do put a post's key figure in highlight so its plate carries a number, not just a category name.",
+      "Do mark state by shape (square → bar, fill → tab) and keep figures tabular.",
+      "Do separate sections with the 2px ink rule and rows with Line hairlines."
     ],
     "donts": [
       "Don't mix gray-* and slate-* neutrals; the system is slate — legacy gray-* classes (mobile sheets) are drift to migrate.",
@@ -754,7 +963,13 @@
       "Don't add KPI cards or charts that don't filter the ledger; counters are links.",
       "Don't add uppercase eyebrows, wide-tracked labels, fluid display type, or hover lifts inside .admin.",
       "Don't reorder, wrap or drop pips, or signal a pip state by colour alone.",
-      "Don't let Exam Blue, cyan, landing teal/vermilion, or the landing fonts into .admin."
+      "Don't let Exam Blue, cyan, landing teal/vermilion, or the landing fonts into .admin.",
+      "Don't lay out recent or related posts as an equal three-up card grid; use the unequal 5 + 7 set.",
+      "Don't put a running head, eyebrow or kicker on a plate or above a headline.",
+      "Don't set text in lemon on white, or use lemon as a category tone.",
+      "Don't add shadows, gradients (other than the highlighter band and ruled texture), or radii above 4px inside .blog.",
+      "Don't track type tighter than -0.04em.",
+      "Don't let Exam Blue, cyan, landing teal/vermilion, admin indigo, or another world's fonts into .blog."
     ]
   }
 }

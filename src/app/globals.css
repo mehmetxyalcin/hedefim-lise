@@ -30,6 +30,18 @@
   --color-admin-tint-ink: var(--admin-tint-ink);
   --color-admin-missing: var(--admin-missing);
   --shadow-admin-card: 0 1px 2px rgb(30 34 53 / 0.04), 0 4px 12px rgb(30 34 53 / 0.04);
+  /* Blog (.blog kapsamı) — "Ders kitabı bölüm sayfası". */
+  --font-blog-display: var(--font-schibsted), system-ui, sans-serif;
+  --font-blog-reading: var(--font-literata), Georgia, serif;
+  --color-blog-paper: var(--blog-paper);
+  --color-blog-sheet: var(--blog-sheet);
+  --color-blog-ink: var(--blog-ink);
+  --color-blog-ink-soft: var(--blog-ink-soft);
+  --color-blog-muted: var(--blog-muted);
+  --color-blog-line: var(--blog-line);
+  --color-blog-lemon: var(--blog-lemon);
+  --color-blog-lemon-soft: var(--blog-lemon-soft);
+  --color-blog-lemon-ink: var(--blog-lemon-ink);
 }
 
 /* ── Landing paleti (Yön #3: Yerleştirme Kılavuzu) ─────────────────────────
@@ -99,6 +111,102 @@
   .admin *::after {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
+  }
+}
+
+/* ── Blog: "Ders kitabı bölüm sayfası" ─────────────────────────────────────
+   Yalnız .blog kapsamında. Beyaz kâğıt, mürekkep siyahı ve tek spot renk:
+   limon (Mersin narenciyesi + fosforlu kalem). Limon yalnız dolgu olarak
+   kullanılır (plaka, vurgu, işaret); beyaz üstünde metin rengi olmaz.
+   Exam Blue, landing ve admin renkleri buraya girmez. */
+.blog {
+  --blog-paper: #ffffff;
+  --blog-sheet: #eeefea; /* ikinci kâğıt: gri plaka, not kutusu */
+  --blog-ink: #14161a;
+  --blog-ink-soft: #33373e; /* gövde metni, beyazda 12:1 */
+  --blog-muted: #5a5f68; /* ikincil metin, sheet üstünde bile ≥5:1 */
+  --blog-line: #dadbd4;
+  --blog-lemon: #f4c534;
+  --blog-lemon-soft: #fae59a;
+  --blog-lemon-ink: #3d3000; /* limon zemindeki ikincil metin, 9:1 */
+  background-color: var(--blog-paper);
+  color: var(--blog-ink);
+  /* @theme inline değişkeni CSS'e yazılmaz; next/font değişkeni doğrudan kullanılır. */
+  font-family: var(--font-literata), Georgia, serif;
+  caret-color: var(--blog-ink);
+  font-optical-sizing: auto;
+}
+.blog ::selection {
+  background: var(--blog-lemon);
+  color: var(--blog-ink);
+}
+.blog :focus-visible {
+  outline: 2px solid var(--blog-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+/* Fosforlu kalem: satır kırılsa da her satırda ayrı çizgi. */
+.blog .blog-mark {
+  background: linear-gradient(
+    180deg,
+    transparent 0 14%,
+    var(--blog-lemon-soft) 14% 90%,
+    transparent 90%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: inherit;
+  padding: 0 0.12em;
+}
+.blog .blog-link {
+  text-decoration-line: underline;
+  text-decoration-color: var(--blog-lemon);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.blog .blog-link:hover {
+  background-color: var(--blog-lemon-soft);
+  text-decoration-color: var(--blog-ink);
+}
+/* Plaka dokusu: ders kitabı sayfasının çizgisi, yalnız zemin tonu kadar. */
+.blog .blog-plate-ruled {
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0 27px,
+    color-mix(in srgb, currentColor 9%, transparent) 27px 28px
+  );
+}
+/* İçindekiler satırı: başlıktan süreye noktalı yol. */
+.blog .blog-leader {
+  flex: 1 1 2rem;
+  min-width: 2rem;
+  border-bottom: 2px dotted var(--blog-line);
+  transform: translateY(-0.3em);
+}
+.blog .blog-scroll {
+  scrollbar-color: var(--blog-line) transparent;
+}
+@keyframes blog-plate-in {
+  from {
+    clip-path: inset(0 0 42% 0);
+    transform: translateY(0.06em);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+/* Tek anı: öne çıkan plakanın figürü baskıdan çıkar gibi yukarıdan açılır. */
+.blog .blog-plate-in {
+  animation: blog-plate-in 700ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .blog *,
+  .blog *::before,
+  .blog *::after {
+    transition-duration: 0ms !important;
+    animation: none !important;
   }
 }
 

@@ -60,6 +60,15 @@ colors:
   admin-danger: "#be123c"
   admin-danger-tint: "#fff1f2"
   admin-danger-ink: "#9f1239"
+  blog-paper: "#ffffff"
+  blog-sheet: "#eeefea"
+  blog-ink: "#14161a"
+  blog-ink-soft: "#33373e"
+  blog-muted: "#5a5f68"
+  blog-line: "#dadbd4"
+  blog-lemon: "#f4c534"
+  blog-lemon-soft: "#fae59a"
+  blog-lemon-ink: "#3d3000"
 typography:
   display:
     fontFamily: "Inter, Arial, Helvetica, sans-serif"
@@ -146,12 +155,53 @@ typography:
     fontSize: "0.6875rem"
     fontWeight: 600
     lineHeight: 1
+  blog-display:
+    fontFamily: "Schibsted Grotesk, system-ui, sans-serif"
+    fontSize: "6rem"
+    fontWeight: 800
+    lineHeight: 0.85
+    letterSpacing: "-0.04em"
+  blog-headline:
+    fontFamily: "Schibsted Grotesk, system-ui, sans-serif"
+    fontSize: "3.75rem"
+    fontWeight: 800
+    lineHeight: 1.05
+    letterSpacing: "-0.035em"
+  blog-title:
+    fontFamily: "Schibsted Grotesk, system-ui, sans-serif"
+    fontSize: "1.875rem"
+    fontWeight: 700
+    lineHeight: 1.25
+    letterSpacing: "-0.02em"
+  blog-body:
+    fontFamily: "Literata, Georgia, serif"
+    fontSize: "1.1875rem"
+    fontWeight: 400
+    lineHeight: 1.75
+  blog-meta:
+    fontFamily: "Schibsted Grotesk, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    fontFeature: "tnum"
+  blog-label:
+    fontFamily: "Schibsted Grotesk, system-ui, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 700
+    letterSpacing: "0.06em"
+  blog-plate-figure:
+    fontFamily: "Schibsted Grotesk, system-ui, sans-serif"
+    fontSize: "min(36cqw, 64cqh)"
+    fontWeight: 800
+    lineHeight: 0.8
+    letterSpacing: "-0.04em"
 rounded:
   md: "8px"
   lg: "12px"
   xl: "16px"
   2xl: "24px"
   full: "9999px"
+  blog: "4px"
+  blog-sm: "3px"
 spacing:
   sm: "8px"
   md: "16px"
@@ -311,6 +361,97 @@ components:
   admin-topbar:
     backgroundColor: "{colors.admin-surface}"
     height: "64px"
+  blog-button-primary:
+    backgroundColor: "{colors.blog-ink}"
+    textColor: "{colors.blog-paper}"
+    typography: "{typography.blog-meta}"
+    rounded: "{rounded.blog}"
+    padding: "12px 20px"
+  blog-button-primary-hover:
+    backgroundColor: "{colors.blog-lemon}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "12px 20px"
+  blog-button-band:
+    backgroundColor: "{colors.blog-lemon}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "12px 20px"
+  blog-button-band-hover:
+    backgroundColor: "{colors.blog-paper}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "12px 20px"
+  blog-button-share:
+    backgroundColor: "{colors.blog-paper}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "0 14px"
+    height: "40px"
+  blog-tab:
+    textColor: "{colors.blog-ink-soft}"
+    rounded: "{rounded.blog}"
+    padding: "0 12px"
+    height: "40px"
+  blog-tab-active:
+    backgroundColor: "{colors.blog-lemon}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "0 12px"
+    height: "40px"
+  blog-input:
+    backgroundColor: "{colors.blog-paper}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "0 12px 0 36px"
+    height: "40px"
+  blog-plate-lemon:
+    backgroundColor: "{colors.blog-lemon}"
+    textColor: "{colors.blog-ink}"
+    typography: "{typography.blog-plate-figure}"
+    rounded: "{rounded.blog}"
+  blog-plate-ink:
+    backgroundColor: "{colors.blog-ink}"
+    textColor: "{colors.blog-lemon}"
+    typography: "{typography.blog-plate-figure}"
+    rounded: "{rounded.blog}"
+  blog-plate-paper:
+    backgroundColor: "{colors.blog-sheet}"
+    textColor: "{colors.blog-ink}"
+    typography: "{typography.blog-plate-figure}"
+    rounded: "{rounded.blog}"
+  blog-callout-note:
+    backgroundColor: "{colors.blog-sheet}"
+    textColor: "{colors.blog-ink-soft}"
+    rounded: "{rounded.blog}"
+    padding: "24px 28px"
+  blog-callout-dikkat:
+    backgroundColor: "{colors.blog-lemon}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog}"
+    padding: "24px 28px"
+  blog-callout-onemli:
+    backgroundColor: "{colors.blog-ink}"
+    textColor: "{colors.blog-paper}"
+    rounded: "{rounded.blog}"
+    padding: "24px 28px"
+  blog-list-number:
+    backgroundColor: "{colors.blog-lemon}"
+    textColor: "{colors.blog-ink}"
+    rounded: "{rounded.blog-sm}"
+    size: "24px"
+  blog-toc-marker:
+    backgroundColor: "{colors.blog-line}"
+    size: "6px"
+  blog-toc-marker-active:
+    backgroundColor: "{colors.blog-ink}"
+    width: "16px"
+    height: "3px"
+  blog-cta-band:
+    backgroundColor: "{colors.blog-ink}"
+    textColor: "{colors.blog-paper}"
+    rounded: "{rounded.blog}"
+    padding: "40px"
 ---
 
 # Design System: Hedefim Lise
@@ -321,7 +462,7 @@ components:
 
 Hedefim Lise sits with an anxious 8th-grader (and their parent, and their counselor) at the moment a life choice is being made, and its whole job is to feel like a calm, credible desk to make that choice at. The system runs on a deliberate duality: a **deep-navy chrome world** — the footer and the dark page headers on interior surfaces (istatistikler, hakkında, alan detayı) — frames the product like a confident night sky you're navigating by, while the **body is a bright, orderly workspace** of near-white canvas, cool slate neutrals, and a single decisive blue. The dark frame supplies gravity and trust; the light body supplies clarity and speed. Nothing shouts except the one place a decision happens.
 
-> **Scope note (2026-08).** The landing route (`/`) no longer uses the old dark-navy `#071426` hero with cyan/amber aurora glows — that hero and its search panel were deleted. The landing now runs its own light, landing-scoped visual world documented in **Landing Surface World (Yön #3 — Yerleştirme Kılavuzu)** below. Everything else — okullar, school detail, alanlar, istatistikler, Navbar/Footer, and the `ui/` primitives — still runs the Exam Blue system this document describes. The admin (`/admin/**`) no longer does: it runs its own scoped world, documented in **Admin Surface World (Veri Sağlık Defteri)** below.
+> **Scope note (2026-08).** The landing route (`/`) no longer uses the old dark-navy `#071426` hero with cyan/amber aurora glows — that hero and its search panel were deleted. The landing now runs its own light, landing-scoped visual world documented in **Landing Surface World (Yön #3 — Yerleştirme Kılavuzu)** below. Everything else — okullar, school detail, alanlar, istatistikler, Navbar/Footer, and the `ui/` primitives — still runs the Exam Blue system this document describes. The admin (`/admin/**`) no longer does: it runs its own scoped world, documented in **Admin Surface World (Veri Sağlık Defteri)** below. The blog (`/blog/**`, 2026-09) does not either: inside the site header and footer it runs its own scoped world, documented in **Blog Surface World (Ders Kitabı Bölüm Sayfası)** below; the admin blog editor stays in the Admin Surface World.
 
 The temperament is **reassuring and calm**: measured spacing, soft rounded surfaces, thin hairline borders, and shadows so light they read as breath rather than weight. Color is rationed — the blue is a signal, not a mood — and the semantic hues (emerald, rose, amber) appear only to mean something. This is an Operate system wearing a Persuade hero: the landing frame earns trust, then gets out of the way so filtering, comparing, and shortlisting stay effortless.
 
@@ -603,6 +744,94 @@ Two radii carry almost everything: **8px** (`rounded-lg`) for buttons, inputs, n
 - **Don't** add uppercase eyebrows, wide-tracked labels, fluid display type, or hover lifts inside `.admin`.
 - **Don't** reorder, wrap or drop pips, or signal a pip state by colour alone.
 - **Don't** let Exam Blue, cyan, landing teal/vermilion, or the landing fonts into `.admin`.
+
+## Blog Surface World (Ders Kitabı Bölüm Sayfası)
+
+**Scope (critical):** This world exists **only inside the `.blog` wrapper**. `BlogFrame` (`src/components/blog/BlogFrame.tsx`) puts it around every `/blog/**` route through `src/app/(site)/blog/layout.tsx`, and it loads the world's two faces (`src/components/blog/fonts.ts`) as next/font variables on that wrapper only. Its values are CSS custom properties (`--blog-*`) defined on `.blog` in `globals.css`, exposed to Tailwind as `blog-*` colour utilities and `font-blog-display` / `font-blog-reading` through `@theme inline`; they resolve to nothing outside the scope. The site's light header and Night Chrome footer frame the blog unchanged and stay in the Exam Blue system. The admin preview renders the same `Article` component, so preview equals live. The admin blog pages (`/admin/blog/**`, `BlogPostForm`) are **not** part of this world: they live in the Admin Surface World and use only `admin-*` values. The palettes never mix: no Exam Blue, cyan, landing teal/vermilion, admin indigo, Inter, Archivo, Source Serif or Roboto Mono inside `.blog`, and no lemon or blog faces outside it.
+
+**Creative North Star (blog): "Ders Kitabı Bölüm Sayfası" (The Textbook Chapter Page).** The blog is a well-set textbook chapter set: every post opens on a printed chapter **plate** carrying its key figure, and the archive reads like an **İçindekiler** (contents) page. It refuses both the SaaS hero with a three-equal-card grid and the cream-serif magazine. Direction contract: `.impeccable/surfaces/src-app-site-blog-page-tsx.md` (direction #3/7, seed 7e5d5fdf).
+
+### Colors (blog-scoped)
+
+White paper, one ink, one spot colour. Lemon is a **fill** (a flood, a highlighter stroke, a marker), never running text on white.
+
+- **Paper** (`blog-paper`): the page, the search field, share buttons.
+- **Sheet** (`blog-sheet`): the second paper: paper-tone plates, the "Not" and "İpucu" callouts, the mobile TOC packet, inline code, image placeholders, and the hover wash on tabs, breadcrumb and pager links.
+- **Ink** (`blog-ink`): headings, figures, every structural rule (the 1px header rules, the 2px section-heading rule), the ink plates, the ink CTA band, the "Önemli" callout, the primary button fill, the focus outline, the active TOC bar.
+- **Ink Soft** (`blog-ink-soft`): reading text, excerpts, deks (12:1 on paper).
+- **Muted** (`blog-muted`): dates, meta, category names in contents rows, idle TOC entries, placeholders (at least 5:1 even on Sheet).
+- **Line** (`blog-line`): hairline row dividers, the dotted leader, idle TOC squares, the reading-progress track, the table body rules.
+- **Lemon** (`blog-lemon`): the single spot colour. Its full list of jobs: the **newest post's plate** wherever it appears (index lead, its own article hero, related thumbnails), the **empty-state plate**, the **active category tab**, **ordered-list number tiles**, the **"Dikkat" callout**, **CTA buttons on the ink band**, the figure colour on ink plates and the icon on the "Önemli" callout (lemon on ink only), `::selection`, the 3–4px title and link underline, and the hover fill of the ink "Yazıyı oku" button.
+- **Lemon Soft** (`blog-lemon-soft`): the highlighter: the `mark` band (search hits, marked terms in articles) and the link-hover wash.
+- **Lemon Ink** (`blog-lemon-ink`): secondary text on a lemon fill (the count inside the active tab), 9:1.
+
+**The Newest-Post Rule.** Lemon is never a category tone. Categories take **ink** or **paper** only (`plateTone()` in `src/lib/blog.ts`: fixed for known categories, hashed across ink/paper for new ones). The lemon plate belongs to exactly one post, the blog's newest (`all[0]`), and it stays lemon on the index, on its own page and in every related list, so readers learn to spot it.
+
+**The Fill-Not-Text Rule.** Lemon appears as a flood, a stroke or a marker. On white it never carries words; on ink it may carry the plate figure or an icon.
+
+### Typography (blog-scoped)
+
+**Display Font:** Schibsted Grotesk (`font-blog-display`, with system-ui): every head, the monumental "Blog", the plate figure, and all UI text (meta, tabs, buttons, TOC, tables).
+**Reading Font:** Literata with optical sizing (`font-blog-reading`, the `.blog` base font, with Georgia): excerpts, deks, article body, blockquotes (italic).
+
+- **Monumental title** (`blog-display`): the index "Blog" at 4 / 5.5 / 6rem, 800, line-height 0.85, -0.04em.
+- **Article title** (`blog-headline`): 2.25 / 3 / 3.75rem, 800, 1.05, -0.035em. The index lead title runs 2 / 2.5 / 2.875rem, 700, 1.08, -0.03em.
+- **Section and body headings** (`blog-title`): section heads ("Son yazılar", "İçindekiler", "Sıradaki yazılar") 1.375 / 1.5rem 700 -0.02em; article h2 1.625 / 1.875rem 700 -0.02em on a 1px ink rule; h3 1.25rem 700 -0.015em.
+- **Reading body** (`blog-body`): Literata 1.125 / 1.1875rem, line-height 1.75, in a **68ch** column; the first paragraph is a lede at 1.25 / 1.3125rem in full ink.
+- **Meta** (`blog-meta`): Schibsted 0.875rem, category in 600 ink, date and read time tabular in Muted, joined by " · ".
+- **Margin label** (`blog-label`): 0.8125rem, 700, uppercase, 0.06em; used only for the "Bu yazıda" and "Paylaş" margin labels and the callout labels, never above a headline.
+- **Plate figure** (`blog-plate-figure`): Schibsted 800 sized to the plate with container units (`cqw`/`cqh`), stepped by length: ≤3 characters fill the plate (line-height 0.8), longer figures step down and break in two lines; tracking -0.04 to -0.035em.
+
+**The Tracking-Floor Rule.** No blog type is tracked tighter than **-0.04em**; only the monumental title and plate figures reach it.
+
+**The Tabular Rule (blog).** Every date, count, read time, page number, ordered-list number and table cell is tabular, so columns align down the contents page.
+
+**The One-Monument Rule.** One face does the monumental work: the grotesk. Literata never sets a head or a figure.
+
+### Layout (blog-scoped)
+
+- **Container:** `max-w-[1240px]`, 16 / 24px gutters, on a 12-column grid at `lg` with a 48px gutter.
+- **Index first viewport:** the monumental "Blog" (7 cols) with a one-line dek and "N yazı · RSS" count right (5 cols), bottom-aligned; then **one row between two 1px ink rules** holding the category tabs (scrolling horizontally on phones) and the search field (288px at `lg`); then the lead split: plate 7 cols (4:3, 16:10 from `sm`) and title / excerpt / meta / "Yazıyı oku" 5 cols.
+- **Recent and related set:** an **unequal set**: one 5-col entry with a 16:9 plate, title, excerpt and meta, beside a 7-col stack of text rows, each with a square plate thumbnail (88px, 144px from `sm`) on the right, hairline-divided. With a single post the entry spans 6 cols.
+- **İçindekiler archive:** an ordered list of hairline rows: a tabular date column (8.5rem), the title, a 2px dotted leader, the category, and a right-aligned tabular read-time column (3.5rem). Below `md` the leader and columns fold into a "category · N dk okuma" line under the title. Paged at 12 rows; search results list flat with the query marked.
+- **Article:** breadcrumb, then title and dek in 8–9 cols, a meta `dl` (Yazan / Yayın / Güncelleme / Okuma) on a 1px ink rule, then a full-width hero plate (16:10, 5:2 from `sm`, 3:1 from `lg`, figure at the top). The body grid gives the **margin** 3 cols (sticky at `top-28`: TOC, progress bar, share) and the text 7 cols at 68ch; the margin is a fixed region on every post. Below `lg` the TOC becomes a compact Sheet packet that expands in place. After the body: the ink CTA band, then "Sıradaki yazılar" as the unequal set.
+- **Rhythm:** section heads sit on a 2px ink top rule with 16px above the text and 32px below; acts are separated by 64 / 80px. Article h2s get 56px above.
+
+### Elevation & Depth (blog-scoped)
+
+Flat, printed. The blog has **no shadows**. Depth comes from flooded planes (plates, the ink band, callouts), ink rules and hairlines. The one moment of motion is the featured plate's figure **unrolling from the top** (`blog-plate-in`: clip-path inset 42% → 0, 700ms expo-out, 120ms delay) on the index lead and the article hero. Otherwise: colour transitions at 150ms, link hover at 160ms expo-out, the TOC marker morph at 200ms ease-out. Under `prefers-reduced-motion` every transition and animation inside `.blog` is 0ms.
+
+### Shapes (blog-scoped)
+
+Square-ish corners: **4px** (`blog`) on plates, buttons, tabs, inputs, callouts, the ink band and images; **3px** (`blog-sm`) on ordered-list tiles, inline code, breadcrumb and TOC hit areas; 2px on the photo inside a plate frame. Rules are 1px ink (structure), 2px ink (section heads, table header) and 1px Line (rows). Plates carry a faint **ruled-page texture** (`blog-plate-ruled`: a 1px line every 28px at 9% of the plate's text colour) when they have no photo. Icons are Lucide at 16px.
+
+### Components (blog-scoped)
+
+- **Plate** (`Plate`, the signature): a tone-flooded rectangle, one flood colour per plate (lemon / ink / paper). Without a photo it shows the ruled texture and a giant figure: the post's `highlight` (its key figure, e.g. "%1,5") or, failing that, the category name. With a photo the plate becomes a **frame**: the tone shows as a 2.5% border around the image, and the highlight sits in the bottom-left corner as a **figure tab** in the plate tone; the tab is hidden when the plate is narrower than **260px** (`@max-[260px]`), so thumbnails show only the framed photo. Plates carry **no running head, eyebrow or label**.
+- **Buttons:** 4px radius, Schibsted 0.9375rem 600, 12px × 20px. **Primary** is an ink fill with white text; the lead's "Yazıyı oku" turns lemon with ink text on hover. **Band CTA** (on the ink band) is a lemon fill with ink text, hover white. **Quiet** buttons (pager, "Okulları incele", "Filtreyi kaldır") have no fill and a Sheet hover. **Share** buttons are 40px white with a 15% ink border, hover full ink border on Sheet; "Bağlantıyı kopyala" confirms with a check.
+- **Category tabs:** 40px, 4px radius, name plus a tabular count; idle Ink Soft with a Sheet hover; **active is a lemon fill** with ink 600 text, the count in Lemon Ink, `aria-current="page"`.
+- **Search field:** 40px, white, 1px Line border, 4px radius, search icon inset left; focus turns the border ink.
+- **Links:** `blog-link` is ink text on a 3px lemon underline (4px offset); hover lays a Lemon Soft wash and turns the underline ink. Card and row titles show the same lemon underline on hover and stretch their hit area over the whole entry.
+- **Highlighter** (`blog-mark`): a Lemon Soft band from 14% to 90% of the line height, cloned per line so it survives wrapping.
+- **Table of contents** ("Bu yazıda"): entries in Muted with a 6px Line square; **the active section is marked by shape, not colour**: its square becomes a 16×3px ink bar and its text goes ink 600, `aria-current="location"`. A 3px progress bar (Line track, ink fill) sits above the list.
+- **Callouts:** 4px radius, 20–28px padding, an uppercase label with a Lucide icon. **Not** and **İpucu** on Sheet; **Dikkat** on lemon; **Önemli** on ink with white text and a lemon icon.
+- **Lists:** ordered items get a 24px lemon tile with a tabular ink number; unordered items get a 16×2px ink dash. **Blockquote:** Literata italic 1.3125 / 1.4375rem ink with a large grotesk quote mark. **Tables:** Schibsted 0.9375rem, a 2px ink header rule, Line row rules, first column 600 ink, all cells tabular, horizontal scroll in a focusable region. **Section break:** three 6px ink dots.
+- **Ink CTA band:** an ink plate (4px) with a white head, 75%-white Literata copy and a lemon CTA, bridging an article to the school list.
+- **Empty state:** a lemon plate reading "Yakında" beside a head, a line of copy and two actions (ink primary, quiet secondary). A search with no hits shows a Sheet panel with a "Tüm yazılar" link.
+
+### Do's and Don'ts (blog)
+
+- **Do** keep every blog value on the `blog-*` utilities and compose `BlogFrame`, `Plate`, `PostMeta`, `PostSet` and `ContentsRow` rather than restyling.
+- **Do** give each plate one flood colour, and give lemon only to the newest post's plate and the empty state; categories get ink or paper.
+- **Do** put a post's key figure in `highlight` so its plate carries a number, not just a category name.
+- **Do** mark state by shape (square → bar, fill → tab) and keep figures tabular.
+- **Do** separate sections with the 2px ink rule and rows with Line hairlines.
+- **Don't** lay out recent or related posts as an equal three-up card grid; use the unequal 5 + 7 set.
+- **Don't** put a running head, eyebrow or kicker on a plate or above a headline.
+- **Don't** set text in lemon on white, or use lemon as a category tone.
+- **Don't** add shadows, gradients (other than the highlighter band and ruled texture), or radii above 4px inside `.blog`.
+- **Don't** track type tighter than -0.04em.
+- **Don't** let Exam Blue, cyan, landing teal/vermilion, admin indigo, or another world's fonts into `.blog`.
 
 
 ## Do's and Don'ts

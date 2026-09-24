@@ -320,3 +320,14 @@ Tasarım: `docs/superpowers/specs/2026-09-23-cok-programli-lise-programlari-desi
 - Kural `src/lib/school-programs.ts` + `school-scores.ts`; `/okullar` tür filtresi ÇPAL'ları programına göre kapsar; kart iki program satırı; detay tablosunda program satırları.
 - Yönetim: okul formunda Programlar, puan sekmesinde 2026 ve Kapsam seçimi, toplu yüklemede Program ve 2026 sütunları.
 
+
+## 25. Blog bölümü — 24 Eylül 2026
+
+Dal: `feat/blog`. Yön sözleşmesi: `.impeccable/surfaces/src-app-site-blog-page-tsx.md` (seed 7e5d5fdf).
+
+- Kullanıcı blog için Exam Blue'yu istemedi; blog `.blog` kapsamında kendi dünyasıdır ("Ders kitabı bölüm sayfası"): beyaz kâğıt, mürekkep `#14161a`, tek spot renk limon `#f4c534` (yalnız dolgu), Schibsted Grotesk (başlık/plaka) + Literata (okuma). Fontlar yalnız `components/blog/fonts.ts` → `BlogFrame` içinde yüklenir. Ortak Navbar/Footer korunur.
+- Public: `/blog` (başlık + kategori sekmeleri/arama, öne çıkan yazı, 3 son yazı, İçindekiler arşivi, 12'li sayfalama; `?kategori=`, `?ara=`, `?sayfa=`), `/blog/[slug]` (kenar dizini + okuma ilerlemesi, paylaş, `/okullar` yönlendirmesi, sıradaki yazılar, BlogPosting + BreadcrumbList JSON-LD), `/blog/rss.xml`, sitemap girişleri. Görsel yoksa kapak = kategori tonunda tipografik plaka + "kapak vurgusu".
+- Metin biçimi: `lib/blog-markdown.ts` güvenli Markdown alt kümesi; HTML üretmez, React ağacı basar. Bağlantı/görsel adresleri güvenlik süzgecinden geçer. Desteklenenler yönetim formundaki "Biçimlendirme rehberi"nde.
+- Veri: `019_blog_posts.sql` — `blog_posts` tablosu, RLS (ziyaretçi yalnız `is_published` ve `published_at <= now()`; yazma yalnız admin), iki TASLAK yazı (SSS'deki 2026 kılavuz bilgileriyle), görünür "Blog" menü öğesi. Kapaklar `site-assets/blog/`. **24 Eylül 2026 canlıya uygulandı** (kullanıcı onayı; `execute_sql`, tek BEGIN/COMMIT, dosya sha256 81ec95bd…). Tek fark: kod henüz yayında olmadığından menü öğesi `is_visible = false` eklendi (order 6); kod yayına girince görünür yapılmalı. Doğrulama: RLS açık, iki politika, iki taslak, anon REST boş liste döndü ve INSERT 42501 ile reddedildi; güvenlik danışmanında yeni uyarı yok.
+- Yönetim: `/admin/blog` (arama, durum süzgeci: Yayında / Zamanlanmış / Taslak), `yeni`, `[id]/duzenle` (başlıktan otomatik adres, sayaçlar, biçim araç çubuğu, İstanbul saatiyle ileri tarihli yayın, kapak yükleme/kaldırma; hata olursa metin korunur), `[id]/onizleme` (public bileşenin aynısı), silme onaylı. Önbellek etiketi `blog-posts`.
+- Doğrulama: 95 test (yeni `blog.test`, `blog-actions.test`, `blog.database.test` — PGlite ile RLS ve kısıtlar), tsc, `eslint .` temiz, üretim derlemesi başarılı. Görsel doğrulama commit edilmeyen örnek verilerle masaüstü/mobil yapıldı (`.impeccable/review/blog/`); oturumlu yönetim akışı ve canlı yazma denenmedi.

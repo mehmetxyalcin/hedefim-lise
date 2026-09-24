@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site";
+import { getPublishedPosts } from "@/lib/blog-data";
 import { createStaticClient } from "@/lib/supabase/static";
 
 // Sitemap build'e çakılı kalmasın: içerik admin panelinden değişiyor, dosya
@@ -16,6 +17,7 @@ const STATIC_ENTRIES = [
   { path: "/alanlar", changeFrequency: "weekly", priority: 0.8 },
   { path: "/istatistikler", changeFrequency: "weekly", priority: 0.7 },
   { path: "/soru-cevap", changeFrequency: "weekly", priority: 0.6 },
+  { path: "/blog", changeFrequency: "weekly", priority: 0.6 },
   { path: "/hakkinda", changeFrequency: "monthly", priority: 0.4 },
   { path: "/iletisim", changeFrequency: "monthly", priority: 0.4 },
 ] as const;
@@ -64,6 +66,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: absolute(`/alanlar/${row.slug}`),
         changeFrequency: "monthly",
         priority: 0.6,
+      });
+    }
+
+    // getPublishedPosts hata vermez; tablo yoksa boş döner.
+    for (const post of await getPublishedPosts()) {
+      entries.push({
+        url: absolute(`/blog/${post.slug}`),
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: "monthly",
+        priority: 0.5,
       });
     }
   } catch {
