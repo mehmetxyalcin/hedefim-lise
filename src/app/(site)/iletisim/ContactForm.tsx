@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, Send } from "lucide-react";
 import { sendContactMessage } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
-import { Button } from "@/components/ui/Button";
 
 const SCHOOL_SUBJECTS = [
   "Okul Bilgisi Güncelleme",
@@ -26,9 +25,20 @@ type SchoolResult = {
   district: string;
 };
 
+// Anasayfa belge dünyasının (.landing) kontrol dili: kâğıt zeminli kutu,
+// odakta teal çerçeve + halka. ScoreScale ve FilterSelect ile aynı ölçüler.
 const INPUT_CLASS =
-  "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
-const LABEL_CLASS = "mb-1.5 block text-sm font-medium text-slate-700";
+  "w-full rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-4 py-3 text-base text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink-faint)] focus:border-[var(--teal)] focus:bg-[var(--doc-panel)] focus:ring-4 focus:ring-[var(--teal-ring)]";
+const LABEL_CLASS =
+  "mb-2 flex items-baseline gap-2 font-display text-sm font-bold text-[var(--ink)]";
+const OPTIONAL = (
+  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--ink-faint)]">
+    isteğe bağlı
+  </span>
+);
+const TEXT_ACTION =
+  "inline-flex items-center gap-1.5 rounded-md font-display text-sm font-bold text-[var(--teal)] transition-colors hover:text-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)]";
+const MIN_MESSAGE = 20;
 
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -111,11 +121,16 @@ export default function ContactForm() {
     setSchoolDropdownOpen(false);
   }
 
-  function isFormValid() {
-    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) return false;
-    if (message.trim().length < 20) return false;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return false;
-    return true;
+  // Gönder düğmesi neden pasif? İlk eksik adımı düz dille söyler.
+  function missingStep(): string | null {
+    if (!name.trim()) return "Adınızı yazın.";
+    if (!email.trim()) return "E-posta adresinizi yazın.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      return "Geçerli bir e-posta adresi yazın.";
+    if (!subject.trim()) return "Bir konu seçin.";
+    const left = MIN_MESSAGE - message.trim().length;
+    if (left > 0) return `Mesajınız için ${left} karakter daha yazın.`;
+    return null;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -142,32 +157,190 @@ export default function ContactForm() {
     }
   }
 
+  function chooseSubject(value: string) {
+    setSubject(value);
+    setSelectedSchool(null);
+    setSchoolQuery("");
+    setSchoolNotInList(false);
+    setSchoolResults([]);
+    setSchoolDropdownOpen(false);
+  }
+
+  const missing = missingStep();
+  const messageLength = message.trim().length;
+
   if (success) {
     return (
-      <div className="flex flex-col items-center justify-center gap-5 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-          <CheckCircle className="h-8 w-8 text-emerald-600" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">Mesajınız Gönderildi!</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            En kısa sürede size dönüş yapacağız. Teşekkür ederiz.
-          </p>
-        </div>
-        <Button onClick={resetForm} size="lg" className="mt-2">
-          Yeni Mesaj Gönder
-        </Button>
+      <div role="status" className="border-t border-[var(--line)] pt-8">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--teal-tint)]">
+          <Check className="h-6 w-6 text-[var(--teal)]" strokeWidth={2.5} />
+        </span>
+        <h3 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-[var(--ink)]">
+          Mesajınız bize ulaştı.
+        </h3>
+        <p className="mt-2 max-w-md text-[var(--ink-soft)]">
+          En kısa sürede size dönüş yapacağız. Teşekkür ederiz.
+        </p>
+        <button
+          type="button"
+          onClick={resetForm}
+          className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--line)] px-5 py-3 font-display text-sm font-bold tracking-wide text-[var(--ink)] transition-colors hover:border-[var(--teal)] hover:text-[var(--teal)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)]"
+        >
+          Yeni mesaj gönder
+        </button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-7">
+      {/* Konu — seçim formun geri kalanını belirler, o yüzden en başta. */}
+      <fieldset>
+        <legend className={LABEL_CLASS}>Konu</legend>
+        <div className="flex flex-wrap gap-2">
+          {SUBJECTS.map((s) => (
+            <label key={s} className="cursor-pointer">
+              <input
+                type="radio"
+                name="subject"
+                value={s}
+                checked={subject === s}
+                onChange={() => chooseSubject(s)}
+                className="peer sr-only"
+              />
+              <span className="inline-flex items-center rounded-lg border border-[var(--line)] bg-[var(--doc-ground)] px-3.5 py-2.5 font-display text-sm font-semibold text-[var(--ink-soft)] transition-colors peer-checked:border-[var(--teal)] peer-checked:bg-[var(--teal)] peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-[var(--teal-ring)] hover:border-[var(--ink-faint)] hover:text-[var(--ink)] peer-checked:hover:text-white">
+                {s}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Okul arama — sadece okul konularında */}
+      {isSchoolSubject && (
+        <div>
+          <label htmlFor="school" className={LABEL_CLASS}>
+            İlgili okul {OPTIONAL}
+          </label>
+
+          {selectedSchool ? (
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--teal)] bg-[var(--teal-tint)] px-4 py-3">
+              <span className="min-w-0 font-display text-base font-bold text-[var(--ink)]">
+                {selectedSchool.name}
+                <span className="ml-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+                  {selectedSchool.district}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSchool(null);
+                  setSchoolQuery("");
+                }}
+                className={`${TEXT_ACTION} shrink-0`}
+              >
+                Değiştir
+              </button>
+            </div>
+          ) : schoolNotInList ? (
+            <div className="space-y-3">
+              <input
+                id="school"
+                type="text"
+                value={schoolQuery}
+                onChange={(e) => setSchoolQuery(e.target.value)}
+                placeholder="Okulun tam adını yazın"
+                className={INPUT_CLASS}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setSchoolNotInList(false);
+                  setSchoolQuery("");
+                }}
+                className={TEXT_ACTION}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Listeden seç
+              </button>
+            </div>
+          ) : (
+            <div className="relative" ref={dropdownRef}>
+              <input
+                id="school"
+                type="text"
+                value={schoolQuery}
+                onChange={(e) => {
+                  setSchoolQuery(e.target.value);
+                }}
+                onFocus={() => {
+                  if (visibleSchoolResults.length > 0) setSchoolDropdownOpen(true);
+                }}
+                placeholder="Okul adıyla arayın"
+                autoComplete="off"
+                className={`${INPUT_CLASS} pr-10`}
+              />
+              {schoolLoading && (
+                <div className="absolute top-3.5 right-3.5">
+                  <Loader2 className="h-4 w-4 animate-spin text-[var(--ink-faint)]" />
+                </div>
+              )}
+              {schoolListOpen && (
+                <div className="listbox-down absolute z-10 mt-2 max-h-80 w-full overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--doc-panel)] p-1 shadow-lg">
+                  {visibleSchoolResults.map((school) => (
+                    <button
+                      key={school.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSchool(school);
+                        setSchoolDropdownOpen(false);
+                        setSchoolQuery("");
+                      }}
+                      className="flex w-full flex-col rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[var(--doc-ground)] focus-visible:bg-[var(--doc-ground)] focus-visible:outline-none"
+                    >
+                      <span className="font-display text-[15px] font-bold text-[var(--ink)]">
+                        {school.name}
+                      </span>
+                      <span className="mt-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--ink-faint)]">
+                        {school.district}
+                      </span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSchoolNotInList(true);
+                      setSchoolDropdownOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-display text-sm font-bold text-[var(--teal)] transition-colors hover:bg-[var(--teal-tint)] focus-visible:bg-[var(--teal-tint)] focus-visible:outline-none ${
+                      visibleSchoolResults.length > 0 ? "mt-1 border-t border-[var(--line)] pt-3" : ""
+                    }`}
+                  >
+                    Okulumu listede göremiyorum
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              {!schoolListOpen && schoolQueryReady && !schoolLoading && visibleSchoolResults.length === 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSchoolNotInList(true)}
+                  className={`${TEXT_ACTION} mt-3`}
+                >
+                  Okulumu listede göremiyorum
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Ad Soyad + E-posta */}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-7 sm:grid-cols-2 sm:gap-5">
         <div>
           <label htmlFor="name" className={LABEL_CLASS}>
-            Ad Soyad <span className="text-rose-500">*</span>
+            Ad Soyad
           </label>
           <input
             id="name"
@@ -181,7 +354,7 @@ export default function ContactForm() {
         </div>
         <div>
           <label htmlFor="email" className={LABEL_CLASS}>
-            E-posta <span className="text-rose-500">*</span>
+            E-posta
           </label>
           <input
             id="email"
@@ -198,7 +371,7 @@ export default function ContactForm() {
       {/* Telefon */}
       <div>
         <label htmlFor="phone" className={LABEL_CLASS}>
-          Telefon
+          Telefon {OPTIONAL}
         </label>
         <input
           id="phone"
@@ -207,186 +380,67 @@ export default function ContactForm() {
           onChange={(e) => setPhone(e.target.value)}
           placeholder="05XX XXX XX XX"
           autoComplete="tel"
-          className={INPUT_CLASS}
+          className={`${INPUT_CLASS} tabular sm:max-w-xs`}
         />
       </div>
 
-      {/* Konu */}
-      <div>
-        <label htmlFor="subject" className={LABEL_CLASS}>
-          Konu <span className="text-rose-500">*</span>
-        </label>
-        <select
-          id="subject"
-          value={subject}
-          onChange={(e) => {
-            setSubject(e.target.value);
-            setSelectedSchool(null);
-            setSchoolQuery("");
-            setSchoolNotInList(false);
-            setSchoolResults([]);
-            setSchoolDropdownOpen(false);
-          }}
-          className={INPUT_CLASS}
-        >
-          <option value="">Konu seçiniz...</option>
-          {SUBJECTS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Okul arama — sadece okul konularında */}
-      {isSchoolSubject && (
-        <div>
-          <label className={LABEL_CLASS}>İlgili Okul</label>
-
-          {selectedSchool ? (
-            <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-              <span className="text-sm font-medium text-blue-800">
-                {selectedSchool.name}
-                <span className="ml-1.5 font-normal text-blue-600">({selectedSchool.district})</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedSchool(null);
-                  setSchoolQuery("");
-                }}
-                className="ml-4 text-xs font-semibold text-blue-500 hover:text-blue-700"
-              >
-                Değiştir
-              </button>
-            </div>
-          ) : schoolNotInList ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={schoolQuery}
-                onChange={(e) => setSchoolQuery(e.target.value)}
-                placeholder="Okul adını yazın (listede olmayan)"
-                className={INPUT_CLASS}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setSchoolNotInList(false);
-                  setSchoolQuery("");
-                }}
-                className="text-xs font-semibold text-blue-500 hover:text-blue-700"
-              >
-                ← Listeden seç
-              </button>
-            </div>
-          ) : (
-            <div className="relative" ref={dropdownRef}>
-              <input
-                type="text"
-                value={schoolQuery}
-                onChange={(e) => {
-                  setSchoolQuery(e.target.value);
-                }}
-                onFocus={() => {
-                  if (visibleSchoolResults.length > 0) setSchoolDropdownOpen(true);
-                }}
-                placeholder="Okul adı ile arayın..."
-                className={INPUT_CLASS}
-              />
-              {schoolLoading && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-                </div>
-              )}
-              {schoolListOpen && (
-                <div className="absolute z-10 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
-                  {visibleSchoolResults.map((school) => (
-                    <button
-                      key={school.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedSchool(school);
-                        setSchoolDropdownOpen(false);
-                        setSchoolQuery("");
-                      }}
-                      className="flex w-full flex-col px-4 py-3 text-left text-sm hover:bg-slate-50 first:rounded-t-xl last:rounded-b-xl"
-                    >
-                      <span className="font-medium text-slate-900">{school.name}</span>
-                      <span className="text-xs text-slate-500">{school.district}</span>
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSchoolNotInList(true);
-                      setSchoolDropdownOpen(false);
-                    }}
-                    className="flex w-full items-center px-4 py-3 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 last:rounded-b-xl"
-                  >
-                    Okulumu listede göremiyorum
-                  </button>
-                </div>
-              )}
-              {!schoolListOpen && schoolQueryReady && !schoolLoading && visibleSchoolResults.length === 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSchoolNotInList(true)}
-                  className="mt-1.5 text-xs font-semibold text-blue-500 hover:text-blue-700"
-                >
-                  Okulumu listede göremiyorum →
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Mesaj */}
       <div>
-        <label htmlFor="message" className={LABEL_CLASS}>
-          Mesajınız <span className="text-rose-500">*</span>
-        </label>
-        <div className="relative">
-          <textarea
-            id="message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={5}
-            placeholder="Mesajınızı buraya yazın... (en az 20 karakter)"
-            className={`${INPUT_CLASS} resize-none pb-7`}
-          />
+        <div className="flex items-baseline justify-between gap-4">
+          <label htmlFor="message" className={LABEL_CLASS}>
+            Mesajınız
+          </label>
           <span
-            className={`absolute bottom-2.5 right-3 text-xs ${
-              message.length < 20 ? "text-slate-400" : "text-emerald-600"
+            aria-live="polite"
+            className={`tabular mb-2 font-mono text-[11px] font-medium tracking-[0.08em] ${
+              messageLength < MIN_MESSAGE ? "text-[var(--ink-faint)]" : "text-[var(--teal)]"
             }`}
           >
-            {message.length} karakter
+            {messageLength < MIN_MESSAGE
+              ? `${messageLength} / ${MIN_MESSAGE}`
+              : `${messageLength} karakter`}
           </span>
         </div>
+        <textarea
+          id="message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={6}
+          placeholder="Mesajınızı buraya yazın (en az 20 karakter)"
+          className={`${INPUT_CLASS} resize-y leading-relaxed`}
+        />
       </div>
 
-      {/* Sunucu hatası */}
+      {/* Sunucu hatası — landing kuralı: satır içi mono hata, vermilyon koyu. */}
       {serverError && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <p role="alert" className="font-mono text-[12px] font-semibold text-[var(--vermilion-deep)]">
           {serverError}
-        </div>
+        </p>
       )}
 
       {/* Submit */}
-      <Button type="submit" size="lg" disabled={!isFormValid() || submitting}>
-        {submitting ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Gönderiliyor...
-          </>
-        ) : (
-          <>
-            <Send className="h-4 w-4" />
-            Mesaj Gönder
-          </>
-        )}
-      </Button>
+      <div className="flex flex-col gap-3 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p aria-live="polite" className="font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">
+          {missing ?? "Hazır. Mesajınız doğrudan bize ulaşır."}
+        </p>
+        <button
+          type="submit"
+          disabled={missing !== null || submitting}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3.5 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--teal)]"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Gönderiliyor
+            </>
+          ) : (
+            <>
+              Mesajı gönder
+              <Send className="h-4 w-4" />
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 }

@@ -1,96 +1,126 @@
 import type { Metadata } from "next";
-import { Mail, MapPin, Clock } from "lucide-react";
 import ContactForm from "./ContactForm";
 import { getFooterSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
-  title: "İletişim | Hedefim Lise",
+  title: "İletişim",
   description:
     "Okul bilgisi güncelleme, hatalı bilgi bildirimi veya öneri ve görüşleriniz için bizimle iletişime geçin.",
 };
 
+// İletişim, anasayfanın belge dünyasında (.landing) durur: aynı kâğıt, aynı
+// teal eylem rengi, aynı mono etiket grameri. Form tek panel; yan sütun bir
+// künye gibi hairline'larla ayrılmış bilgi listesi, kart yığını değil.
 export default async function IletisimPage() {
   const { contact_email, address } = await getFooterSettings();
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-16">
-      <div className="mx-auto max-w-6xl">
-        {/* Başlık */}
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">İletişim</h1>
-          <p className="mt-3 text-base text-slate-500">
+    <div className="landing">
+      <section className="container mx-auto max-w-6xl px-6 pt-10 pb-10 md:pt-14 md:pb-12">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-12">
+          <h1 className="font-display text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[1.02] tracking-[-0.02em] text-balance text-[var(--ink)] lg:col-span-7">
+            Bize <span className="text-[var(--teal)]">yazın.</span>
+          </h1>
+          <p className="max-w-xl text-lg leading-relaxed text-[var(--ink-soft)] md:text-xl lg:col-span-5 lg:pb-2">
             Soru, öneri veya bilgi güncelleme talepleriniz için bize ulaşın.
+            Okul verisindeki her düzeltme listeyi herkes için daha doğru yapar.
           </p>
         </div>
+      </section>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Sol — Form */}
-          <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 text-lg font-bold text-slate-900">Mesaj Gönder</h2>
-              <ContactForm />
-            </div>
-          </div>
+      <div className="border-t border-[var(--line)]">
+        <div className="container mx-auto grid max-w-6xl gap-12 px-6 pt-10 pb-16 md:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-20">
+          <section
+            aria-labelledby="form-title"
+            className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-6 shadow-sm sm:p-8 md:p-10 lg:col-span-8"
+          >
+            <h2
+              id="form-title"
+              className="font-display text-2xl font-extrabold tracking-tight text-[var(--ink)] md:text-3xl"
+            >
+              Mesaj gönder
+            </h2>
+            <p className="mt-2 mb-8 text-[var(--ink-soft)]">
+              Önce konuyu seçin; okul bilgisiyle ilgiliyse okulu da işaretleyin.
+            </p>
+            <ContactForm />
+          </section>
 
-          {/* Sağ — Bilgi kartları */}
-          <div className="flex flex-col gap-4">
-            {/* İletişim Bilgileri */}
-            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
-                İletişim Bilgileri
-              </h3>
-              <ul className="space-y-3">
-                {contact_email && (
-                  <li className="flex items-start gap-3">
-                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+          <aside className="lg:sticky lg:top-28 lg:col-span-4 lg:self-start">
+            <dl>
+              <div className="border-t border-[var(--ink)] pt-5 pb-7">
+                <dt className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
+                  Yanıt süresi
+                </dt>
+                <dd className="mt-3">
+                  <span className="tabular font-display text-5xl font-extrabold leading-none tracking-tight text-[var(--ink)]">
+                    1–2
+                  </span>
+                  <span className="ml-2 font-display text-lg font-bold text-[var(--ink)]">
+                    iş günü
+                  </span>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-soft)]">
+                    Mesajınızı aldıktan sonra mümkün olan en kısa sürede yanıt
+                    vermeye çalışıyoruz.
+                  </p>
+                </dd>
+              </div>
+
+              {contact_email && (
+                <div className="border-t border-[var(--line)] py-5">
+                  <dt className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
+                    E-posta
+                  </dt>
+                  <dd className="mt-2">
                     <a
                       href={`mailto:${contact_email}`}
-                      className="text-sm text-slate-700 hover:text-blue-600"
+                      className="font-display text-lg font-bold break-all text-[var(--ink)] underline decoration-[var(--line)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--teal)] hover:decoration-[var(--teal)]"
                     >
                       {contact_email}
                     </a>
-                  </li>
-                )}
-                <li className="flex items-start gap-3">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-                  <span className="text-sm text-slate-700">{address || "Mersin, Türkiye"}</span>
-                </li>
-              </ul>
-            </div>
+                  </dd>
+                </div>
+              )}
 
-            {/* Yanıt Süresi */}
-            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
-              <div className="mb-3 flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-600" />
-                <h3 className="text-sm font-bold text-blue-800">Yanıt Süresi</h3>
+              <div className="border-t border-[var(--line)] py-5">
+                <dt className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
+                  Konum
+                </dt>
+                <dd className="mt-2 font-display text-lg font-bold text-[var(--ink)]">
+                  {address || "Mersin, Türkiye"}
+                </dd>
               </div>
-              <p className="text-2xl font-extrabold text-blue-700">1-2 iş günü</p>
-              <p className="mt-1 text-xs text-blue-600">
-                Mesajınızı aldıktan sonra mümkün olan en kısa sürede yanıt vermeye çalışıyoruz.
-              </p>
-            </div>
 
-            {/* Sık İletişim Konuları */}
-            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
-                Sık İletişim Konuları
-              </h3>
-              <ul className="space-y-2">
-                {[
-                  "Okul bilgisi güncelleme",
-                  "Yeni okul ekleme talebi",
-                  "Hatalı bilgi bildirimi",
-                  "Teknik sorun bildirimi",
-                  "Öneri ve görüş paylaşımı",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              <div className="border-t border-[var(--line)] pt-5">
+                <dt className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
+                  Düzeltme bildirirken
+                </dt>
+                <dd className="mt-3">
+                  <ul className="space-y-2.5 text-[15px] leading-relaxed text-[var(--ink-soft)]">
+                    {[
+                      "Hangi bilginin yanlış olduğunu yazın.",
+                      "Doğrusunu ve hangi yıla ait olduğunu belirtin.",
+                      "Varsa kaynağını ekleyin: okulun sitesi, resmî duyuru.",
+                    ].map((item) => (
+                      <li key={item} className="flex gap-3">
+                        <span
+                          aria-hidden
+                          className="mt-[0.7em] h-px w-3 shrink-0 bg-[var(--teal)]"
+                        />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            </dl>
+
+            <p className="mt-10 font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">
+              Bağımsız bir rehberdir; MEB veya okullar adına işlem yapmaz.
+              Yerleştirme ve kayıt işlemleri için okulunuza ya da ilçe millî
+              eğitim müdürlüğüne başvurun.
+            </p>
+          </aside>
         </div>
       </div>
     </div>
