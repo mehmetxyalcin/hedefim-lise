@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: post.publishedAt ?? undefined,
       modifiedTime: post.updatedAt,
       section: post.category,
-      authors: [post.authorName],
+      authors: [post.author ? getSiteUrlWithPath(`/blog/yazar/${post.author.slug}`) : post.authorName],
       images: image,
     },
     twitter: {
@@ -69,7 +69,9 @@ export default async function BlogPostPage({ params }: PageProps) {
       inLanguage: "tr-TR",
       mainEntityOfPage: url,
       image: post.coverImageUrl ?? undefined,
-      author: { "@type": "Organization", name: post.authorName },
+      author: post.author
+        ? { "@type": "Person", name: post.author.name, jobTitle: post.author.title ?? undefined, url: getSiteUrlWithPath(`/blog/yazar/${post.author.slug}`) }
+        : { "@type": "Organization", name: post.authorName },
       publisher: { "@type": "Organization", name: "Hedefim Lise", url: getSiteUrlWithPath("/") },
     },
     {

@@ -10,11 +10,12 @@ import { adminCard, adminFocus, adminHint, adminInput, adminLabel } from "@/comp
 import { cn } from "@/lib/cn";
 import { readingMinutes, slugifyTr, toIstanbulInput } from "@/lib/blog";
 import type { BlogFormState } from "@/app/admin/blog/actions";
-import type { BlogPost } from "@/types/blog";
+import type { BlogAuthor, BlogPost } from "@/types/blog";
 
 type Props = {
   post: BlogPost | null;
   categories: string[];
+  authors: Pick<BlogAuthor, "id" | "name" | "title">[];
   action: (state: BlogFormState, formData: FormData) => Promise<BlogFormState>;
 };
 
@@ -43,7 +44,7 @@ function Counter({ value, max, ideal }: { value: string; max: number; ideal?: [n
   );
 }
 
-export function BlogPostForm({ post, categories, action }: Props) {
+export function BlogPostForm({ post, categories, authors, action }: Props) {
   const router = useRouter();
   const [state, dispatch, pending] = useActionState(action, null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -289,7 +290,21 @@ export function BlogPostForm({ post, categories, action }: Props) {
             </label>
             <label className="block">
               <span className={adminLabel}>Yazar</span>
-              <input name="author_name" maxLength={100} defaultValue={post?.authorName ?? "Hedefim Lise"} className={adminInput} />
+              <select name="author_id" defaultValue={post?.authorId ?? ""} className={adminInput}>
+                <option value="">Hedefim Lise (yazar sayfası yok)</option>
+                {authors.map((author) => (
+                  <option key={author.id} value={author.id}>
+                    {author.title ? `${author.name} · ${author.title}` : author.name}
+                  </option>
+                ))}
+              </select>
+              <span className={adminHint}>
+                Yeni yazarı{" "}
+                <Link href="/admin/blog/yazarlar/yeni" className="font-semibold text-admin-accent hover:underline">
+                  Yazarlar
+                </Link>{" "}
+                sayfasından ekleyin.
+              </span>
             </label>
           </section>
 

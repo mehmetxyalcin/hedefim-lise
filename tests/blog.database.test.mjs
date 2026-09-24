@@ -6,6 +6,7 @@ const db = new PGlite();
 const admin = '00000000-0000-4000-8000-000000000001';
 const member = '00000000-0000-4000-8000-000000000002';
 const migration = readFileSync('supabase/migrations/019_blog_posts.sql', 'utf8');
+const authorsMigration = readFileSync('supabase/migrations/020_blog_authors.sql', 'utf8');
 before(async () => {
   await db.exec(`
     create role anon; create role authenticated;
@@ -20,9 +21,10 @@ before(async () => {
     insert into navigation_items(label, href, order_index) values ('Okullar','/okullar',0),('Soru-Cevap','/soru-cevap',4);
   `);
   await db.exec(migration);
+  await db.exec(authorsMigration);
   // Supabase public tablolara bu yetkileri varsayılan olarak verir; RLS asıl sınırdır.
   // profiles okuma yetkisi canlıyla aynı (015: kullanıcı yalnız kendi satırını görür).
-  await db.exec(`grant select on blog_posts to anon; grant select,insert,update,delete on blog_posts to authenticated; grant select on profiles to authenticated;`);
+  await db.exec(`grant select on blog_posts to anon; grant select,insert,update,delete on blog_posts to authenticated; grant select on profiles to authenticated; grant select on blog_authors to anon; grant select,insert,update,delete on blog_authors to authenticated;`);
 });
 after(() => db.close());
 
@@ -76,4 +78,29 @@ test('constraints reject malformed slugs, blank titles and published posts witho
     "insert into blog_posts(slug,title,excerpt,body) values ('gecmis','T','Ö','M')",
     `insert into blog_posts(slug,title,excerpt,body,highlight) values ('uzun','T','Ö','M','${'x'.repeat(25)}')`,
   ]) await assert.rejects(db.query(sql), undefined, sql);
+});
+
+test('authors: public profiles, admin-only writes, contact checks, and posts survive author deletion', async () => {
+  await db.exec(authorsMigration); // yeniden çalıştırılabilir
+  await as(admin, "insert into blog_authors(slug,name,email,website_url) values ('ayse-yilmaz','Ayşe Yılmaz','ayse@ornek.com','https://ornek.com')");
+  for (const user of [null, member]) {
+    assert.equal((await as(user, 'select name from blog_authors')).rows[0].name, 'Ayşe Yılmaz', `user ${user}`);
+  }
+  await assert.rejects(as(member, "insert into blog_authors(slug,name) values ('sahte','Sahte')"), /row-level security/);
+  assert.equal((await as(member, "update blog_authors set name = 'X' returning id")).rows.length, 0);
+  for (const sql of [
+    "insert into blog_authors(slug,name,email) values ('a1','A','yanlis')",
+    "insert into blog_authors(slug,name,website_url) values ('a2','A','javascript:alert(1)')",
+    "insert into blog_authors(slug,name) values ('Büyük','A')",
+    "insert into blog_authors(slug,name) values ('a3','   ')",
+  ]) await assert.rejects(db.query(sql), undefined, sql);
+
+  const { rows: [{ id }] } = await db.query("select id from blog_authors where slug = 'ayse-yilmaz'");
+  await db.query("insert into blog_posts(slug,title,excerpt,body,is_published,published_at,author_id,author_name) values ('imzali','İmzalı','Ö','M',true,now() - interval '1 day',$1,'Ayşe Yılmaz')", [id]);
+  const joined = await as(null, "select p.slug, a.name from blog_posts p left join blog_authors a on a.id = p.author_id where p.slug = 'imzali'");
+  assert.equal(joined.rows[0].name, 'Ayşe Yılmaz');
+
+  assert.equal((await as(admin, 'delete from blog_authors where id = $1 returning id', [id])).rows.length, 1);
+  const after = (await db.query("select author_id, author_name from blog_posts where slug = 'imzali'")).rows[0];
+  assert.deepEqual(after, { author_id: null, author_name: 'Ayşe Yılmaz' });
 });

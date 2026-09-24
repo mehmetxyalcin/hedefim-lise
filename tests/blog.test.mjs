@@ -123,3 +123,18 @@ test('seeded drafts in the migration parse into headed sections', () => {
     assert.ok(blocks.some(b => b.type === 'callout'));
   }
 });
+
+test('authors: reserved slugs, initials, safe contact links and bio paragraphs', () => {
+  assert.equal(blog.isReservedPostSlug('yazar'), true);
+  assert.equal(blog.isReservedPostSlug('yazarlik-uzerine'), false);
+  assert.equal(blog.authorInitials('ışıl şahin yılmaz'), 'IY');
+  assert.equal(blog.authorInitials('  İlkay '), 'İ');
+  const contacts = plain(blog.authorContacts({ email: 'a@b.co', phone: '0 (324) 123 45 67', websiteUrl: 'https://www.ornek.com/', instagramUrl: 'javascript:alert(1)', xUrl: 'https://x.com/ornek', linkedinUrl: '  ', youtubeUrl: null }));
+  assert.deepEqual(contacts.map(c => c.kind), ['email', 'phone', 'website', 'x']);
+  assert.equal(contacts[1].href, 'tel:03241234567');
+  assert.equal(contacts[2].display, 'ornek.com');
+  assert.equal(contacts[3].display, 'x.com/ornek');
+  assert.deepEqual(plain(blog.authorContacts({ email: 'yanlis', phone: '12', websiteUrl: 'ftp://x', instagramUrl: null, xUrl: null, linkedinUrl: null, youtubeUrl: null })), []);
+  assert.deepEqual(plain(blog.bioParagraphs('Bir\nsatır\r\n\r\nİki\n\n\n')), ['Bir satır', 'İki']);
+  assert.deepEqual(plain(blog.bioParagraphs(null)), []);
+});

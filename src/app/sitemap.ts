@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site";
-import { getPublishedPosts } from "@/lib/blog-data";
+import { getBlogAuthors, getPublishedPosts } from "@/lib/blog-data";
 import { createStaticClient } from "@/lib/supabase/static";
 
 // Sitemap build'e çakılı kalmasın: içerik admin panelinden değişiyor, dosya
@@ -69,8 +69,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    // getPublishedPosts hata vermez; tablo yoksa boş döner.
-    for (const post of await getPublishedPosts()) {
+    // getPublishedPosts ve getBlogAuthors hata vermez; tablo yoksa boş döner.
+    const [posts, authors] = await Promise.all([getPublishedPosts(), getBlogAuthors()]);
+    // Yalnız yayında yazısı olan yazarların profili listelenir.
+    const writing = new Set(posts.map((post) => post.authorId));
+    for (const author of authors) {
+      if (!writing.has(author.id)) continue;
+      entries.push({
+        url: absolute(`/blog/yazar/${author.slug}`),
+        lastModified: new Date(author.updatedAt),
+        changeFrequency: "monthly",
+        priority: 0.4,
+      });
+    }
+    for (const post of posts) {
       entries.push({
         url: absolute(`/blog/${post.slug}`),
         lastModified: new Date(post.updatedAt),

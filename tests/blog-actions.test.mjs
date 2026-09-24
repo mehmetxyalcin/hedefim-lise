@@ -19,13 +19,13 @@ const uuid = '12345678-1234-1234-1234-123456789012';
 const form = values => { const f = new FormData(); for (const [k, v] of Object.entries(values)) f.append(k, v); return f; };
 const valid = { title: 'Nakil dönemi: İlk adımlar', excerpt: 'Kısa özet', body: 'Metin\r\n\r\n## Başlık', category: 'Nakil İşlemleri', status: 'yayinda' };
 
-function actions(responder = () => ({ data: { id: uuid, slug: 'eski-adres' }, error: null })) {
+function actions(responder = () => ({ data: { id: uuid, slug: 'eski-adres' }, error: null }), file = 'src/app/admin/blog/actions.ts') {
   const calls = [];
   const db = {
     from(table) {
       calls.push(['from', table]);
       const chain = {};
-      for (const method of ['select', 'insert', 'update', 'delete', 'eq', 'single', 'maybeSingle']) chain[method] = (...args) => { calls.push([method, ...args]); return chain; };
+      for (const method of ['select', 'insert', 'update', 'delete', 'eq', 'single', 'maybeSingle', 'not']) chain[method] = (...args) => { calls.push([method, ...args]); return chain; };
       chain.then = (resolve, reject) => Promise.resolve(responder(calls)).then(resolve, reject);
       return chain;
     },
@@ -33,7 +33,7 @@ function actions(responder = () => ({ data: { id: uuid, slug: 'eski-adres' }, er
   };
   const revalidated = [];
   const redirect = url => { throw new Error(`REDIRECT:${decodeURIComponent(url)}`); };
-  const api = load('src/app/admin/blog/actions.ts', {
+  const api = load(file, {
     '@/lib/admin-auth': { requireAdmin: async () => ({ supabase: db, profile: { role: 'admin' }, user: { id: uuid } }) },
     '@/lib/blog-data': { BLOG_CACHE_TAG: 'blog-posts' },
     'next/navigation': { redirect },
@@ -117,4 +117,78 @@ test('delete validates the id and confirms the row was removed', async () => {
   const ok = actions(() => ({ data: { slug: 'silinen' }, error: null }));
   await assert.rejects(ok.api.deleteBlogPost(form({ id: uuid })), /REDIRECT:\/admin\/blog\?success=Yazı silindi/);
   assert.ok(ok.revalidated.includes('/blog/silinen'));
+});
+
+const authorId = '00000000-0000-4000-8000-0000000000aa';
+
+test('posts: reserved slug is refused, chosen author signs the post, missing author is reported', async () => {
+  const reserved = actions();
+  assert.match((await reserved.api.saveBlogPost(null, form({ ...valid, slug: 'yazar' }))).message, /başka bir sayfaya ayrılmış/);
+  assert.equal(reserved.calls.length, 0);
+
+  const signed = actions(calls => calls.at(-1)[0] === 'maybeSingle' && calls.some(c => c[0] === 'from' && c[1] === 'blog_authors') ? { data: { name: 'Ayşe Yılmaz' }, error: null } : { data: { id: uuid, slug: 'eski-adres' }, error: null });
+  await signed.api.saveBlogPost(null, form({ ...valid, id: uuid, author_id: authorId }));
+  const record = written(signed.calls, 'update');
+  assert.equal(record.author_id, authorId);
+  assert.equal(record.author_name, 'Ayşe Yılmaz');
+
+  const gone = actions(calls => calls.some(c => c[0] === 'from' && c[1] === 'blog_authors') ? { data: null, error: null } : { data: { slug: 'x' }, error: null });
+  assert.match((await gone.api.saveBlogPost(null, form({ ...valid, id: uuid, author_id: authorId }))).message, /Seçilen yazar bulunamadı/);
+  assert.equal(gone.calls.some(c => c[0] === 'update'), false);
+
+  const unsigned = actions();
+  await unsigned.api.saveBlogPost(null, form({ ...valid, id: uuid, author_id: '' }));
+  assert.equal(written(unsigned.calls, 'update').author_id, null);
+  assert.equal(written(unsigned.calls, 'update').author_name, 'Hedefim Lise');
+});
+
+const AUTHOR_FILE = 'src/app/admin/blog/yazarlar/actions.ts';
+const author = { name: 'Ayşe Yılmaz', title: 'Rehber öğretmen', bio: 'Bir\r\n\r\nİki', email: 'ayse@ornek.com', website_url: 'https://ornek.com' };
+
+test('authors: invalid contacts never reach the database', async () => {
+  for (const bad of [{ name: ' ' }, { email: 'yanlis' }, { phone: '12' }, { website_url: 'javascript:alert(1)' }, { instagram_url: 'instagram.com/x' }, { name: '!!!', slug: '' }]) {
+    const { calls, api } = actions(undefined, AUTHOR_FILE);
+    assert.equal((await api.saveBlogAuthor(null, form({ ...author, ...bad }))).success, false, JSON.stringify(bad));
+    assert.equal(calls.length, 0);
+  }
+});
+
+test('authors: create derives slug and opens editor; update keeps post signatures in sync', async () => {
+  const created = actions(calls => ({ data: calls.some(c => c[0] === 'insert') ? { id: authorId } : null, error: null }), AUTHOR_FILE);
+  await assert.rejects(created.api.saveBlogAuthor(null, form(author)), new RegExp(`REDIRECT:/admin/blog/yazarlar/${authorId}\\?success=`));
+  const record = written(created.calls, 'insert');
+  assert.equal(record.slug, 'ayse-yilmaz');
+  assert.equal(record.bio, 'Bir\n\nİki');
+  assert.equal(record.phone, null);
+  assert.equal(record.x_url, null);
+
+  const updated = actions(() => ({ data: { id: authorId, slug: 'eski' }, error: null }), AUTHOR_FILE);
+  const result = await updated.api.saveBlogAuthor(null, form({ ...author, id: authorId, name: 'Ayşe Kaya' }));
+  assert.equal(result.success, true);
+  const updates = updated.calls.filter(c => c[0] === 'update').map(c => c[1]);
+  assert.equal(updates[0].name, 'Ayşe Kaya');
+  assert.deepEqual({ ...updates[1] }, { author_name: 'Ayşe Kaya' });
+  assert.ok(updated.calls.some(c => c[0] === 'eq' && c[1] === 'author_id' && c[2] === authorId));
+  assert.ok(updated.revalidated.includes('/blog/yazar/eski') && updated.revalidated.includes('/blog/yazar/ayse-kaya'));
+
+  const taken = actions(calls => calls.some(c => c[0] === 'update') ? { data: null, error: { code: '23505', message: 'dup' } } : { data: { slug: 'eski' }, error: null }, AUTHOR_FILE);
+  assert.match((await taken.api.saveBlogAuthor(null, form({ ...author, id: authorId }))).message, /başka bir yazarda/);
+});
+
+test('authors: photo must be raster and delete confirms the removed row', async () => {
+  const svg = actions(undefined, AUTHOR_FILE);
+  assert.match((await svg.api.saveBlogAuthor(null, form({ ...author, id: authorId, photo_file: new File(['<svg/>'], 'a.svg', { type: 'image/svg+xml' }) }))).message, /Fotoğraf JPG/);
+  assert.equal(svg.calls.some(c => c[0] === 'upload' || c[0] === 'update'), false);
+
+  const png = actions(() => ({ data: { id: authorId, slug: 'ayse-yilmaz' }, error: null }), AUTHOR_FILE);
+  const saved = await png.api.saveBlogAuthor(null, form({ ...author, id: authorId, photo_file: new File([new Uint8Array([1])], 'p.png', { type: 'image/png' }) }));
+  assert.match(png.calls.find(c => c[0] === 'upload')[1], /^blog\/yazarlar\/ayse-yilmaz-\d+\.png$/);
+  assert.match(saved.photoUrl, /^https:\/\/cdn\.test\/blog\/yazarlar\//);
+
+  const bad = actions(undefined, AUTHOR_FILE);
+  await assert.rejects(bad.api.deleteBlogAuthor(form({ id: 'x' })), /REDIRECT:\/admin\/blog\/yazarlar\?error=/);
+  assert.equal(bad.calls.length, 0);
+  const ok = actions(() => ({ data: { slug: 'ayse-yilmaz' }, error: null }), AUTHOR_FILE);
+  await assert.rejects(ok.api.deleteBlogAuthor(form({ id: authorId })), /REDIRECT:\/admin\/blog\/yazarlar\?success=Yazar silindi/);
+  assert.ok(ok.revalidated.includes('/blog/yazar/ayse-yilmaz'));
 });

@@ -4,8 +4,9 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { contentFormRules, validateAdminForm } from "@/lib/admin-form-validation";
 import { requireAdmin } from "@/lib/admin-auth";
-import { fromIstanbulInput, SLUG_PATTERN, slugifyTr } from "@/lib/blog";
+import { fromIstanbulInput, isReservedPostSlug, SLUG_PATTERN, slugifyTr } from "@/lib/blog";
 import { BLOG_CACHE_TAG } from "@/lib/blog-data";
+import { errorMessage, uploadBlogImage } from "@/lib/blog-storage";
 
 export type BlogFormState =
   | { success: false; message: string }
@@ -14,16 +15,7 @@ export type BlogFormState =
   | null;
 
 const LIST_PATH = "/admin/blog";
-const BUCKET = "site-assets";
-// Kapak raster olmalı: SVG yüklenen dosyada betik taşıyabilir.
-const COVER_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/avif": "avif",
-};
-
-type Admin = Awaited<ReturnType<typeof requireAdmin>>;
+const DEFAULT_SIGNATURE = "Hedefim Lise";
 
 function field(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -32,17 +24,6 @@ function field(formData: FormData, key: string) {
 
 function fail(message: string): BlogFormState {
   return { success: false, message };
-}
-
-async function uploadCover(supabase: Admin["supabase"], file: File, slug: string) {
-  const extension = COVER_TYPES[file.type];
-  if (!extension) throw new Error("Kapak görseli JPG, PNG, WebP veya AVIF olmalıdır.");
-  const path = `blog/${slug}-${Date.now()}.${extension}`;
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, new Uint8Array(await file.arrayBuffer()), { contentType: file.type });
-  if (error) throw new Error(`Kapak görseli yüklenemedi: ${error.message}`);
-  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
 function refreshBlog(...slugs: (string | null | undefined)[]) {
@@ -70,6 +51,7 @@ export async function saveBlogPost(_previous: BlogFormState, formData: FormData)
   if (!slug || !SLUG_PATTERN.test(slug)) {
     return fail("Adres (slug) en az bir harf veya rakam içermelidir.");
   }
+  if (isReservedPostSlug(slug)) return fail(`“${slug}” adresi blogda başka bir sayfaya ayrılmış. Farklı bir adres girin.`);
 
   const publish = field(formData, "status") === "yayinda";
   const rawDate = field(formData, "published_at");
@@ -86,14 +68,24 @@ export async function saveBlogPost(_previous: BlogFormState, formData: FormData)
     previousSlug = existing.slug;
   }
 
+  // Yazar seçildiyse imza onun adıdır; seçilmediyse yayın imzası.
+  const authorId = field(formData, "author_id") || null;
+  let authorName = DEFAULT_SIGNATURE;
+  if (authorId) {
+    const { data: author, error } = await supabase.from("blog_authors").select("name").eq("id", authorId).maybeSingle();
+    if (error) return fail(`Yazar okunamadı: ${error.message}`);
+    if (!author) return fail("Seçilen yazar bulunamadı; silinmiş olabilir. Sayfayı yenileyin.");
+    authorName = author.name;
+  }
+
   let coverImageUrl: string | null = field(formData, "current_cover") || null;
   if (formData.get("remove_cover") === "on") coverImageUrl = null;
   const coverFile = formData.get("cover_file");
   if (coverFile instanceof File && coverFile.size > 0) {
     try {
-      coverImageUrl = await uploadCover(supabase, coverFile, slug);
+      coverImageUrl = await uploadBlogImage(supabase, coverFile, "blog", slug, "Kapak görseli");
     } catch (error) {
-      return fail(error instanceof Error ? error.message : "Kapak görseli yüklenemedi.");
+      return fail(errorMessage(error, "Kapak görseli yüklenemedi."));
     }
   }
 
@@ -106,7 +98,8 @@ export async function saveBlogPost(_previous: BlogFormState, formData: FormData)
     highlight: field(formData, "highlight") || null,
     cover_image_url: coverImageUrl,
     cover_image_alt: coverImageUrl ? field(formData, "cover_image_alt") || null : null,
-    author_name: field(formData, "author_name") || "Hedefim Lise",
+    author_id: authorId,
+    author_name: authorName,
     is_published: publish,
     published_at: publishedAt,
     updated_at: new Date().toISOString(),

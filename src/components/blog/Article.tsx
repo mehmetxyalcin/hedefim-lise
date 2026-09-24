@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { categoryParam, formatBlogDate, readingMinutes } from "@/lib/blog";
 import { parseMarkdown, tableOfContents } from "@/lib/blog-markdown";
 import type { BlogPost } from "@/types/blog";
 import { ArticleBody } from "./ArticleBody";
+import { AuthorAvatar, AuthorCard } from "./Author";
 import { ArticleToc } from "./ArticleToc";
 import { Plate } from "./Plate";
 import { PostSet } from "./PostList";
@@ -75,7 +77,19 @@ export function Article({
         <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3 border-t border-blog-ink pt-4 font-blog-display text-[0.875rem]">
           <div>
             <dt className="text-blog-muted">Yazan</dt>
-            <dd className="font-semibold text-blog-ink">{post.authorName}</dd>
+            <dd className="font-semibold text-blog-ink">
+              {post.author ? (
+                <Link
+                  href={`/blog/yazar/${post.author.slug}`}
+                  className="inline-flex items-center gap-2 decoration-blog-lemon decoration-[3px] underline-offset-4 hover:underline"
+                >
+                  <AuthorAvatar author={post.author} sizes="24px" className="w-6" />
+                  {post.author.name}
+                </Link>
+              ) : (
+                post.authorName
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-blog-muted">Yayın</dt>
@@ -132,7 +146,9 @@ export function Article({
             <ArticleBody blocks={blocks} />
           </div>
 
-          <footer className="mt-14 max-w-[68ch] border-t border-blog-ink pt-6">
+          {post.author && <AuthorCard author={post.author} className="mt-14 max-w-[68ch]" />}
+
+          <footer className={cn("max-w-[68ch] border-t border-blog-ink pt-6", post.author ? "mt-10" : "mt-14")}>
             {!preview && (
               <div className="lg:hidden">
                 <p className="mb-3 font-blog-display text-[0.9375rem] font-semibold text-blog-ink">Bu yazıyı paylaşın</p>

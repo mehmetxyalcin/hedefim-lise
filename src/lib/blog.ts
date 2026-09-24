@@ -202,3 +202,88 @@ export function highlightSegments(text: string, query: string): TextSegment[] {
   }
   return segments;
 }
+
+/** `/blog/<slug>` altında rotası olan adresler yazıya verilemez. */
+export const RESERVED_POST_SLUGS = ["yazar"] as const;
+
+export function isReservedPostSlug(slug: string): boolean {
+  return (RESERVED_POST_SLUGS as readonly string[]).includes(slug);
+}
+
+/** Fotoğrafı olmayan yazar için plaka üzerindeki baş harfler (en fazla iki). */
+export function authorInitials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const letters = words.length > 1 ? [words[0], words.at(-1)!] : words.slice(0, 1);
+  return letters.map((word) => [...word][0]?.toLocaleUpperCase("tr-TR") ?? "").join("");
+}
+
+export type AuthorContactKind = "email" | "phone" | "website" | "instagram" | "x" | "linkedin" | "youtube";
+
+export type AuthorContact = { kind: AuthorContactKind; label: string; href: string; display: string };
+
+type ContactSource = {
+  email: string | null;
+  phone: string | null;
+  websiteUrl: string | null;
+  instagramUrl: string | null;
+  xUrl: string | null;
+  linkedinUrl: string | null;
+  youtubeUrl: string | null;
+};
+
+function webDisplay(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname.replace(/\/+$/, "");
+    return `${parsed.hostname.replace(/^www\./, "")}${path}`;
+  } catch {
+    return url;
+  }
+}
+
+function isWebUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return (parsed.protocol === "https:" || parsed.protocol === "http:") && !parsed.username && !parsed.password;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Profilde gösterilecek iletişim satırları, sabit sırayla. Boş ya da biçimi
+ * bozuk değerler atlanır; bağlantılar yalnız mailto:, tel: ve http(s) olur.
+ */
+export function authorContacts(author: ContactSource): AuthorContact[] {
+  const contacts: AuthorContact[] = [];
+  const email = author.email?.trim();
+  if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    contacts.push({ kind: "email", label: "E-posta", href: `mailto:${email}`, display: email });
+  }
+  const phone = author.phone?.trim();
+  const digits = phone?.replace(/[^\d+]/g, "") ?? "";
+  if (phone && /^\+?\d{7,15}$/.test(digits)) {
+    contacts.push({ kind: "phone", label: "Telefon", href: `tel:${digits}`, display: phone });
+  }
+  const web: [AuthorContactKind, string, string | null][] = [
+    ["website", "Web sitesi", author.websiteUrl],
+    ["instagram", "Instagram", author.instagramUrl],
+    ["x", "X", author.xUrl],
+    ["linkedin", "LinkedIn", author.linkedinUrl],
+    ["youtube", "YouTube", author.youtubeUrl],
+  ];
+  for (const [kind, label, value] of web) {
+    const url = value?.trim();
+    if (url && isWebUrl(url)) contacts.push({ kind, label, href: url, display: webDisplay(url) });
+  }
+  return contacts;
+}
+
+/** Yazar biyografisi: boş satırla ayrılmış paragraflar. */
+export function bioParagraphs(bio: string | null): string[] {
+  return (bio ?? "")
+    .replace(/\r\n?/g, "\n")
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, " ").trim())
+    .filter(Boolean);
+}

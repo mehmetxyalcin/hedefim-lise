@@ -775,7 +775,7 @@ White paper, one ink, one spot colour. Lemon is a **fill** (a flood, a highlight
 **Reading Font:** Literata with optical sizing (`font-blog-reading`, the `.blog` base font, with Georgia): excerpts, deks, article body, blockquotes (italic).
 
 - **Monumental title** (`blog-display`): the index "Blog" at 4 / 5.5 / 6rem, 800, line-height 0.85, -0.04em.
-- **Article title** (`blog-headline`): 2.25 / 3 / 3.75rem, 800, 1.05, -0.035em. The index lead title runs 2 / 2.5 / 2.875rem, 700, 1.08, -0.03em.
+- **Article title** (`blog-headline`): 2.25 / 3 / 3.75rem, 800, 1.05, -0.035em. The **author name** on a profile page runs 2.75 / 3.75 / 4.5rem, 800, 0.95, -0.04em, with the author title beneath in Literata 1.1875 / 1.3125rem Ink Soft. The index lead title runs 2 / 2.5 / 2.875rem, 700, 1.08, -0.03em.
 - **Section and body headings** (`blog-title`): section heads ("Son yazılar", "İçindekiler", "Sıradaki yazılar") 1.375 / 1.5rem 700 -0.02em; article h2 1.625 / 1.875rem 700 -0.02em on a 1px ink rule; h3 1.25rem 700 -0.015em.
 - **Reading body** (`blog-body`): Literata 1.125 / 1.1875rem, line-height 1.75, in a **68ch** column; the first paragraph is a lede at 1.25 / 1.3125rem in full ink.
 - **Meta** (`blog-meta`): Schibsted 0.875rem, category in 600 ink, date and read time tabular in Muted, joined by " · ".
@@ -817,6 +817,9 @@ Square-ish corners: **4px** (`blog`) on plates, buttons, tabs, inputs, callouts,
 - **Callouts:** 4px radius, 20–28px padding, an uppercase label with a Lucide icon. **Not** and **İpucu** on Sheet; **Dikkat** on lemon; **Önemli** on ink with white text and a lemon icon.
 - **Lists:** ordered items get a 24px lemon tile with a tabular ink number; unordered items get a 16×2px ink dash. **Blockquote:** Literata italic 1.3125 / 1.4375rem ink with a large grotesk quote mark. **Tables:** Schibsted 0.9375rem, a 2px ink header rule, Line row rules, first column 600 ink, all cells tabular, horizontal scroll in a focusable region. **Section break:** three 6px ink dots.
 - **Ink CTA band:** an ink plate (4px) with a white head, 75%-white Literata copy and a lemon CTA, bridging an article to the school list.
+- **Author avatar** (`AuthorAvatar`): a square, 4px photo; without a photo, a **monogram plate** in the author name's tone (ink or paper, ruled) with up to two Turkish-uppercased initials at plate scale (ink plate: lemon initials). Used at 24px in the article byline, 88–112px in the author card and full column width on the profile.
+- **Author profile** (`/blog/yazar/[slug]`): breadcrumb, avatar over 4 columns, the monumental name, title, bio paragraphs (62ch) beside a **contact list**, then "Yazıları" as a `PostSet` and older posts as `ContentsRow`s. The contact list is a Line-ruled definition list: a 16px icon and label in Muted (E-posta, Telefon, Web sitesi, Instagram, X, LinkedIn, YouTube in that fixed order; brand icons are hand-drawn in the Lucide stroke), the value as a `blog-link`. Empty fields are omitted, never shown blank.
+- **Author card** (`AuthorCard`): a Sheet panel at the end of an article, avatar beside the name as the heading (no "Yazar hakkında" eyebrow; that phrase is screen-reader only), title, the bio's first paragraph clamped to three lines, and a link to the profile. The byline under the article title links the name, with its 24px avatar, to the profile.
 - **Empty state:** a lemon plate reading "Yakında" beside a head, a line of copy and two actions (ink primary, quiet secondary). A search with no hits shows a Sheet panel with a "Tüm yazılar" link.
 
 ### Do's and Don'ts (blog)

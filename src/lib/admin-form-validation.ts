@@ -123,13 +123,21 @@ const faq = { question: text('Soru', true, 3000), answer: text('Yanıt', true), 
 const blogPost: FormRules = {
   id: uuid('Kayıt', false), title: text('Başlık', true, 200), slug: text('Adres (slug)', false, 120),
   excerpt: text('Özet', true, 300), body: text('Yazı metni', true, 100000), category: text('Kategori', true, 60),
-  highlight: text('Kapak vurgusu', false, 24), author_name: text('Yazar', false, 100),
+  highlight: text('Kapak vurgusu', false, 24),
   cover_file: { ...upload, label: 'Kapak görseli' }, current_cover: url('Mevcut kapak'), cover_image_alt: text('Kapak açıklaması', false, 300),
   remove_cover: choice('Kapağı kaldır', ['on']), status: choice('Yayın durumu', ['taslak', 'yayinda'], true),
-  published_at: text('Yayın tarihi', false, 16),
+  published_at: text('Yayın tarihi', false, 16), author_id: uuid('Yazar', false),
+};
+const blogAuthor: FormRules = {
+  id: uuid('Kayıt', false), name: text('Ad soyad', true, 120), slug: text('Adres (slug)', false, 120),
+  title: text('Unvan', false, 160), bio: text('Hakkında', false, 5000),
+  photo_file: { ...upload, label: 'Fotoğraf' }, current_photo: url('Mevcut fotoğraf'), remove_photo: choice('Fotoğrafı kaldır', ['on']),
+  email: { label: 'E-posta', kind: 'email', max: 254 }, phone: { label: 'Telefon', kind: 'phone' },
+  website_url: url('Web sitesi'), instagram_url: url('Instagram'), x_url: url('X'), linkedin_url: url('LinkedIn'), youtube_url: url('YouTube'),
 };
 export const contentFormRules: Record<string, FormRules> = {
   saveBlogPost: blogPost, deleteBlogPost: { id: uuid('Kayıt') },
+  saveBlogAuthor: blogAuthor, deleteBlogAuthor: { id: uuid('Kayıt') },
   createFaq: faq, updateFaq: { ...faq, id: uuid('Kayıt') }, deleteFaq: { id: uuid('Kayıt') },
   updateSiteSettings: { site_title: text('Site başlığı', true, 300), logo_alt: text('Logo alt metni', true, 300), current_logo_url: url('Logo adresi'), logo_file: { ...upload, max: 2 * 1024 * 1024 } },
   createNavigationItem: navigation, updateNavigationItem: { ...navigation, id: uuid('Kayıt'), is_visible: choice('Görünürlük', ['on']) },

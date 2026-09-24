@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
-import { blogCategoryOptions, loadAdminPost } from "@/lib/admin-blog";
+import { blogCategoryOptions, loadAdminAuthors, loadAdminPost } from "@/lib/admin-blog";
 import { postState } from "@/lib/blog";
 import { AdminPage } from "@/components/admin/ui/AdminPage";
 import { PageHeader } from "@/components/admin/ui/PageHeader";
@@ -28,9 +28,10 @@ export default async function AdminEditBlogPostPage({ params, searchParams }: Pa
   const { supabase } = await requireAdmin();
   const { id } = await params;
   const flash = searchParams ? await searchParams : undefined;
-  const [post, categories] = await Promise.all([
+  const [post, categories, authors] = await Promise.all([
     loadAdminPost(supabase, id),
     supabase.from("blog_posts").select("category"),
+    loadAdminAuthors(supabase),
   ]);
   if (!post) notFound();
 
@@ -51,7 +52,7 @@ export default async function AdminEditBlogPostPage({ params, searchParams }: Pa
         }
       />
       <FlashBanner success={flash?.success} error={flash?.error} />
-      <BlogPostForm key={post.id} post={post} categories={blogCategoryOptions(categories.data ?? [])} action={saveBlogPost} />
+      <BlogPostForm key={post.id} post={post} categories={blogCategoryOptions(categories.data ?? [])} authors={authors} action={saveBlogPost} />
 
       <form action={deleteBlogPost} className={cn(adminCard, "mt-10 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between")}>
         <input type="hidden" name="id" value={post.id} />
