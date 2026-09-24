@@ -16,9 +16,9 @@ export default async function IletisimPage() {
 
   return (
     <div className="landing">
-      <section className="container mx-auto max-w-6xl px-6 pt-10 pb-10 md:pt-14 md:pb-12">
+      <section className="container mx-auto max-w-6xl px-6 pt-8 pb-8 md:pt-10 md:pb-8">
         <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-12">
-          <h1 className="font-display text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[1.02] tracking-[-0.02em] text-balance text-[var(--ink)] lg:col-span-7">
+          <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.02] tracking-[-0.02em] text-balance text-[var(--ink)] lg:col-span-7">
             Bize <span className="text-[var(--teal)]">yazın.</span>
           </h1>
           <p className="max-w-xl text-lg leading-relaxed text-[var(--ink-soft)] md:text-xl lg:col-span-5 lg:pb-2">
@@ -28,10 +28,10 @@ export default async function IletisimPage() {
       </section>
 
       <div className="border-t border-[var(--line)]">
-        <div className="container mx-auto grid max-w-6xl gap-12 px-6 pt-10 pb-16 md:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-20">
+        <div className="container mx-auto grid max-w-6xl gap-12 px-6 pt-8 pb-16 lg:grid-cols-12 lg:gap-12 lg:pb-20">
           <section
             aria-labelledby="form-title"
-            className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-6 shadow-sm sm:p-8 md:p-10 lg:col-span-8"
+            className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] p-6 shadow-sm sm:p-8 lg:col-span-8"
           >
             <h2
               id="form-title"
@@ -39,7 +39,7 @@ export default async function IletisimPage() {
             >
               Mesaj gönder
             </h2>
-            <p className="mt-2 mb-8 text-[var(--ink-soft)]">
+            <p className="mt-1.5 mb-6 text-[var(--ink-soft)]">
               Önce konuyu seçin; okul bilgisiyle ilgiliyse okulu da işaretleyin.
             </p>
             <ContactForm />

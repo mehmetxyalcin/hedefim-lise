@@ -28,7 +28,7 @@ type SchoolResult = {
 // Anasayfa belge dünyasının (.landing) kontrol dili: kâğıt zeminli kutu,
 // odakta teal çerçeve + halka. ScoreScale ve FilterSelect ile aynı ölçüler.
 const INPUT_CLASS =
-  "w-full rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-4 py-3 text-base text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink-faint)] focus:border-[var(--teal)] focus:bg-[var(--doc-panel)] focus:ring-4 focus:ring-[var(--teal-ring)]";
+  "w-full rounded-xl border border-[var(--line)] bg-[var(--doc-ground)] px-4 py-2.5 text-base text-[var(--ink)] outline-none transition-colors placeholder:text-[var(--ink-faint)] focus:border-[var(--teal)] focus:bg-[var(--doc-panel)] focus:ring-4 focus:ring-[var(--teal-ring)]";
 const LABEL_CLASS =
   "mb-2 flex items-baseline gap-2 font-display text-sm font-bold text-[var(--ink)]";
 const OPTIONAL = (
@@ -186,7 +186,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-7">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
       {/* Konu — seçim formun geri kalanını belirler, o yüzden en başta. */}
       <fieldset>
         <legend className={LABEL_CLASS}>Konu</legend>
@@ -201,7 +201,7 @@ export default function ContactForm() {
                 onChange={() => chooseSubject(s)}
                 className="peer sr-only"
               />
-              <span className="inline-flex items-center rounded-lg border border-[var(--line)] bg-[var(--doc-ground)] px-3.5 py-2.5 font-display text-sm font-semibold text-[var(--ink-soft)] transition-colors peer-checked:border-[var(--teal)] peer-checked:bg-[var(--teal)] peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-[var(--teal-ring)] hover:border-[var(--ink-faint)] hover:text-[var(--ink)] peer-checked:hover:text-white">
+              <span className="inline-flex items-center rounded-lg border border-[var(--line)] bg-[var(--doc-ground)] px-3.5 py-2 font-display text-sm font-semibold text-[var(--ink-soft)] transition-colors peer-checked:border-[var(--teal)] peer-checked:bg-[var(--teal)] peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-[var(--teal-ring)] hover:border-[var(--ink-faint)] hover:text-[var(--ink)] peer-checked:hover:text-white">
                 {s}
               </span>
             </label>
@@ -329,8 +329,8 @@ export default function ContactForm() {
         </div>
       )}
 
-      {/* Ad Soyad + E-posta */}
-      <div className="grid gap-7 sm:grid-cols-2 sm:gap-5">
+      {/* Ad Soyad + E-posta + Telefon: geniş ekranda tek satır */}
+      <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
         <div>
           <label htmlFor="name" className={LABEL_CLASS}>
             Ad Soyad
@@ -359,22 +359,20 @@ export default function ContactForm() {
             className={INPUT_CLASS}
           />
         </div>
-      </div>
-
-      {/* Telefon */}
-      <div>
-        <label htmlFor="phone" className={LABEL_CLASS}>
-          Telefon {OPTIONAL}
-        </label>
-        <input
-          id="phone"
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="05XX XXX XX XX"
-          autoComplete="tel"
-          className={`${INPUT_CLASS} tabular sm:max-w-xs`}
-        />
+        <div>
+          <label htmlFor="phone" className={LABEL_CLASS}>
+            Telefon {OPTIONAL}
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="05XX XXX XX XX"
+            autoComplete="tel"
+            className={`${INPUT_CLASS} tabular`}
+          />
+        </div>
       </div>
 
       {/* Mesaj */}
@@ -398,7 +396,7 @@ export default function ContactForm() {
           id="message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          rows={6}
+          rows={4}
           placeholder="Mesajınızı buraya yazın (en az 20 karakter)"
           className={`${INPUT_CLASS} resize-y leading-relaxed`}
         />
@@ -412,11 +410,11 @@ export default function ContactForm() {
       )}
 
       {/* Submit */}
-      <div className="flex flex-col border-t border-[var(--line)] pt-6 sm:items-end">
+      <div className="flex flex-col sm:items-end">
         <button
           type="submit"
           disabled={!isFormValid() || submitting}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3.5 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--teal)]"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--teal)]"
         >
           {submitting ? (
             <>
