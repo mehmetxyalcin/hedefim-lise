@@ -23,7 +23,6 @@ export default async function IletisimPage() {
           </h1>
           <p className="max-w-xl text-lg leading-relaxed text-[var(--ink-soft)] md:text-xl lg:col-span-5 lg:pb-2">
             Soru, öneri veya bilgi güncelleme talepleriniz için bize ulaşın.
-            Okul verisindeki her düzeltme listeyi herkes için daha doğru yapar.
           </p>
         </div>
       </section>
@@ -91,28 +90,6 @@ export default async function IletisimPage() {
                 </dd>
               </div>
 
-              <div className="border-t border-[var(--line)] pt-5">
-                <dt className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--ink-faint)]">
-                  Düzeltme bildirirken
-                </dt>
-                <dd className="mt-3">
-                  <ul className="space-y-2.5 text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                    {[
-                      "Hangi bilginin yanlış olduğunu yazın.",
-                      "Doğrusunu ve hangi yıla ait olduğunu belirtin.",
-                      "Varsa kaynağını ekleyin: okulun sitesi, resmî duyuru.",
-                    ].map((item) => (
-                      <li key={item} className="flex gap-3">
-                        <span
-                          aria-hidden
-                          className="mt-[0.7em] h-px w-3 shrink-0 bg-[var(--teal)]"
-                        />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
             </dl>
 
             <p className="mt-10 font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">

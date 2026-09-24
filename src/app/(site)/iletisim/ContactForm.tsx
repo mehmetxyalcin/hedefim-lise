@@ -121,16 +121,10 @@ export default function ContactForm() {
     setSchoolDropdownOpen(false);
   }
 
-  // Gönder düğmesi neden pasif? İlk eksik adımı düz dille söyler.
-  function missingStep(): string | null {
-    if (!name.trim()) return "Adınızı yazın.";
-    if (!email.trim()) return "E-posta adresinizi yazın.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      return "Geçerli bir e-posta adresi yazın.";
-    if (!subject.trim()) return "Bir konu seçin.";
-    const left = MIN_MESSAGE - message.trim().length;
-    if (left > 0) return `Mesajınız için ${left} karakter daha yazın.`;
-    return null;
+  function isFormValid() {
+    if (!name.trim() || !email.trim() || !subject.trim()) return false;
+    if (message.trim().length < MIN_MESSAGE) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -166,7 +160,6 @@ export default function ContactForm() {
     setSchoolDropdownOpen(false);
   }
 
-  const missing = missingStep();
   const messageLength = message.trim().length;
 
   if (success) {
@@ -419,13 +412,10 @@ export default function ContactForm() {
       )}
 
       {/* Submit */}
-      <div className="flex flex-col gap-3 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p aria-live="polite" className="font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">
-          {missing ?? "Hazır. Mesajınız doğrudan bize ulaşır."}
-        </p>
+      <div className="flex flex-col border-t border-[var(--line)] pt-6 sm:items-end">
         <button
           type="submit"
-          disabled={missing !== null || submitting}
+          disabled={!isFormValid() || submitting}
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3.5 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--teal)]"
         >
           {submitting ? (
