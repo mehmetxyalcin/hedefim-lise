@@ -587,6 +587,10 @@ Soft, consistent, generously rounded. The radius vocabulary is tight: **12px (`r
 - **Tercihlerim:** a right-aligned bordered pill (star + label + blue count badge); icon-only 40px circle with a corner badge below `sm`. Always in the bar, never hidden in the menu.
 - **Mobile (< `lg`):** a 40px menu button opens a full-height white panel under the header (absolute to the header, because its backdrop-filter traps `fixed`): 16px/600 rows with hairline dividers and a chevron, current page in blue tint. Escape and any route change close it; page scroll is locked while open.
 
+### Favicon (2026-09)
+- **Mark:** a white "H" on an Exam Blue tile (`#2563eb → #1d4ed8`), its right stem taller and carrying an amber (`#fbbf24`) pennant: "reaching the goal" (hedef). `src/app/icon.svg` is the master; `favicon.ico` holds a pixel-hinted 16px drawing plus 32/48px renders; `apple-icon.png` is 180px full-bleed (iOS rounds it). Amber lives only in the mark, never in UI.
+- `themeColor` is `#ffffff` to match the light header.
+
 ### Hero Search — removed (2026-08)
 The old signature — a white `rounded-2xl` panel with `shadow-2xl` straddling the dark hero, cyan focus rings, "Okul Ara" submit — was deleted with the dark hero. The landing's decision control is now the **Percentile Scale** (`src/components/home/PercentileScale.tsx`), documented in Landing Surface World below. Do not rebuild the hero search.
 

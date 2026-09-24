@@ -68,7 +68,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Çentikli cihazlarda güvenli alan (env safe-area-inset-*) desteğini açar.
   viewportFit: "cover",
-  themeColor: "#0a0f1c",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
