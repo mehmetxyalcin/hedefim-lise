@@ -291,7 +291,9 @@ export function BlogPostForm({ post, categories, authors, action }: Props) {
             <label className="block">
               <span className={adminLabel}>Yazar</span>
               <select name="author_id" defaultValue={post?.authorId ?? ""} className={adminInput}>
-                <option value="">Hedefim Lise (yazar sayfası yok)</option>
+                <option value="">
+                  {post && !post.authorId ? post.authorName : "Hedefim Lise"} (yazar sayfası yok)
+                </option>
                 {authors.map((author) => (
                   <option key={author.id} value={author.id}>
                     {author.title ? `${author.name} · ${author.title}` : author.name}

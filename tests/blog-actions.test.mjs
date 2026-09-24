@@ -192,3 +192,13 @@ test('authors: photo must be raster and delete confirms the removed row', async 
   await assert.rejects(ok.api.deleteBlogAuthor(form({ id: authorId })), /REDIRECT:\/admin\/blog\/yazarlar\?success=Yazar silindi/);
   assert.ok(ok.revalidated.includes('/blog/yazar/ayse-yilmaz'));
 });
+
+test('posts: a legacy free-text signature survives saving without an author', async () => {
+  const legacy = actions(() => ({ data: { id: uuid, slug: 'eski', author_id: null, author_name: 'Leyla Örnek' }, error: null }));
+  await legacy.api.saveBlogPost(null, form({ ...valid, id: uuid, author_id: '' }));
+  assert.equal(written(legacy.calls, 'update').author_name, 'Leyla Örnek');
+
+  const detached = actions(() => ({ data: { id: uuid, slug: 'eski', author_id: '00000000-0000-4000-8000-0000000000aa', author_name: 'Ayşe Yılmaz' }, error: null }));
+  await detached.api.saveBlogPost(null, form({ ...valid, id: uuid, author_id: '' }));
+  assert.equal(written(detached.calls, 'update').author_name, 'Hedefim Lise', 'removing a profile author falls back to the house signature');
+});

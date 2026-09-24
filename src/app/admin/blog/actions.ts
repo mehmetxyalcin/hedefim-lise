@@ -61,16 +61,23 @@ export async function saveBlogPost(_previous: BlogFormState, formData: FormData)
   const publishedAt = parsedDate ?? (publish ? new Date().toISOString() : null);
 
   let previousSlug: string | null = null;
+  let previousSignature: string | null = null;
   if (id) {
-    const { data: existing, error } = await supabase.from("blog_posts").select("slug").eq("id", id).maybeSingle();
+    const { data: existing, error } = await supabase
+      .from("blog_posts")
+      .select("slug, author_id, author_name")
+      .eq("id", id)
+      .maybeSingle();
     if (error) return fail(`Yazı okunamadı: ${error.message}`);
     if (!existing) return fail("Yazı bulunamadı; silinmiş olabilir. Sayfayı yenileyin.");
     previousSlug = existing.slug;
+    // Yazar profili olmayan eski imza (ör. elle yazılmış ad) kaydederken korunur.
+    if (!existing.author_id && existing.author_name) previousSignature = existing.author_name;
   }
 
   // Yazar seçildiyse imza onun adıdır; seçilmediyse yayın imzası.
   const authorId = field(formData, "author_id") || null;
-  let authorName = DEFAULT_SIGNATURE;
+  let authorName = previousSignature ?? DEFAULT_SIGNATURE;
   if (authorId) {
     const { data: author, error } = await supabase.from("blog_authors").select("name").eq("id", authorId).maybeSingle();
     if (error) return fail(`Yazar okunamadı: ${error.message}`);
