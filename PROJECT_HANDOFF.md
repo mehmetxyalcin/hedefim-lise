@@ -43,8 +43,8 @@ Görsel optimizasyonu `images.unoptimized: true` ile kapalı. Supabase public st
 | `/` | `src/app/(site)/page.tsx` (genel sayfalar 23 Eylül'den beri `(site)` route group'unda; URL'ler aynı); aktif okul sayıları, son puan yılı, dağılımlar, öne çıkan okul |
 | `/okullar` | `src/app/okullar/page.tsx`; sunucuda sorgu/filtre/sayfalama; `components/schools/SchoolList.tsx` etkileşimleri |
 | `/okullar/[slug]` | `lib/supabase/schoolDetail.ts` → **`components/school/SchoolDetail.tsx`** |
-| `/alanlar` | Supabase meslek alanları → `components/vocational/VocationalAtlas.tsx` |
-| `/alanlar/[slug]` | Alan + ilişkili aktif okullar + alan puanları → `VocationalDetail.tsx` / `school/VocationalSchoolList.tsx` |
+| `/alanlar` | Supabase meslek alanları → `lib/vocational-atlas.ts` (`buildAtlas`) → `components/vocational/VocationalAtlas.tsx` |
+| `/alanlar/[slug]` | Alan + ilişkili aktif okullar + `/okullar?alan=` ile aynı puan kuralı (`placementValues` + `lib/score-display.ts`) → `VocationalDetail.tsx` |
 | `/istatistikler` | `data/mersinSchoolStatistics2026.ts` → `SchoolStatisticsDashboard.tsx`; Supabase'den bağımsız |
 | `/soru-cevap` | `lib/faqs.ts` → `components/faq/FaqSearch.tsx`; yayımlanmış kayıtlar, kategori ve metin araması |
 | `/tercihlerim` | Tamamen tarayıcıdaki tercih listesi; sıra değiştirme, silme, temizleme, yazdırma |
@@ -341,3 +341,12 @@ Dal: `feat/blog-authors`.
 - Yönetim: `/admin/blog/yazarlar` (liste, yeni, düzenle, sil); yazı formunda yazar seçimi (boş = "Hedefim Lise"). Yazar adı değişince yazılardaki `author_name` imzası güncellenir; yazar silinirse yazılar kalır, imza düz metin olur. Fotoğraflar `site-assets/blog/yazarlar/`.
 - İletişim bilgisi herkese açıktır; formda yalnız yazarın onay verdiği kişisel bilgilerin girilmesi, kurumların resmî iletişim bilgisinin kullanılmaması uyarısı var (PRODUCT.md kurumsal bağlılık kuralı).
 - Doğrulama: 102 test (yazar action'ları, saklı adres, yazar seçimi, 020 RLS/kısıt/silme davranışı), tsc, `eslint .`, üretim derlemesi. Görsel kontrol commit edilmeyen örnek verilerle (`.impeccable/review/blog-authors/`); oturumlu yönetim akışı denenmedi.
+
+## 27. Meslek atlası landing belge dünyasında — 28 Eylül 2026
+
+- `/alanlar` artık `.landing` kapsamında (iletişim sayfasıyla aynı iskelet): afiş soru başlığı, altında 8 sütun dizin paneli + 4 sütun yapışkan künye. Kart ızgarası kaldırıldı; 78 kaydın yalnız 2'sinde açıklama/dal vardı ve kartların çoğu boş kalıyordu.
+- `lib/vocational-atlas.ts` (`buildAtlas`): "(SINAVLI)" kayıtlarını aynı başlıklı ana alanın altına bağlar, yalnız görünür ve aktif okulları sayar, bağlı okulu olmayan kayıtları dipnot listesine ayırır, Türkçe sıralar ve arama anahtarı üretir (`foldTurkish`). Testi: `tests/vocational-atlas.test.mjs`.
+- Dizin: satır başına "bir çizgi = bir okul" şeridi, A–Z / okul sayısı sıralaması (view transition ile satırlar yer değiştirir; azaltılmış harekette kapalı), Türkçe duyarsız arama, harf dizini. Sorgu `schools(is_active)` gömülü seçimle okul sayısını alır; sayfa önbellek davranışı değişmedi (dinamik).
+- Alan sayfası (`/alanlar/[slug]`) da aynı dünyaya taşındı: okullar ilçeye göre gruplu tek panelde, puan `/okullar?alan={id}` listesindekiyle aynı (22 okulda karşılaştırıldı, fark yok). Puan hücresi kuralı `SchoolList.tsx`'ten `lib/score-display.ts`'e taşındı; iki sayfa onu kullanır. Künye yalnız veride olanı yazar (dallar, beceriler, kariyer, sınavlı/sınavsız eş program bağlantısı `findSibling`); "Okul listesinde filtrele" → `/okullar?alan={id}`.
+- Eski sayfadaki uydurma/sabit metinler kaldırıldı: her dala aynı cümle, "Kamu Kurumları / Özel Sektör / İş Yeri Açma" listesi, M.T.O.K. kontenjanı ve ek puan kutuları (bale ve özel eğitim programlarında da çıkıyordu). `vocational_field_id` kolonu yokken çalışan yedek sorgu da kaldırıldı (kolon canlıda var).
+- Kullanılmayan `school/VocationalSchoolList.tsx` ve `lib/vocational-icons.ts` silindi.

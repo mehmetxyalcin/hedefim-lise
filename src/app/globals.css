@@ -249,6 +249,24 @@
   }
 }
 
+/* Meslek atlası: sıralama değişince satırlar yeni yerlerine kayar (tek an).
+   Geçiş yalnız atlas başlattığında data-vt="atlas" ile etkin; başlık ayrı
+   katmanda kalır ki kayan satırlar onun üstünden geçmesin. */
+.landing .atlas-row {
+  view-transition-class: atlas-row;
+}
+html[data-vt="atlas"] .site-header {
+  view-transition-name: site-header;
+}
+html[data-vt="atlas"]::view-transition-group(.atlas-row) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+html[data-vt="atlas"]::view-transition-old(root),
+html[data-vt="atlas"]::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
 /* Site başlığı: sayfa en üstteyken düz; kaydırıldıkça altına ince bir gölge iner.
    Kaydırmaya bağlı animasyonu desteklemeyen tarayıcılarda çizgi yeterli. */
 @keyframes site-header-lift {

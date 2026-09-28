@@ -5,7 +5,14 @@ import {
   mapVocationalField,
 } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
-import { VocationalDetail } from "@/components/vocational/VocationalDetail";
+import { MULTI_PROGRAM_TYPE } from "@/lib/school-programs";
+import { placementValues, programOBPs } from "@/lib/school-scores";
+import { scoreRows } from "@/lib/score-display";
+import { findSibling } from "@/lib/vocational-atlas";
+import {
+  VocationalDetail,
+  type DetailSchool,
+} from "@/components/vocational/VocationalDetail";
 
 type AlanDetayPageProps = {
   params: Promise<{ slug: string }>;
@@ -85,41 +92,57 @@ export default async function AlanDetayPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Try with school_scores including vocational_field_id (requires migration).
-  // Falls back to scores without vocational_field_id if the column doesn't exist yet.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let data: any = null;
-
-  const { data: detailed, error: detailedErr } = await supabase
-    .from("vocational_fields")
-    .select(
-      "*, school_vocational_fields(school_id, schools(*, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id)))",
-    )
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (!detailedErr) {
-    data = detailed;
-  } else {
-    const { data: basic, error: basicErr } = await supabase
+  const [fieldResult, yearResult, allFieldsResult] = await Promise.all([
+    supabase
       .from("vocational_fields")
       .select(
-        "*, school_vocational_fields(school_id, schools(*, school_scores(id, school_id, year, obp_score, lgs_score, percentile)))",
+        "*, school_vocational_fields(school_id, schools(*, school_scores(id, school_id, year, obp_score, lgs_score, percentile, vocational_field_id, program)))",
       )
       .eq("slug", slug)
-      .maybeSingle();
+      .maybeSingle(),
+    // /okullar ile aynı yıl: veri kümesinin son yılı (kural: lib/school-scores).
+    supabase
+      .from("school_scores")
+      .select("year")
+      .order("year", { ascending: false })
+      .limit(1),
+    supabase.from("vocational_fields").select("id, slug, title"),
+  ]);
 
-    if (basicErr || !basic) notFound();
-    data = basic;
-  }
+  const data = fieldResult.data;
+  if (fieldResult.error || !data) notFound();
 
-  if (!data) notFound();
+  const field = mapVocationalField(data);
+  const scoreYear = (yearResult.data?.[0]?.year as number | undefined) ?? null;
+
+  // Satır puanı /okullar?alan= listesindekiyle aynıdır: alanın yüzdeliği,
+  // okulun OBP'si, ÇPAL'da program OBP'leri.
+  const schools: DetailSchool[] = extractSchoolsFromVocationalField(data).map(
+    (school) => {
+      const scores = school.scores ?? [];
+      return {
+        id: school.id,
+        slug: school.slug,
+        name: school.name,
+        type: school.type,
+        district: school.district,
+        score: scoreRows(
+          placementValues(scores, scoreYear, field.id),
+          school.type === MULTI_PROGRAM_TYPE
+            ? programOBPs(scores, scoreYear)
+            : undefined,
+          null,
+        ),
+      };
+    },
+  );
 
   return (
     <VocationalDetail
-      field={mapVocationalField(data)}
-      relatedSchools={extractSchoolsFromVocationalField(data)}
-      fieldId={data.id as number}
+      field={field}
+      schools={schools}
+      scoreYear={scoreYear}
+      sibling={findSibling(field, allFieldsResult.data ?? [])}
     />
   );
 }

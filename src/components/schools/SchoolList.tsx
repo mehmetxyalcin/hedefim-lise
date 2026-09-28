@@ -19,7 +19,7 @@ import type { School } from "@/types/school";
 import type { Placement, PlacementValues, ProgramOBPs } from "@/lib/school-scores";
 import type { VocationalField } from "@/types/vocationalField";
 import { BottomSheet } from "@/components/ui/BottomSheet";
-import { PROGRAM_LABELS } from "@/lib/school-programs";
+import { scoreRows } from "@/lib/score-display";
 import { cn } from "@/lib/cn";
 
 const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
@@ -57,44 +57,6 @@ type Props = {
   obpMin?: number | null;
   obpMax?: number | null;
 };
-
-const formatScore = (v: number) =>
-  v.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-type ScoreRow = { label: string; value: string };
-
-/** Satırın sağ sütunu: tek değer büyük, iki değer (merkezi+yerel ya da ÇPAL programları) iki satır. */
-function scoreRows(
-  values: PlacementValues | undefined,
-  programs: ProgramOBPs | undefined,
-  placement: Placement | null,
-): { single: ScoreRow | null; rows: ScoreRow[] | null } {
-  const merkezi = values?.merkezi ?? null;
-  const yerel = values?.yerel ?? null;
-  const al = programs?.anadolu_lisesi ?? null;
-  const mp = programs?.meslek ?? null;
-  // İki programlı ÇPAL: tür filtresi yoksa ve merkezi gösterilmiyorsa iki OBP satırı.
-  const programRows =
-    al != null && mp != null && placement !== "merkezi" && (placement === "yerel" || merkezi == null)
-      ? [
-          { label: PROGRAM_LABELS.anadolu_lisesi, value: formatScore(al) },
-          { label: PROGRAM_LABELS.meslek, value: formatScore(mp) },
-        ]
-      : null;
-  const single = programRows ? null
-    : placement === "merkezi" ? (merkezi != null ? { label: "Yüzdelik dilim", value: `%${formatScore(merkezi)}` } : null)
-    : placement === "yerel" ? (yerel != null ? { label: "OBP puanı", value: formatScore(yerel) } : null)
-    : merkezi != null && yerel == null ? { label: "Yüzdelik dilim", value: `%${formatScore(merkezi)}` }
-    : yerel != null && merkezi == null ? { label: "OBP puanı", value: formatScore(yerel) }
-    : null;
-  const rows = programRows ?? (placement === null && merkezi != null && yerel != null
-    ? [
-        { label: "Merkezi", value: `%${formatScore(merkezi)}` },
-        { label: "Yerel OBP", value: formatScore(yerel) },
-      ]
-    : null);
-  return { single, rows };
-}
 
 function ScoreCell({ values, programs, placement }: { values: PlacementValues | undefined; programs: ProgramOBPs | undefined; placement: Placement | null }) {
   const { single, rows } = scoreRows(values, programs, placement);
