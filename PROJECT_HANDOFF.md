@@ -350,3 +350,9 @@ Dal: `feat/blog-authors`.
 - Alan sayfası (`/alanlar/[slug]`) da aynı dünyaya taşındı: okullar ilçeye göre gruplu tek panelde, puan `/okullar?alan={id}` listesindekiyle aynı (22 okulda karşılaştırıldı, fark yok). Puan hücresi kuralı `SchoolList.tsx`'ten `lib/score-display.ts`'e taşındı; iki sayfa onu kullanır. Künye yalnız veride olanı yazar (dallar, beceriler, kariyer, sınavlı/sınavsız eş program bağlantısı `findSibling`); "Okul listesinde filtrele" → `/okullar?alan={id}`.
 - Eski sayfadaki uydurma/sabit metinler kaldırıldı: her dala aynı cümle, "Kamu Kurumları / Özel Sektör / İş Yeri Açma" listesi, M.T.O.K. kontenjanı ve ek puan kutuları (bale ve özel eğitim programlarında da çıkıyordu). `vocational_field_id` kolonu yokken çalışan yedek sorgu da kaldırıldı (kolon canlıda var).
 - Kullanılmayan `school/VocationalSchoolList.tsx` ve `lib/vocational-icons.ts` silindi.
+
+## 28. Hostinger derlemesi webpack ile — 28 Eylül 2026
+
+- Hostinger'da `next build` (Next 16'da varsayılan Turbopack) `globals.css` işlenirken `TurbopackInternalError … node process exited before we could connect to it` ile düştü. Turbopack PostCSS/Tailwind'i soketle bağlanan yardımcı Node süreçlerinde çalıştırıyor; Hostinger'ın derleme sunucusunda bu süreçler bağlanamadan kapanıyor. Kod ya da deponun gizli/açık olmasıyla ilgili değil (klonlama ve `npm install` başarılıydı).
+- Çözüm: `package.json` → `"build": "next build --webpack"`, `next.config.ts` → `experimental.webpackBuildWorker: false` (webpack ana süreçte derler). Yerel geliştirme (`dev`, `dev:preview`) Turbopack'te kaldı.
+- Yerelde temiz webpack derlemesi başarılı; `next start` ile anasayfa ve `/alanlar` görsel olarak aynı.
