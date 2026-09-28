@@ -42,8 +42,6 @@ export type Atlas = {
   fieldCount: number;
   schoolCount: number;
   sinavliCount: number;
-  // Çizgi şeridinin ortak ölçeği: dizindeki en büyük okul sayısı.
-  maxCount: number;
 };
 
 const SINAVLI = /\s*\(\s*s[ıi]navl[ıi]\s*\)\s*$/iu;
@@ -175,11 +173,5 @@ export function buildAtlas(rows: AtlasRowInput[]): Atlas {
     fieldCount: visible.length,
     schoolCount: allSchools.size,
     sinavliCount: visible.filter((entry) => entry.sinavli).length,
-    maxCount: Math.max(
-      1,
-      ...visible.map((entry) =>
-        Math.max(entry.schoolCount, entry.sinavli?.schoolCount ?? 0),
-      ),
-    ),
   };
 }

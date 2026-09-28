@@ -36,7 +36,6 @@ test('attaches a sınavlı record under its base field', () => {
   assert.equal(atlas.fieldCount, 1);
   assert.equal(atlas.sinavliCount, 1);
   assert.equal(atlas.schoolCount, 4, 'distinct schools across both programs');
-  assert.equal(atlas.maxCount, 3);
   assert.ok(entry.searchText.includes('sinavli'));
 });
 

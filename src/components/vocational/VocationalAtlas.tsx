@@ -18,9 +18,9 @@ import {
 } from "@/lib/vocational-atlas";
 
 // Meslek atlası, anasayfanın belge dünyasında (.landing) bir dizin sayfasıdır:
-// kart ızgarası değil, harf harf ilerleyen bir alan listesi. Her satırdaki
-// çizgi şeridi landing ölçeğinin kuralını sürdürür: bir çizgi = bir okul.
-// "Okul sayısı" sıralaması aynı satırları bir histograma dizer.
+// kart ızgarası değil, harf harf ilerleyen bir alan listesi; her satırda
+// alanı okutan okul sayısı. "Okul sayısı" sıralaması aynı satırları en çok
+// okulu olan alandan başlayarak dizer.
 
 const ALPHABET = [
   "A", "B", "C", "Ç", "D", "E", "F", "G", "H", "I", "İ", "J", "K", "L",
@@ -40,10 +40,10 @@ const MICRO =
   "font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--ink-faint)]";
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)]";
-// Satır ızgarası: alan · çizgi şeridi · sayı · ok. Başlık satırı aynı ızgarayı kullanır.
-// Telefonda sayı başlık satırına hizalanır (şerit başlığın altına iner).
+// Satır ızgarası: alan · sayı · ok. Başlık satırı aynı ızgarayı kullanır.
+// Telefonda sayı, birden çok satıra kırılan başlığın ilk satırına hizalanır.
 const ROW_GRID =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 sm:grid-cols-[minmax(0,1fr)_9.5rem_2.25rem_1rem] sm:items-center";
+  "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 sm:grid-cols-[minmax(0,1fr)_2.25rem_1rem] sm:items-center";
 // Sol oluk: alfabetik düzende harf, sayı düzeninde sıra numarası.
 const GUTTER = "grid grid-cols-[2.25rem_minmax(0,1fr)] sm:grid-cols-[3.25rem_minmax(0,1fr)]";
 
@@ -199,14 +199,9 @@ export function VocationalAtlas({ atlas }: { atlas: Atlas }) {
                 {folded ? " bulundu" : ""}
               </span>
               {!nothingFound && (
-                <>
-                  <span aria-hidden className="hidden sm:block">
-                    Her çizgi bir okul
-                  </span>
-                  <span aria-hidden className="text-right">
-                    Okul
-                  </span>
-                </>
+                <span aria-hidden className="text-right">
+                  Okul
+                </span>
               )}
             </span>
           </p>
@@ -245,7 +240,7 @@ export function VocationalAtlas({ atlas }: { atlas: Atlas }) {
               </h3>
               <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_60%,transparent)]">
                 {list.map((entry) => (
-                  <EntryRow key={entry.id} entry={entry} max={atlas.maxCount} />
+                  <EntryRow key={entry.id} entry={entry} />
                 ))}
               </ol>
             </section>
@@ -257,7 +252,7 @@ export function VocationalAtlas({ atlas }: { atlas: Atlas }) {
                 <span className="tabular pt-[1.1rem] font-mono text-[11px] font-medium text-[var(--ink-faint)]">
                   {index + 1}
                 </span>
-                <EntryRow as="div" entry={entry} max={atlas.maxCount} />
+                <EntryRow as="div" entry={entry} />
               </li>
             ))}
           </ol>
@@ -339,11 +334,9 @@ export function VocationalAtlas({ atlas }: { atlas: Atlas }) {
 
 function EntryRow({
   entry,
-  max,
   as: Tag = "li",
 }: {
   entry: AtlasEntry;
-  max: number;
   as?: "li" | "div";
 }) {
   // Satırın kimliği sıralama geçişinde korunur: A–Z'den sayıya geçerken
@@ -352,7 +345,7 @@ function EntryRow({
 
   return (
     <Tag style={style} className="atlas-row min-w-0 py-1">
-      <ProgramLink program={entry} max={max}>
+      <ProgramLink program={entry}>
         <span className="min-w-0">
           <span className="block font-display text-[1.0625rem] leading-snug font-bold text-[var(--ink)] transition-colors group-hover:text-[var(--teal)]">
             {entry.title}
@@ -362,21 +355,11 @@ function EntryRow({
               {entry.branches.join(" · ")}
             </span>
           )}
-          <Ticks
-            count={entry.schoolCount}
-            max={max}
-            className="mt-2 h-3 max-w-[9.5rem] sm:hidden"
-          />
         </span>
       </ProgramLink>
 
       {entry.sinavli && (
-        <ProgramLink
-          program={entry.sinavli}
-          max={max}
-          sub
-          parentTitle={entry.title}
-        >
+        <ProgramLink program={entry.sinavli} sub parentTitle={entry.title}>
           <span className="flex min-w-0 items-center gap-2.5">
             <span
               aria-hidden
@@ -394,13 +377,11 @@ function EntryRow({
 
 function ProgramLink({
   program,
-  max,
   sub = false,
   parentTitle,
   children,
 }: {
   program: AtlasProgram;
-  max: number;
   sub?: boolean;
   parentTitle?: string;
   children: ReactNode;
@@ -421,12 +402,6 @@ function ProgramLink({
     >
       {sub && parentTitle && <span className="sr-only">{parentTitle}, </span>}
       {children}
-      <Ticks
-        count={program.schoolCount}
-        max={max}
-        faint={sub}
-        className={`hidden sm:grid ${sub ? "h-2.5" : "h-4"}`}
-      />
       <span
         className={`tabular text-right font-display leading-none ${countTone} ${
           sub ? "text-base font-bold" : "pt-[3px] text-lg font-extrabold sm:pt-0"
@@ -440,33 +415,6 @@ function ProgramLink({
         className="hidden h-4 w-4 -translate-x-1 text-[var(--teal)] opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 sm:block"
       />
     </Link>
-  );
-}
-
-function Ticks({
-  count,
-  max,
-  faint = false,
-  className = "",
-}: {
-  count: number;
-  max: number;
-  faint?: boolean;
-  className?: string;
-}) {
-  return (
-    <span
-      aria-hidden
-      className={`grid items-stretch ${className}`}
-      style={{ gridTemplateColumns: `repeat(${max}, minmax(0, 1fr))` }}
-    >
-      {Array.from({ length: count }, (_, i) => (
-        <span
-          key={i}
-          className={`w-[2px] ${faint ? "bg-[var(--teal)]/55" : "bg-[var(--teal)]"}`}
-        />
-      ))}
-    </span>
   );
 }
 
