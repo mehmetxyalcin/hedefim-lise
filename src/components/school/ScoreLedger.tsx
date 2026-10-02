@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useId,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { CircleHelp } from "lucide-react";
 import { cn } from "@/lib/cn";
 import {
   formatPhone,
@@ -77,12 +85,16 @@ export function ScoreLedger({ ledger, phone }: Props) {
           ) : null
         }
       >
-        <h2
-          id="puan-baslik"
-          className="font-display text-2xl leading-tight font-extrabold tracking-tight text-[var(--ink)] md:text-[1.75rem]"
-        >
-          Hangi puanla öğrenci alıyor?
-        </h2>
+        <div className="flex items-start justify-between gap-3">
+          <h2
+            id="puan-baslik"
+            className="font-display text-2xl leading-tight font-extrabold tracking-tight text-[var(--ink)] md:text-[1.75rem]"
+          >
+            Hangi puanla öğrenci alıyor?
+          </h2>
+          <NoteButton />
+        </div>
+        <NoteText />
       </Slice>
 
       {!hasData ? (
@@ -156,6 +168,54 @@ export function ScoreLedger({ ledger, phone }: Props) {
 
 // Panel, her biri kendi kenar notunu taşıyan dilimlerden oluşur: masaüstünde
 // not dilimin hizasında sağ sütunda, telefonda dilimin içinde altta durur.
+// Telefonda notlar kapalı gelir; dilimin başlığındaki "?" düğmesi açar.
+// Masaüstünde not her zaman kenar sütunundadır ve düğme görünmez.
+const NoteContext = createContext<{
+  id: string;
+  open: boolean;
+  toggle: () => void;
+  note: ReactNode;
+} | null>(null);
+
+function NoteButton() {
+  const note = useContext(NoteContext);
+  if (!note) return null;
+  return (
+    <button
+      type="button"
+      onClick={note.toggle}
+      aria-expanded={note.open}
+      aria-controls={note.id}
+      aria-label={note.open ? "Açıklamayı gizle" : "Bu ne demek?"}
+      className={cn(
+        "-my-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors lg:hidden",
+        FOCUS,
+        note.open
+          ? "bg-[var(--teal-tint)] text-[var(--teal)]"
+          : "text-[var(--ink-faint)] hover:text-[var(--ink)]",
+      )}
+    >
+      <CircleHelp className="h-[18px] w-[18px]" strokeWidth={2} />
+    </button>
+  );
+}
+
+// Açılan not, düğmenin bulunduğu başlığın hemen altında durur. Panelin iç
+// boşluğu kadar taşar ki son yıl bandı notun arkasından geçmesin.
+function NoteText() {
+  const note = useContext(NoteContext);
+  if (!note) return null;
+  return (
+    <p
+      id={note.id}
+      hidden={!note.open}
+      className="relative -mx-[var(--pad)] mt-2 bg-[var(--doc-panel)] px-[var(--pad)] pb-1 text-sm leading-relaxed text-[var(--ink-soft)] lg:hidden"
+    >
+      {note.note}
+    </p>
+  );
+}
+
 function Slice({
   children,
   note,
@@ -169,36 +229,35 @@ function Slice({
   divided?: boolean;
   position?: "first" | "last";
 }) {
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  const context = note ? { id, open, toggle: () => setOpen((v) => !v), note } : null;
   return (
-    <div className="lg:grid lg:grid-cols-12 lg:gap-x-12">
-      <div
-        className={cn(
-          "ledger-slice border-x border-[var(--line)] bg-[var(--doc-panel)] px-[var(--pad)] lg:col-span-8",
-          band && "ledger-band",
-          divided && "border-t",
-          position === "first" && "rounded-t-2xl border-t pt-5 sm:pt-6",
-          position === "last" && "rounded-b-2xl border-b pb-3 shadow-sm",
-        )}
-      >
-        {children}
+    <NoteContext.Provider value={context}>
+      <div className="lg:grid lg:grid-cols-12 lg:gap-x-12">
+        <div
+          className={cn(
+            "ledger-slice border-x border-[var(--line)] bg-[var(--doc-panel)] px-[var(--pad)] lg:col-span-8",
+            band && "ledger-band",
+            divided && "border-t",
+            position === "first" && "rounded-t-2xl border-t pt-5 sm:pt-6",
+            position === "last" && "rounded-b-2xl border-b pb-3 shadow-sm",
+          )}
+        >
+          {children}
+        </div>
         {note && (
-          // Telefonda not panelin içinde durur; son yıl bandı notun arkasından geçmez.
-          <p className="relative -mx-[var(--pad)] bg-[var(--doc-panel)] px-[var(--pad)] pt-1 pb-4 text-sm leading-relaxed text-[var(--ink-soft)] lg:hidden">
+          <p
+            className={cn(
+              "hidden text-[15px] leading-relaxed text-[var(--ink-soft)] lg:col-span-4 lg:block",
+              position === "first" ? "pt-6" : "border-t border-[var(--line)] pt-4",
+            )}
+          >
             {note}
           </p>
         )}
       </div>
-      {note && (
-        <p
-          className={cn(
-            "hidden text-[15px] leading-relaxed text-[var(--ink-soft)] lg:col-span-4 lg:block",
-            position === "first" ? "pt-6" : "border-t border-[var(--line)] pt-4",
-          )}
-        >
-          {note}
-        </p>
-      )}
-    </div>
+    </NoteContext.Provider>
   );
 }
 
@@ -264,10 +323,13 @@ function GroupBlock({
     <div className="pt-4">
       {/* Anahtar başlığın yanında durur; son yıl bandına taşmaz. */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <h3 className="font-display text-[15px] font-extrabold tracking-tight text-[var(--teal)]">
-          {title}
-          <span className={`ml-2 align-[1px] ${MICRO}`}>{via}</span>
-        </h3>
+        <div className="flex items-center gap-1">
+          <h3 className="font-display text-[15px] font-extrabold tracking-tight text-[var(--teal)]">
+            {title}
+            <span className={`ml-2 align-[1px] ${MICRO}`}>{via}</span>
+          </h3>
+          <NoteButton />
+        </div>
         {onMetric && group.metrics.length > 1 && (
           <div
             role="group"
@@ -298,6 +360,7 @@ function GroupBlock({
         )}
       </div>
 
+      <NoteText />
       <div
         role="table"
         aria-label={`${title}, taban ${METRIC_LABEL[metric].toLocaleLowerCase("tr-TR")}`}
@@ -400,9 +463,13 @@ function QuotaBlock({ rows, years, max }: { rows: QuotaRow[]; years: number[]; m
   const last = years.length - 1;
   return (
     <div className="pt-4">
-      <h3 className="font-display text-[15px] font-extrabold tracking-tight text-[var(--teal)]">
-        Kaç öğrenci alıyor?
-      </h3>
+      <div className="flex items-center gap-1">
+        <h3 className="font-display text-[15px] font-extrabold tracking-tight text-[var(--teal)]">
+          Kaç öğrenci alıyor?
+        </h3>
+        <NoteButton />
+      </div>
+      <NoteText />
       <div role="table" aria-label="Kontenjan, öğrenci sayısı" className="mt-2">
         <div role="rowgroup" className="sr-only">
           <div role="row">
