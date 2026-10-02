@@ -40,7 +40,8 @@ export async function generateMetadata({ params }: OkulDetayPageProps): Promise<
   const absoluteImage = image ? getSiteUrlWithPath(image) : undefined;
 
   return {
-    title: `${data.name} | Hedefim Lise`,
+    // Kök yerleşimin şablonu "| Hedefim Lise" ekini kendisi koyar.
+    title: data.name,
     description,
     alternates: { canonical: path },
     openGraph: {
