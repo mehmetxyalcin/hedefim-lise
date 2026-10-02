@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { BookOpen } from "lucide-react";
@@ -5,6 +6,7 @@ import { getSiteSettings, getNavigationItems } from "@/lib/site-settings";
 import { DesktopNav } from "./DesktopNav";
 import { FavoritesNavIcon } from "./FavoritesNavIcon";
 import { MobileMenu } from "./MobileMenu";
+import { NavigationProgress } from "./NavigationProgress";
 import type { HeaderLink } from "./nav-links";
 
 export async function Navbar() {
@@ -68,6 +70,9 @@ export async function Navbar() {
           <MobileMenu links={links} />
         </div>
       </div>
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
     </header>
   );
 }

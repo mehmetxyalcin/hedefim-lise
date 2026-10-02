@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { beginNavigation } from "@/lib/navigation-progress";
 import { FilterSelect } from "./FilterSelect";
 import { DISTRICTS } from "@/data/districts";
 import { SCHOOL_TYPES } from "@/data/schoolTypes";
@@ -80,6 +81,9 @@ const METRICS: Record<
 // yapmak zorunda kalmasın. Hepsi aynı submit'te aynı URL'e gider.
 export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
   const router = useRouter();
+  // /okullar puan sıralamasıyla sunucuda bir-iki saniye sürer; bu arada
+  // düğme "yoldayız" der ve ikinci dokunuş yeni bir gezinme başlatmaz.
+  const [isLeaving, startLeaving] = useTransition();
 
   const bounds = useMemo(() => {
     const of = (vals: number[]) =>
@@ -204,6 +208,7 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
   }
 
   function submit() {
+    if (isLeaving) return;
     const lowVal = parseNum(lowRaw);
     const highVal = parseNum(highRaw);
     if (lowVal == null || highVal == null) {
@@ -228,7 +233,9 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
     if (ilce) params.set("ilce", ilce);
     if (tur) params.set("tur", tur);
     params.set("siralama", cfg.sort);
-    router.push(`/okullar?${params.toString()}`);
+    const url = `/okullar?${params.toString()}`;
+    beginNavigation(url);
+    startLeaving(() => router.push(url));
   }
 
   const hasData = values.length > 0;
@@ -478,10 +485,11 @@ export function ScoreScale({ percentiles, obpScores, latestYear }: Props) {
           <button
             type="button"
             onClick={submit}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] sm:ml-auto sm:shrink-0"
+            aria-busy={isLeaving}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--teal)] px-6 py-3 font-display text-sm font-bold tracking-wide text-white transition-colors hover:bg-[var(--teal-deep)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)] aria-busy:bg-[var(--teal-deep)] sm:ml-auto sm:shrink-0"
           >
             Okulları gör
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className={isLeaving ? "arrow-underway h-4 w-4" : "h-4 w-4"} />
           </button>
         </div>
       </div>

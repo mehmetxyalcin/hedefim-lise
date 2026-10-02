@@ -21,6 +21,7 @@ import type { VocationalField } from "@/types/vocationalField";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { scoreRows } from "@/lib/score-display";
 import { cn } from "@/lib/cn";
+import { beginNavigation } from "@/lib/navigation-progress";
 
 const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -192,6 +193,7 @@ export function SchoolList({
   const hasObpRange = obpMin != null && obpMax != null;
 
   function go(url: string) {
+    beginNavigation(url);
     startTransition(() => router.push(url));
   }
 

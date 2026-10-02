@@ -466,6 +466,31 @@ body {
   display: none;
 }
 
+/* Basılma tepkisini PressFeedback verir (boyuna göre küçülme / soluklaşma);
+   tarayıcının gri dokunma lekesi onun üstüne binmesin. Yönetim paneli hariç. */
+:where(a[href], button, summary, [role="button"], [role="tab"]):not(.admin *) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Gezinme sürerken düğmenin oku yola koyulur: sağa itilir, geri gelir. */
+@keyframes arrow-underway {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 4px 0;
+  }
+}
+.arrow-underway {
+  animation: arrow-underway 700ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .arrow-underway {
+    animation: none;
+  }
+}
+
 /* Dokunmalı cihazlarda form kontrolleri en az 16px: iOS Safari'nin odakta
    otomatik yakınlaştırmasını engeller. Masaüstünde (fine pointer) text-sm
    görünümü olduğu gibi korunur. */

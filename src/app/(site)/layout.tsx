@@ -1,5 +1,6 @@
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PressFeedback } from "@/components/layout/PressFeedback";
 
 // Genel sitenin kromu. /admin bu grubun dışında kalır ve kendi kabuğunu kullanır.
 export default function SiteLayout({
@@ -10,6 +11,7 @@ export default function SiteLayout({
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
+      <PressFeedback />
     </>
   );
 }
