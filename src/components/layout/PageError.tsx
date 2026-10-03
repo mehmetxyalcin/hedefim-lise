@@ -5,13 +5,23 @@ import { useEffect, useSyncExternalStore } from "react";
 const RELOAD_KEY = "hedefim:auto-reload-at";
 const RELOAD_WINDOW_MS = 30_000;
 
-// Yeni sürüm yayına girdiğinde açık kalan sekme, artık sunucuda olmayan eski
-// bir kod parçasını isteyebilir. Bunu bir sayfa yenilemesi düzeltir.
+// Bir sayfa yenilemesinin düzelttiği iki hata ailesi:
+// - Yeni sürüm yayına girdiğinde açık kalan sekme, artık sunucuda olmayan eski
+//   bir kod parçasını ister.
+// - Sayfa verisi akarken bağlantı kopar (telefonda sık): Safari "Load failed",
+//   Chrome "Failed to fetch" / "network error", Firefox "NetworkError" der.
 const LOAD_ERROR =
   /ChunkLoadError|Loading (CSS )?chunk|dynamically imported module|Importing a module script failed/i;
+const NETWORK_ERROR =
+  /Load failed|Failed to fetch|NetworkError|network error|network connection was lost|Error in input stream/i;
 
 function isLoadError(error: Error) {
-  return error.name === "ChunkLoadError" || LOAD_ERROR.test(error.message ?? "");
+  const message = error.message ?? "";
+  return (
+    error.name === "ChunkLoadError" ||
+    LOAD_ERROR.test(message) ||
+    (error.name === "TypeError" && NETWORK_ERROR.test(message))
+  );
 }
 
 // Yükleme hatasında sayfa bir kez kendiliğinden yenilenir; kullanıcının elle
@@ -25,6 +35,16 @@ function reloadAllowed() {
   }
 }
 const noSubscribe = () => () => {};
+
+// Yığının ilk satırı: hatanın hangi dosyada ve konumda çıktığı. Üretimde dosya
+// adı yayındaki parçanın adıdır; o parça indirilip konumuna bakılabilir.
+function firstFrame(error: Error) {
+  const line = error.stack
+    ?.split("\n")
+    .map((l) => l.trim())
+    .find((l) => /https?:\/\/|\.js:\d+/.test(l));
+  return line ? line.replace(/^at\s+/, "").slice(0, 200) : null;
+}
 
 type Props = {
   error: Error & { digest?: string };
@@ -90,6 +110,17 @@ export function PageError({ error, retry }: Props) {
             Sorun sürerse bize bu kodu iletebilirsin:{" "}
             <span className="font-mono font-semibold text-slate-700 select-all">{code}</span>
           </p>
+        ) : null}
+        {/* Tarayıcı hatasının mesajı nedeni gösterir (sunucu hatasında Next
+            mesajı gizler; orada digest yeter). Kopyalanıp iletilebilsin. */}
+        {!error.digest && error.message ? (
+          <details className="mt-3 text-left text-xs text-slate-500">
+            <summary className="cursor-pointer text-center select-none">Teknik ayrıntı</summary>
+            <p className="mt-2 rounded-lg bg-slate-100 p-3 font-mono break-words text-slate-700 select-all">
+              {error.name}: {error.message.slice(0, 300)}
+              {firstFrame(error) ? <><br />{firstFrame(error)}</> : null}
+            </p>
+          </details>
         ) : null}
       </div>
     </div>
