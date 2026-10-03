@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { mapSchool, mapVocationalField } from "@/lib/supabase/public";
 import { buildTurkishNameRegex } from "@/lib/turkishSearch";
-import { createClient } from "@/lib/supabase/server";
+import { createVisitorClient } from "@/lib/supabase/visitor";
 import { SchoolList } from "@/components/schools/SchoolList";
 import { MULTI_PROGRAM_TYPE, programForType, typeFilterExpression } from "@/lib/school-programs";
 import {
@@ -94,7 +94,7 @@ export default async function OkullarPage({ searchParams }: Props) {
   const sayfa = Math.max(Number(params.sayfa) || 1, 1);
   const offset = (sayfa - 1) * limit;
 
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
   const scoreSort = isScoreSort(siralama);
   const needsScores = yerlestirme !== null || hasYuzdelikRange || hasObpRange || scoreSort;
   // Meslek alanı, yerleştirme türü ya da puan aralığı okul kimliklerine indirgenir.

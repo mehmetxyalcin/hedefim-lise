@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createVisitorClient } from "@/lib/supabase/visitor";
 
 // Okulun slug'ı değiştiğinde eskisi school_slug_history'ye düşer
 // (migration 013 + schools_slug_history tetikleyicisi). Detay sayfası
@@ -8,7 +8,7 @@ export async function findSchoolSlugInHistory(
   oldSlug: string,
 ): Promise<string | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await createVisitorClient();
 
     const { data, error } = await supabase
       .from("school_slug_history")

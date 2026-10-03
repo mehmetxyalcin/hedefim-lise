@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getSchoolWithDetails } from "@/lib/supabase/schoolDetail";
 import { findSchoolSlugInHistory } from "@/lib/supabase/slugHistory";
-import { createClient } from "@/lib/supabase/server";
+import { createVisitorClient } from "@/lib/supabase/visitor";
 import { SchoolDetail } from "@/components/school/SchoolDetail";
 import { getSiteUrlWithPath } from "@/lib/site";
 
@@ -18,7 +18,7 @@ function truncateDescription(value: string, maxLength = 155) {
 
 export async function generateMetadata({ params }: OkulDetayPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
   const { data } = await supabase
     .from("schools")
     .select("name, slug, type, district, description, images, is_active")

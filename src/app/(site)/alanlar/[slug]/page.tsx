@@ -4,7 +4,7 @@ import {
   extractSchoolsFromVocationalField,
   mapVocationalField,
 } from "@/lib/supabase/public";
-import { createClient } from "@/lib/supabase/server";
+import { createVisitorClient } from "@/lib/supabase/visitor";
 import { MULTI_PROGRAM_TYPE } from "@/lib/school-programs";
 import { placementValues, programOBPs } from "@/lib/school-scores";
 import { scoreRows } from "@/lib/score-display";
@@ -51,7 +51,7 @@ export async function generateMetadata({
   params,
 }: AlanDetayPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
   const { data } = await supabase
     .from("vocational_fields")
     .select("slug, title, description, career")
@@ -90,7 +90,7 @@ export default async function AlanDetayPage({
   params,
 }: AlanDetayPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
 
   const [fieldResult, yearResult, allFieldsResult] = await Promise.all([
     supabase

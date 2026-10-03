@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createVisitorClient } from "@/lib/supabase/visitor";
 import { buildAtlas, type AtlasRowInput } from "@/lib/vocational-atlas";
 import { VocationalAtlas } from "@/components/vocational/VocationalAtlas";
 
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 // Meslek atlası, anasayfanın belge dünyasında (.landing) durur: afiş başlık,
 // altında bir hairline, sonra 8 sütunluk dizin paneli ve 4 sütunluk künye.
 export default async function AlanlarPage() {
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
   const { data, error } = await supabase
     .from("vocational_fields")
     .select(

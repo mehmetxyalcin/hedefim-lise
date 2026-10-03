@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createVisitorClient } from "@/lib/supabase/visitor";
 import { isSchoolProgram } from "@/lib/school-programs";
 import type {
   SchoolWithDetails,
@@ -183,7 +183,7 @@ function mapRawToSchoolWithDetails(row: any): SchoolWithDetails {
 export async function getSchoolWithDetails(
   slug: string,
 ): Promise<SchoolWithDetails | null> {
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
 
   const { data, error } = await supabase
     .from("schools")
@@ -223,7 +223,7 @@ export async function getSchoolWithDetails(
 export async function getSchoolSelectedBranches(
   schoolId: number,
 ): Promise<string[]> {
-  const supabase = await createClient();
+  const supabase = await createVisitorClient();
 
   const { data } = await supabase
     .from("school_vocational_branches")
