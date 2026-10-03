@@ -20,6 +20,8 @@ const STATIC_ENTRIES = [
   { path: "/blog", changeFrequency: "weekly", priority: 0.6 },
   { path: "/hakkinda", changeFrequency: "monthly", priority: 0.4 },
   { path: "/iletisim", changeFrequency: "monthly", priority: 0.4 },
+  { path: "/gizlilik", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/kullanim", changeFrequency: "yearly", priority: 0.2 },
 ] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

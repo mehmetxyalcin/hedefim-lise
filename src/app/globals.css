@@ -71,6 +71,42 @@
   color: #fff;
 }
 
+/* Gizlilik / kullanım koşulları gövdesi (LegalDocument): Source Serif okuma
+   metni, rahat ölçü, teal madde imleri ve bağlantılar. */
+.landing .legal-prose {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.landing .legal-prose > * + * {
+  margin-top: 0.9em;
+}
+.landing .legal-prose :is(p, ul, ol) {
+  max-width: 68ch;
+}
+.landing .legal-prose ul {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.landing .legal-prose li + li {
+  margin-top: 0.4em;
+}
+.landing .legal-prose li::marker {
+  color: var(--teal);
+}
+.landing .legal-prose strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.landing .legal-prose code {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.85em;
+  background: var(--doc-ground);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+}
+
 /* Yüzdelik işaretinin ilk belirişi: pop yerine kısa fade. */
 /* ── Yönetim paneli: "Veri Sağlık Defteri" ──────────────────────────────
    Yalnız .admin kapsamında. Tek vurgu indigo; yalnız yön bulma için

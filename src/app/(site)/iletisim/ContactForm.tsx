@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2, Send } from "lucide-react";
 import { sendContactMessage } from "./actions";
 import { createClient } from "@/lib/supabase/client";
@@ -409,8 +410,18 @@ export default function ContactForm() {
         </p>
       )}
 
-      {/* Submit */}
-      <div className="flex flex-col sm:items-end">
+      {/* Submit — KVKK: aydınlatma bilgi toplanırken yapılır; ayrıntı /gizlilik'te. */}
+      <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-[46ch] text-sm leading-relaxed text-[var(--ink-faint)]">
+          Bilgilerinizi yalnızca mesajınızı yanıtlamak ve bildirdiğiniz düzeltmeyi
+          yapmak için kullanır, en geç 1 yıl içinde sileriz. Ayrıntılar:{" "}
+          <Link
+            href="/gizlilik"
+            className="font-semibold text-[var(--teal)] underline decoration-1 underline-offset-[3px] hover:text-[var(--teal-deep)] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--teal-ring)]"
+          >
+            Gizlilik ve kişisel veriler
+          </Link>
+        </p>
         <button
           type="submit"
           disabled={!isFormValid() || submitting}
