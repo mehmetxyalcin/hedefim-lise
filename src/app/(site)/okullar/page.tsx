@@ -122,12 +122,18 @@ export default async function OkullarPage({ searchParams }: Props) {
     }
     return q;
   };
+  // Aynı adı taşıyan okullar var (ör. iki "Atatürk Anadolu Lisesi"). Yalnız
+  // ada göre sıralanınca veritabanı bunları her seferinde başka sırada
+  // verebilir; sayfa sınırına denk gelirse biri iki sayfada görünür, öbürü
+  // hiç görünmez. İlçe ve kimlik sırayı sabitler.
   const namePage = (ids: number[] | null) => {
     let schoolsQuery = supabase
       .from("schools")
       .select(SCHOOLS_SELECT, { count: "exact" })
       .eq("is_active", true)
-      .order("name");
+      .order("name")
+      .order("district")
+      .order("id");
     schoolsQuery = applyFilters(schoolsQuery, ids);
     return schoolsQuery.range(offset, offset + limit - 1);
   };
@@ -173,8 +179,14 @@ export default async function OkullarPage({ searchParams }: Props) {
   // İsim sıralamasında kimlik filtresi yoksa sayfa sorgusu hiçbir şeyi beklemez.
   const earlyNamePagePromise = !scoreSort && !filtersByIds ? send(namePage(null)) : null;
   // Puan sıralamasında filtreli kimlikler de beklemez; kimlik filtresi aşağıda
-  // bellekte uygulanır.
-  let idQuery = supabase.from("schools").select("id, name").eq("is_active", true);
+  // bellekte uygulanır. Puan ve ad eşitse sıralama kararlı olduğundan bu sıra
+  // korunur; aynı adlı okullar burada da sabit sırada kalır.
+  let idQuery = supabase
+    .from("schools")
+    .select("id, name")
+    .eq("is_active", true)
+    .order("district")
+    .order("id");
   idQuery = applyFilters(idQuery, null);
   const idRowsPromise = scoreSort ? send(idQuery) : null;
 
