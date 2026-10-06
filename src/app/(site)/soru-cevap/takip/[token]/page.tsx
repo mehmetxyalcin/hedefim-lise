@@ -181,15 +181,6 @@ function Found({ status }: { status: QuestionStatus }) {
           </>
         )}
       </div>
-
-      {status.details?.trim() && (
-        <div className="border-t border-[var(--line)] px-5 py-5 sm:px-7">
-          <h2 className={DT}>Yazdığın açıklama</h2>
-          <p className="mt-2 max-w-[64ch] text-[15px] leading-relaxed whitespace-pre-line text-[var(--ink-soft)]">
-            {status.details.trim()}
-          </p>
-        </div>
-      )}
     </section>
   );
 }

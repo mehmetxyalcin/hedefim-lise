@@ -69,7 +69,7 @@ const sections: LegalSection[] = [
             },
             {
               label: "Soru-Cevap'ta soru sorduğunuzda",
-              what: "Sorunuz, isterseniz açıklaması, seçtiğiniz konu ve rumuzunuz. Ad, e-posta ya da telefon istemeyiz. Kısa sürede çok soru gönderilmesini önlemek için IP adresinizden günlük değişen, geri çevrilemeyen bir özet tutulur; IP adresinizin kendisi kaydedilmez. Takip bağlantınızdaki anahtarı saklamayız, yalnızca özetini tutarız.",
+              what: "Sorunuz, seçtiğiniz konu ve rumuzunuz. Ad, e-posta ya da telefon istemeyiz. Kısa sürede çok soru gönderilmesini önlemek için IP adresinizden günlük değişen, geri çevrilemeyen bir özet tutulur; IP adresinizin kendisi kaydedilmez. Takip bağlantınızdaki anahtarı saklamayız, yalnızca özetini tutarız.",
               why: "Sorunuzu yanıtlamak ve yanıtı size takip bağlantısıyla göstermek. Yanıtlanan bir soru, kimliğinizi belirten bilgi olmadan düzenlenip herkese açık soru-cevaplara eklenebilir.",
               keep: "Soru yanıtlandıktan ya da yanıtlanmayacağı belirlendikten sonra en geç 1 yıl içinde silinir; herkese açık soru-cevaplara eklenen düzenlenmiş metin sitede kalır.",
             },

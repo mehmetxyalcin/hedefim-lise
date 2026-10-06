@@ -6,7 +6,6 @@ import { ArrowRight, ChevronDown, Loader2, Send } from "lucide-react";
 import { cn } from "@/lib/cn";
 import {
   checkSubmission,
-  DETAILS_MAX,
   indexFaqs,
   NICKNAME_MAX,
   QUESTION_MAX,
@@ -70,7 +69,6 @@ function Counter({ id, length, max, min }: { id: string; length: number; max: nu
 
 export function AskForm({ faqs, categories, initialQuestion }: Props) {
   const [question, setQuestion] = useState(initialQuestion);
-  const [details, setDetails] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [nickname, setNickname] = useState("");
   const [website, setWebsite] = useState("");
@@ -101,13 +99,12 @@ export function AskForm({ faqs, categories, initialQuestion }: Props) {
   );
 
   function update(field: Field, value: string) {
-    const setters: Record<Field, (v: string) => void> = {
+    const setters: Partial<Record<Field, (v: string) => void>> = {
       question: setQuestion,
-      details: setDetails,
       categoryId: setCategoryId,
       nickname: setNickname,
     };
-    setters[field](value);
+    setters[field]?.(value);
     if (errors[field]) setErrors((current) => ({ ...current, [field]: undefined }));
     if (serverError) setServerError("");
   }
@@ -122,7 +119,7 @@ export function AskForm({ faqs, categories, initialQuestion }: Props) {
     if (submitting) return;
     setServerError("");
 
-    const input: SubmissionInput = { question, details, categoryId, nickname };
+    const input: SubmissionInput = { question, categoryId, nickname };
     const check = checkSubmission(input);
     if (!check.ok) {
       showError(check.field, check.error);
@@ -158,7 +155,6 @@ export function AskForm({ faqs, categories, initialQuestion }: Props) {
 
   function reset() {
     setQuestion("");
-    setDetails("");
     setCategoryId("");
     setNickname("");
     setErrors({});
@@ -265,16 +261,12 @@ export function AskForm({ faqs, categories, initialQuestion }: Props) {
           maxLength={QUESTION_MAX}
           placeholder="Örneğin: Pansiyonlu bir okulu nasıl tercih ederim?"
           aria-invalid={errors.question ? true : undefined}
-          aria-describedby={describedBy("question", "question-ipucu", "question-sayac")}
+          aria-describedby={describedBy("question", "question-sayac")}
           className={cn(INPUT, borderFor(errors.question), "resize-y font-display text-[1.0625rem] leading-snug font-semibold placeholder:font-reading placeholder:font-normal")}
         />
-        {errors.question ? (
+        {errors.question && (
           <p id="question-hata" className={ERROR}>
             {errors.question}
-          </p>
-        ) : (
-          <p id="question-ipucu" className={HINT}>
-            Tek bir soru, kısa ve açık. En az {QUESTION_MIN} karakter.
           </p>
         )}
 
@@ -307,34 +299,6 @@ export function AskForm({ faqs, categories, initialQuestion }: Props) {
             </section>
           )}
         </div>
-      </div>
-
-      <div>
-        <div className="mb-2 flex items-baseline justify-between gap-4">
-          <label htmlFor="details" className={LABEL}>
-            Açıklama {OPTIONAL}
-          </label>
-          {details.length > 0 && <Counter id="details-sayac" length={details.trim().length} max={DETAILS_MAX} />}
-        </div>
-        <textarea
-          id="details"
-          ref={(node) => {
-            fields.current.details = node;
-          }}
-          value={details}
-          onChange={(event) => update("details", event.target.value)}
-          rows={4}
-          maxLength={DETAILS_MAX}
-          placeholder="Durumunu biraz anlat: hangi okul türü, hangi aşama, neyi merak ediyorsun?"
-          aria-invalid={errors.details ? true : undefined}
-          aria-describedby={describedBy("details", details.length > 0 ? "details-sayac" : "")}
-          className={cn(INPUT, borderFor(errors.details), "resize-y leading-relaxed")}
-        />
-        {errors.details && (
-          <p id="details-hata" className={ERROR}>
-            {errors.details}
-          </p>
-        )}
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">

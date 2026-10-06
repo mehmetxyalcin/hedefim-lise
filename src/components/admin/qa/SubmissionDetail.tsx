@@ -96,15 +96,6 @@ export function SubmissionDetail({ submission: s, categories, publishedFaqs, all
         </div>
       </dl>
 
-      {s.details && (
-        <div className="mt-4">
-          <p className="mb-1 text-xs text-admin-muted">Açıklama</p>
-          <p className="rounded-lg bg-admin-ground px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-admin-body">
-            {s.details}
-          </p>
-        </div>
-      )}
-
       <p className="mt-5 rounded-lg border border-admin-line bg-admin-ground px-4 py-3 text-[13px] leading-relaxed text-admin-body">
         Ziyaretçi, yanıtı ve notu yalnızca kendisine verilen özel takip bağlantısından görür. “Herkese açık soru-cevaba
         ekle” demediğiniz sürece hiçbir ziyaretçi sorusu ya da yanıtı sitede herkese görünmez.

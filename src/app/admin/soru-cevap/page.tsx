@@ -31,7 +31,7 @@ type PageProps = {
 
 // Takip anahtarı özeti (token_hash) ve istemci özeti (client_hash) bilerek okunmaz.
 const SUBMISSION_COLUMNS =
-  "id, question, details, category_id, nickname, status, answer, answered_at, note, related_faq_id, published_faq_id, created_at, updated_at";
+  "id, question, category_id, nickname, status, answer, answered_at, note, related_faq_id, published_faq_id, created_at, updated_at";
 const SUBMISSION_LIMIT = 500;
 
 function first(value: string | string[] | undefined): string | undefined {

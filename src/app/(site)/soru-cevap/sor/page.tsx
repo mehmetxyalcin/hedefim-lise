@@ -20,7 +20,7 @@ type PageProps = {
 const STEPS = [
   {
     title: "Sorunu yaz",
-    text: "Kısa ve açık yazman yeter. Durumunu anlatırsan daha iyi yanıt verebiliriz.",
+    text: "Kısa ve açık yazman yeter.",
   },
   {
     title: "Bağlantını sakla",

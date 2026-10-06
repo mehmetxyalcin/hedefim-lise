@@ -44,7 +44,6 @@ export async function submitQuestion(payload: SubmitQuestionPayload): Promise<Su
 
   const check = checkSubmission({
     question: String(payload.question ?? ""),
-    details: String(payload.details ?? ""),
     categoryId: String(payload.categoryId ?? ""),
     nickname: String(payload.nickname ?? ""),
   });
@@ -53,7 +52,6 @@ export async function submitQuestion(payload: SubmitQuestionPayload): Promise<Su
   const supabase = createStaticClient();
   const { data, error } = await supabase.rpc("submit_question", {
     p_question: check.value.question,
-    p_details: check.value.details,
     p_category_id: check.value.categoryId,
     p_nickname: check.value.nickname,
     p_client_hash: await clientHash(),

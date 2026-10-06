@@ -63,7 +63,6 @@ export type SubmissionStatus = "new" | "answered" | "rejected";
 export type QuestionSubmission = {
   id: string;
   question: string;
-  details: string | null;
   categoryId: string | null;
   nickname: string | null;
   status: SubmissionStatus;
@@ -79,7 +78,6 @@ export type QuestionSubmission = {
 export type QuestionSubmissionRow = {
   id: string;
   question: string;
-  details: string | null;
   category_id: string | null;
   nickname: string | null;
   status: SubmissionStatus;
@@ -95,7 +93,6 @@ export type QuestionSubmissionRow = {
 /** Ziyaretçinin takip anahtarıyla gördüğü durum (get_question_status). */
 export type QuestionStatus = {
   question: string;
-  details: string | null;
   categoryTitle: string | null;
   status: SubmissionStatus;
   answer: string | null;
@@ -110,7 +107,6 @@ export type QuestionStatus = {
 
 export type QuestionStatusRow = {
   question: string;
-  details: string | null;
   category_title: string | null;
   status: SubmissionStatus;
   answer: string | null;
@@ -158,7 +154,6 @@ export function mapSubmission(row: QuestionSubmissionRow): QuestionSubmission {
   return {
     id: row.id,
     question: row.question,
-    details: row.details,
     categoryId: row.category_id,
     nickname: row.nickname,
     status: row.status,
@@ -179,7 +174,6 @@ export function faqHref(categorySlug: string, faqSlug: string): string {
 export function mapQuestionStatus(row: QuestionStatusRow): QuestionStatus {
   return {
     question: row.question,
-    details: row.details,
     categoryTitle: row.category_title,
     status: row.status,
     answer: row.answer,

@@ -6,7 +6,6 @@ import type { Faq, FaqCategory } from "@/types/faq";
 
 export const QUESTION_MIN = 10;
 export const QUESTION_MAX = 300;
-export const DETAILS_MAX = 2000;
 export const NICKNAME_MAX = 40;
 export const NOTE_MAX = 600;
 export const ANSWER_MAX = 6000;
@@ -201,13 +200,12 @@ export function groupByCategory(categories: FaqCategory[], faqs: Faq[]): Categor
 
 export type SubmissionInput = {
   question: string;
-  details: string;
   categoryId: string;
   nickname: string;
 };
 
 export type SubmissionCheck =
-  | { ok: true; value: { question: string; details: string | null; categoryId: string | null; nickname: string | null } }
+  | { ok: true; value: { question: string; categoryId: string | null; nickname: string | null } }
   | { ok: false; field: keyof SubmissionInput; error: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -218,7 +216,6 @@ const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 
 export function checkSubmission(input: SubmissionInput): SubmissionCheck {
   const question = input.question.replace(/\s+/g, " ").trim();
-  const details = input.details.trim();
   const nickname = input.nickname.replace(/\s+/g, " ").trim();
   const categoryId = input.categoryId.trim();
 
@@ -226,11 +223,9 @@ export function checkSubmission(input: SubmissionInput): SubmissionCheck {
     return { ok: false, field: "question", error: `Sorun en az ${QUESTION_MIN} karakter olmalı.` };
   if (question.length > QUESTION_MAX)
     return { ok: false, field: "question", error: `Sorun en fazla ${QUESTION_MAX} karakter olabilir.` };
-  if (details.length > DETAILS_MAX)
-    return { ok: false, field: "details", error: `Açıklama en fazla ${DETAILS_MAX} karakter olabilir.` };
   if (nickname.length > NICKNAME_MAX)
     return { ok: false, field: "nickname", error: `Rumuz en fazla ${NICKNAME_MAX} karakter olabilir.` };
-  for (const [field, value] of [["question", question], ["details", details], ["nickname", nickname]] as const) {
+  for (const [field, value] of [["question", question], ["nickname", nickname]] as const) {
     if (PHONE.test(value) || EMAIL.test(value))
       return { ok: false, field, error: "Telefon numarası ya da e-posta adresi yazma; yanıtı takip bağlantından göreceksin." };
   }
@@ -241,7 +236,6 @@ export function checkSubmission(input: SubmissionInput): SubmissionCheck {
     ok: true,
     value: {
       question,
-      details: details || null,
       categoryId: categoryId || null,
       nickname: nickname || null,
     },

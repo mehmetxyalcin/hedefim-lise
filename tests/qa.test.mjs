@@ -56,13 +56,13 @@ test('groups by category order and drops empty categories', () => {
 });
 
 test('submission check trims, bounds and refuses contact details', () => {
-  const ok = qa.checkSubmission({ question: '  Pansiyon   ücreti ne kadar?  ', details: '', categoryId: '', nickname: ' ' });
+  const ok = qa.checkSubmission({ question: '  Pansiyon   ücreti ne kadar?  ', categoryId: '', nickname: ' ' });
   assert.equal(ok.ok, true);
-  assert.deepEqual({ ...ok.value }, { question: 'Pansiyon ücreti ne kadar?', details: null, categoryId: null, nickname: null });
-  assert.equal(qa.checkSubmission({ question: 'kısa', details: '', categoryId: '', nickname: '' }).field, 'question');
-  assert.equal(qa.checkSubmission({ question: 'Beni arayın lütfen yardım', details: '0532 123 45 67', categoryId: '', nickname: '' }).field, 'details');
-  assert.equal(qa.checkSubmission({ question: 'Mail atın ali@example.com adresime', details: '', categoryId: '', nickname: '' }).field, 'question');
-  assert.equal(qa.checkSubmission({ question: 'Geçerli bir soru metni', details: '', categoryId: 'x', nickname: '' }).field, 'categoryId');
+  assert.deepEqual({ ...ok.value }, { question: 'Pansiyon ücreti ne kadar?', categoryId: null, nickname: null });
+  assert.equal(qa.checkSubmission({ question: 'kısa', categoryId: '', nickname: '' }).field, 'question');
+  assert.equal(qa.checkSubmission({ question: 'Beni arayın lütfen yardım', categoryId: '', nickname: '0532 123 45 67' }).field, 'nickname');
+  assert.equal(qa.checkSubmission({ question: 'Mail atın ali@example.com adresime', categoryId: '', nickname: '' }).field, 'question');
+  assert.equal(qa.checkSubmission({ question: 'Geçerli bir soru metni', categoryId: 'x', nickname: '' }).field, 'categoryId');
   assert.equal(qa.TOKEN_PATTERN.test('a'.repeat(64)), true);
   assert.equal(qa.TOKEN_PATTERN.test('A'.repeat(64)), false);
 });
