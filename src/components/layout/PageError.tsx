@@ -5,23 +5,29 @@ import { useEffect, useSyncExternalStore } from "react";
 const RELOAD_KEY = "hedefim:auto-reload-at";
 const RELOAD_WINDOW_MS = 30_000;
 
-// Bir sayfa yenilemesinin düzelttiği iki hata ailesi:
+// Bir sayfa yenilemesinin düzelttiği hata aileleri:
 // - Yeni sürüm yayına girdiğinde açık kalan sekme, artık sunucuda olmayan eski
 //   bir kod parçasını ister.
+// - Aynı durumun öbür yüzü: webpack parçaları numarayla tanır ve numaralar
+//   sürümler arasında aynı kalır. Eski sekmenin yükleyicisi "bu parça bende
+//   var" deyip yeni sürümün parçasını indirmez, yeni modülü bulamaz:
+//   "l[e] is not a function", yığının ilk satırı webpack-*.js (2026-10-06,
+//   İletişim'e geçerken, o gün 14:10 UTC'deki yayından sonra).
 // - Sayfa verisi akarken bağlantı kopar (telefonda sık): Safari "Load failed",
 //   Chrome "Failed to fetch" / "network error", Firefox "NetworkError" der.
 const LOAD_ERROR =
   /ChunkLoadError|Loading (CSS )?chunk|dynamically imported module|Importing a module script failed/i;
 const NETWORK_ERROR =
   /Load failed|Failed to fetch|NetworkError|network error|network connection was lost|Error in input stream/i;
+const WEBPACK_RUNTIME = /\/_next\/static\/chunks\/webpack-[\w-]+\.js/;
 
 function isLoadError(error: Error) {
   const message = error.message ?? "";
-  return (
-    error.name === "ChunkLoadError" ||
-    LOAD_ERROR.test(message) ||
-    (error.name === "TypeError" && NETWORK_ERROR.test(message))
-  );
+  if (error.name === "ChunkLoadError" || LOAD_ERROR.test(message)) return true;
+  if (error.name !== "TypeError") return false;
+  if (NETWORK_ERROR.test(message)) return true;
+  // Uygulama kodundaki "is not a function" burada sayılmaz: yalnız yükleyicide çıkan.
+  return /is not a function/.test(message) && WEBPACK_RUNTIME.test(firstFrame(error) ?? "");
 }
 
 // Yükleme hatasında sayfa bir kez kendiliğinden yenilenir; kullanıcının elle
