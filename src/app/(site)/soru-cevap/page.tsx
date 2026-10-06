@@ -199,7 +199,7 @@ export default async function SoruCevapPage() {
                   if (!category) return null;
                   return (
                     <li key={faq.id}>
-                      <FaqItem faq={faq} categorySlug={category.slug} categoryTitle={category.title} tone="ground" />
+                      <FaqItem faq={faq} categorySlug={category.slug} tone="ground" />
                     </li>
                   );
                 })}
