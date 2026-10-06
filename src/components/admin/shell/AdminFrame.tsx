@@ -13,6 +13,7 @@ type Props = {
   collapsed: boolean;
   email: string;
   unreadCount: number;
+  questionCount: number;
   schoolCount: number;
   schools: QuickSearchSchool[];
   children: React.ReactNode;
@@ -22,6 +23,7 @@ export function AdminFrame({
   collapsed: initialCollapsed,
   email,
   unreadCount,
+  questionCount,
   schoolCount,
   schools,
   children,
@@ -51,7 +53,7 @@ export function AdminFrame({
     };
   }, [drawerOpen]);
 
-  const counts = { unreadCount, schoolCount };
+  const counts = { unreadCount, questionCount, schoolCount };
 
   return (
     <div className="admin flex min-h-screen w-full flex-1">

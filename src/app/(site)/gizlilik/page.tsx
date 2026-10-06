@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 
 // Metindeki her işlem sitenin gerçekte yaptığına dayanır: iletişim formu
 // (contact_messages), Google Analytics (kök düzen), Tercihlerim (localStorage),
+// soru-cevap ziyaretçi soruları (question_submissions, Sorduklarım localStorage),
 // barındırma Hostinger (Litvanya), veritabanı Supabase (Frankfurt).
 // Yeni bir veri işleme eklenirse bu sayfa ve tarih birlikte güncellenmeli.
 const sections: LegalSection[] = [
@@ -65,6 +66,18 @@ const sections: LegalSection[] = [
               what: "IP adresiniz, tarih ve saat, açılan sayfa ve tarayıcı bilgisi (teknik kayıtlar).",
               why: "Sitenin güvenliğini sağlamak ve teknik sorunları bulmak.",
               keep: "Barındırma ve altyapı sağlayıcılarımızın belirlediği kısa süre boyunca.",
+            },
+            {
+              label: "Soru-Cevap'ta soru sorduğunuzda",
+              what: "Sorunuz, isterseniz açıklaması, seçtiğiniz konu ve rumuzunuz. Ad, e-posta ya da telefon istemeyiz. Kısa sürede çok soru gönderilmesini önlemek için IP adresinizden günlük değişen, geri çevrilemeyen bir özet tutulur; IP adresinizin kendisi kaydedilmez. Takip bağlantınızdaki anahtarı saklamayız, yalnızca özetini tutarız.",
+              why: "Sorunuzu yanıtlamak ve yanıtı size takip bağlantısıyla göstermek. Yanıtlanan bir soru, kimliğinizi belirten bilgi olmadan düzenlenip herkese açık soru-cevaplara eklenebilir.",
+              keep: "Soru yanıtlandıktan ya da yanıtlanmayacağı belirlendikten sonra en geç 1 yıl içinde silinir; herkese açık soru-cevaplara eklenen düzenlenmiş metin sitede kalır.",
+            },
+            {
+              label: "Sorduklarım listesini kullandığınızda",
+              what: "Sorduğunuz soruların takip bağlantıları. Yalnızca sizin tarayıcınızda saklanır; yanıt durumunu göstermek için bu bağlantılar sitemize gönderilir.",
+              why: "Sorularınızın yanıtlanıp yanıtlanmadığını aynı tarayıcıda görebilmeniz.",
+              keep: "Listeden çıkardığınızda ya da tarayıcı verilerini sildiğinizde silinir.",
             },
             {
               label: "Tercihlerim listesini kullandığınızda",
@@ -147,7 +160,7 @@ const sections: LegalSection[] = [
           </li>
         </ul>
         <p>
-          Tercihlerim listesi çerez değildir; tarayıcınızın kendi saklama alanında
+          Tercihlerim ve Sorduklarım listeleri çerez değildir; tarayıcınızın kendi saklama alanında
           durur. Çerezleri tarayıcınızın ayarlarından silebilir ya da
           engelleyebilirsiniz. Google Analytics&apos;i bütün sitelerde kapatmak için
           Google&apos;ın{" "}
@@ -211,7 +224,7 @@ export default function GizlilikPage() {
     <LegalDocument
       title="Gizlilik ve kişisel veriler"
       lead="Hedefim Lise'yi kullanırken hangi bilgilerinizin işlendiğini, neden işlendiğini ve ne kadar süre saklandığını bu sayfada anlatıyoruz. Bu metin, 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamındaki aydınlatma metnidir."
-      updated={{ iso: "2026-10-03", label: "3 Ekim 2026" }}
+      updated={{ iso: "2026-10-06", label: "6 Ekim 2026" }}
       sections={sections}
       related={{ href: "/kullanim", label: "Kullanım koşulları" }}
     />

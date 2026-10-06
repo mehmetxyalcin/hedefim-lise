@@ -356,3 +356,14 @@ Dal: `feat/blog-authors`.
 - Hostinger'da `next build` (Next 16'da varsayılan Turbopack) `globals.css` işlenirken `TurbopackInternalError … node process exited before we could connect to it` ile düştü. Turbopack PostCSS/Tailwind'i soketle bağlanan yardımcı Node süreçlerinde çalıştırıyor; Hostinger'ın derleme sunucusunda bu süreçler bağlanamadan kapanıyor. Kod ya da deponun gizli/açık olmasıyla ilgili değil (klonlama ve `npm install` başarılıydı).
 - Çözüm: `package.json` → `"build": "next build --webpack"`, `next.config.ts` → `experimental.webpackBuildWorker: false` (webpack ana süreçte derler). Yerel geliştirme (`dev`, `dev:preview`) Turbopack'te kaldı.
 - Yerelde temiz webpack derlemesi başarılı; `next start` ile anasayfa ve `/alanlar` görsel olarak aynı.
+
+## 29. Soru-cevap merkezi — 6 Ekim 2026
+
+Tasarım: `docs/superpowers/specs/2026-10-06-soru-cevap-merkezi-design.md`.
+
+- `021_qa_center.sql`: `faq_categories` (panelden yönetilir; `sor`/`takip` adresleri yasak), `faqs` yeni kolonlar (`category_id`, `slug`, `is_featured`, `origin`, `submission_id`; eski `category` metni tetikleyiciyle senkron), `question_submissions` (anon erişemez; yalnız `submit_question` ve `get_question_status` SECURITY DEFINER fonksiyonları — danışmandaki iki uyarı bilinçli). **6 Ekim 2026 canlıya uygulandı** (kullanıcı onayı; tek BEGIN/COMMIT). Doğrulama: 5 kategori, 22 sorunun tümü bağlı, anon tablo okuması kapalı; uçtan uca test sorusu gönderildi, yanıtlandı, takip sayfasında görüldü ve silindi.
+- Aynı gün kullanıcı isteğiyle: 2026'ya özgü 3 tarih sorusu yayından çekildi (silinmedi), 4 sorunun yanıtındaki 2026 tarihleri "tercih takviminde belirtilen tarihlerde" biçimine çevrildi. Yayında 19 soru, hiçbirinde yıl yok.
+- Public (`.landing`): `/soru-cevap` hub (anında arama, konu dizini, öne çıkanlar, Sorduklarım, son ziyaretçi soruları), `/soru-cevap/[kategori]` (çapalı sorular, FAQPage JSON-LD), `/soru-cevap/sor` (benzer soru önerisi, bal küpü, 3 sn alt süre, telefon/e-posta reddi), `/soru-cevap/takip/[token]` (noindex, no-referrer). Kurallar `lib/qa.ts`, okuma `lib/faqs.ts` (hata önbelleğe yazılmaz), eylemler `(site)/soru-cevap/actions.ts`. GA, takip sayfasına doğrudan girişte adresi anahtarsız gönderir (site içi geçişte GA'nın geçmiş olayı tam adresi görebilir).
+- Yönetim: `/admin/soru-cevap` sekmeleri Gelen sorular / Sorular / Kategoriler; yan menüde yeni soru sayacı; `/admin/soru-cevap/toplu-yukle` Excel/CSV. Oturumlu panel tarayıcıda denenmedi.
+- Gizlilik sayfası yeni veri işlemeyi anlatıyor (6 Ekim 2026). "1 yıl içinde silinir" taahhüdü elle uygulanır; otomatik silme yok.
+- Doğrulama: 169 test (yeni `qa`, `qa.database`, `qa-admin-actions`, `faq-import`), tsc, `eslint .`, webpack üretim derlemesi.

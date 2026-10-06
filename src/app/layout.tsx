@@ -84,7 +84,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <div hidden dangerouslySetInnerHTML={{ __html: `<!--\n${DIRECTION_CONTRACT}\n-->` }} />
         {children}
-        {/* Google Analytics (gtag.js) */}
+        {/* Google Analytics (gtag.js). Soru takip adresindeki anahtar gizli bir
+            paroladır: o sayfalarda sayfa adresi anahtarsız gönderilir. */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
@@ -94,7 +95,10 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
+            var qaTrack = location.pathname.indexOf('/soru-cevap/takip/') === 0;
+            gtag('config', '${GA_MEASUREMENT_ID}', qaTrack
+              ? { page_location: location.origin + '/soru-cevap/takip/', page_path: '/soru-cevap/takip/' }
+              : {});
           `}
         </Script>
       </body>

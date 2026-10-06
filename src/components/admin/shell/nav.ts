@@ -18,7 +18,7 @@ export type AdminNavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  count?: "schools" | "unread";
+  count?: "schools" | "unread" | "questions";
   isActive: (pathname: string) => boolean;
 };
 
@@ -75,6 +75,7 @@ export const ADMIN_NAV: { group: string; items: AdminNavItem[] }[] = [
         href: "/admin/soru-cevap",
         label: "Soru-cevap",
         icon: CircleHelp,
+        count: "questions",
         isActive: (p) => p.startsWith("/admin/soru-cevap"),
       },
     ],

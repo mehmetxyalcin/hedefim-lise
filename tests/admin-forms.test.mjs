@@ -48,14 +48,17 @@ test('numeric forms accept zero and decimal comma, reject partial, out-of-range 
   assert.equal(validate(form(score),school.upsertSchoolScore),null);
   for (const extra of [{obp_score:'100.1'},{lgs_score:'501'},{year:'2025.0'},{percentile:'3abc'},{obp_score:['1','2']}]) assert.ok(validate(form({...score,...extra}),school.upsertSchoolScore));
   assert.ok(validate(form({school_id:'1',year:'2025',sinavli_count:'1.5'}),school.upsertSchoolQuota));
-  assert.ok(validate(form({question:'S',answer:'C',category:'K',sort_order:'abc'}),content.createFaq));
-  assert.ok(validate(form({question:'S',answer:'C',category:'K',source_page:'0'}),content.createFaq));
+  assert.ok(validate(form({question:'S',answer:'C',category_id:uuid,sort_order:'abc'}),content.createFaq));
+  assert.ok(validate(form({question:'S',answer:'C',category_id:'K'}),content.createFaq),'category must be an id');
+  assert.ok(validate(form({question:'S',answer:'C',category_id:uuid,slug:'Bad Slug'}),content.createFaq));
+  assert.equal(validate(form({question:'S',answer:'C',category_id:uuid,slug:'iyi-adres-2'}),content.createFaq),null);
+  assert.ok(validate(form({question:'S',answer:'C',category_id:uuid,source_page:'0'}),content.createFaq));
 });
 function actions(file, responder = () => ({data:null,error:null})) {
   const calls=[];
   const db = { from(table) { calls.push(['from',table]); const chain={}; for (const method of ['select','insert','update','delete','eq','neq','in','order','limit','single','maybeSingle','upsert']) chain[method]=(...args)=>{calls.push([method,...args]);return chain;}; chain.then=(resolve,reject)=>Promise.resolve(responder(calls)).then(resolve,reject); return chain; }, rpc(){calls.push(['rpc']);return Promise.resolve({error:null});} };
   const redirect = url => {throw new Error(`REDIRECT:${decodeURIComponent(url)}`);};
-  return { calls, api:load(file, {'@/lib/admin-form-validation':validation,'@/lib/admin-auth':{requireAdmin:async()=>({supabase:db,profile:{role:'admin'},user:{id:uuid}})},'next/navigation':{redirect},'next/cache':{revalidatePath(){},revalidateTag(){}},'@/lib/site-settings':{SITE_SETTINGS_ID:uuid,FOOTER_SETTINGS_ID:uuid}}) };
+  return { calls, api:load(file, {'@/lib/admin-form-validation':validation,'@/lib/admin-auth':{requireAdmin:async()=>({supabase:db,profile:{role:'admin'},user:{id:uuid}})},'next/navigation':{redirect},'next/cache':{revalidatePath(){},revalidateTag(){}},'@/lib/site-settings':{SITE_SETTINGS_ID:uuid,FOOTER_SETTINGS_ID:uuid},'@/lib/faqs':{FAQ_CACHE_TAG:'faqs'}}) };
 }
 test('invalid requests reach no database or storage calls through real school actions', async () => {
   const {calls,api}=actions('src/app/admin/okullar/actions.ts');
@@ -97,7 +100,7 @@ test('scholarship update scopes the child record to the submitted school', async
 test('invalid content and direct-argument admin requests do not write', async () => {
   for (const [file,name,args] of [
     ['src/app/admin/site-settings/actions.ts','createNavigationItem',[form({label:'Link',href:'javascript:1'})]],
-    ['src/app/admin/soru-cevap/actions.ts','createFaq',[form({question:'S',answer:'C',category:'K',sort_order:'bad'})]],
+    ['src/app/admin/soru-cevap/actions.ts','createFaq',[form({question:'S',answer:'C',category_id:uuid,sort_order:'bad'})]],
     ['src/app/admin/meslek-alanlari/actions.ts','addVocationalField',[{}]],
     ['src/app/admin/mesajlar/actions.ts','markMessageStatus',[uuid,'deleted']],
   ]) { const {calls,api}=actions(file);await assert.rejects(api[name](...args));assert.equal(calls.length,0); }
@@ -107,7 +110,7 @@ test('valid school, score, quota and content requests still reach the expected w
     ['src/app/admin/okullar/actions.ts','createSchool',[null,form({...validBasic,is_active:'on'})],'schools'],
     ['src/app/admin/okullar/actions.ts','upsertSchoolScore',[form({school_id:'1',year:'2025',obp_score:'0'})],'school_scores'],
     ['src/app/admin/okullar/actions.ts','upsertSchoolQuota',[form({school_id:'1',year:'2025',sinavli_count:'0'})],'school_quotas'],
-    ['src/app/admin/soru-cevap/actions.ts','createFaq',[form({question:'Soru',answer:'Yanıt',category:'Genel',sort_order:'0'})],'faqs'],
+    ['src/app/admin/soru-cevap/actions.ts','createFaq',[form({question:'Soru',answer:'Yanıt',category_id:uuid,sort_order:'0'})],'faqs'],
     ['src/app/admin/site-settings/actions.ts','createNavigationItem',[form({label:'Okullar',href:'/okullar',target:'_self'})],'navigation_items'],
   ]) {
     const {calls,api}=actions(file,calls=>({data:calls.some(c=>c[0]==='insert'||c[0]==='upsert')?{id:1,slug:'ornek'}:null,error:null}));
@@ -117,7 +120,7 @@ test('valid school, score, quota and content requests still reach the expected w
 });
 test('content update with no writable row reports an error instead of success', async () => {
   const {api}=actions('src/app/admin/soru-cevap/actions.ts',()=>({data:null,error:{message:'Kayıt bulunamadı'}}));
-  await assert.rejects(api.updateFaq(form({id:uuid,question:'Soru',answer:'Yanıt',category:'Genel'})),/REDIRECT:.*error=Kayıt bulunamadı/);
+  await assert.rejects(api.updateFaq(form({id:uuid,question:'Soru',answer:'Yanıt',category_id:uuid})),/REDIRECT:.*error=Kayıt bulunamadı/);
 });
 test('uploads and explicitly blank enum values are rejected before saving', async () => {
   const data={...validBasic};

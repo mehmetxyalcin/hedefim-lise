@@ -12,6 +12,7 @@ type Props = {
   onToggleCollapsed?: () => void;
   onNavigate?: () => void;
   unreadCount: number;
+  questionCount: number;
   schoolCount: number;
   variant: "rail" | "drawer";
 };
@@ -21,6 +22,7 @@ export function AdminSidebar({
   onToggleCollapsed,
   onNavigate,
   unreadCount,
+  questionCount,
   schoolCount,
   variant,
 }: Props) {
@@ -58,7 +60,16 @@ export function AdminSidebar({
               {group.items.map((item) => {
                 const active = item.isActive(pathname);
                 const count =
-                  item.count === "unread" ? unreadCount : item.count === "schools" ? schoolCount : 0;
+                  item.count === "unread"
+                    ? unreadCount
+                    : item.count === "questions"
+                      ? questionCount
+                      : item.count === "schools"
+                        ? schoolCount
+                        : 0;
+                // Bekleyen iş sayaçları (okunmamış mesaj, yeni soru) vurgulu rozet; okul sayısı sade.
+                const isAlert = item.count === "unread" || item.count === "questions";
+                const alertLabel = item.count === "questions" ? "yeni soru" : "okunmamış";
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>
@@ -86,19 +97,19 @@ export function AdminSidebar({
                         <span
                           className={cn(
                             "text-xs tabular-nums",
-                            item.count === "unread"
+                            isAlert
                               ? "rounded-full bg-admin-accent px-1.5 py-px font-semibold text-white"
                               : "text-admin-muted",
                           )}
                         >
                           {count}
-                          {item.count === "unread" && <span className="sr-only"> okunmamış</span>}
+                          {isAlert && <span className="sr-only"> {alertLabel}</span>}
                         </span>
                       )}
-                      {compact && item.count === "unread" && count > 0 && (
+                      {compact && isAlert && count > 0 && (
                         <>
                           <span aria-hidden="true" className="absolute top-1.5 right-3 h-2 w-2 rounded-full bg-admin-accent ring-2 ring-white" />
-                          <span className="sr-only">{count} okunmamış</span>
+                          <span className="sr-only">{count} {alertLabel}</span>
                         </>
                       )}
                     </Link>

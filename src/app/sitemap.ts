@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site";
 import { getBlogAuthors, getPublishedPosts } from "@/lib/blog-data";
+import { getQaContent } from "@/lib/faqs";
+import { groupByCategory } from "@/lib/qa";
 import { createStaticClient } from "@/lib/supabase/static";
 
 // Sitemap build'e çakılı kalmasın: içerik admin panelinden değişiyor, dosya
@@ -9,7 +11,8 @@ import { createStaticClient } from "@/lib/supabase/static";
 // bu süre yalnızca hiçbir eylem tetiklenmediğinde geçerli olan tavan.
 export const revalidate = 3600; // 1 saat
 
-// robots.txt'te kapattığımız yollar (admin, login, auth, api, tercihlerim)
+// robots.txt'te kapattığımız yollar (admin, login, auth, api, tercihlerim,
+// soru-cevap takip sayfaları)
 // burada da yok: sitemap ile robots birbiriyle çelişmemeli.
 const STATIC_ENTRIES = [
   { path: "/", changeFrequency: "daily", priority: 1 },
@@ -68,6 +71,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: absolute(`/alanlar/${row.slug}`),
         changeFrequency: "monthly",
         priority: 0.6,
+      });
+    }
+
+    // Soru-cevap kategori sayfaları: yalnız yayındaki ve içinde soru olan
+    // kategoriler (boş kategorinin sayfası 404 verir). getQaContent hata
+    // vermez; tablo yoksa boş döner. lastmod, kategorideki en yeni sorudan.
+    const qa = await getQaContent();
+    for (const { category, faqs } of groupByCategory(qa.categories, qa.faqs)) {
+      const latest = faqs.reduce((max, faq) => (faq.updatedAt > max ? faq.updatedAt : max), "");
+      entries.push({
+        url: absolute(`/soru-cevap/${category.slug}`),
+        lastModified: latest ? new Date(latest) : undefined,
+        changeFrequency: "weekly",
+        priority: 0.5,
       });
     }
 

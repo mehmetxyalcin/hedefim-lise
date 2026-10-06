@@ -6,7 +6,7 @@ export type FieldRule = {
   label: string;
   required?: boolean;
   multiple?: boolean;
-  kind?: 'number' | 'integer' | 'uuid' | 'url' | 'link' | 'email' | 'phone' | 'time' | 'file';
+  kind?: 'number' | 'integer' | 'uuid' | 'slug' | 'url' | 'link' | 'email' | 'phone' | 'time' | 'file';
   min?: number;
   max?: number;
   choices?: readonly string[];
@@ -16,6 +16,7 @@ const text = (label: string, required = false, max = 50000): FieldRule => ({ lab
 const integer = (label: string, required = true, min = 1, max = Number.MAX_SAFE_INTEGER): FieldRule => ({ label, required, kind: 'integer', min, max });
 const number = (label: string, max: number): FieldRule => ({ label, kind: 'number', min: 0, max });
 const uuid = (label: string, required = true): FieldRule => ({ label, required, kind: 'uuid' });
+const slug = (label: string, max = 100): FieldRule => ({ label, kind: 'slug', max });
 const choice = (label: string, choices: readonly string[], required = false): FieldRule => ({ label, choices, required });
 const url = (label: string): FieldRule => ({ label, kind: 'url', max: 2048 });
 const upload: FieldRule = { label: 'Görsel', kind: 'file', max: 5 * 1024 * 1024 };
@@ -107,6 +108,7 @@ export function validateAdminForm(form: FormData, rules: FormRules): string | nu
         const number = Number(value);
         if (!/^\d+$/.test(value) || !Number.isSafeInteger(number) || number < (rule.min ?? 0) || number > (rule.max ?? Number.MAX_SAFE_INTEGER)) return `${rule.label} ${rule.min ?? 0}–${rule.max ?? Number.MAX_SAFE_INTEGER} arasında bir tam sayı olmalıdır.`;
       } else if (value.length > (rule.max ?? 50000)) return `${rule.label} en fazla ${rule.max ?? 50000} karakter olabilir.`;
+      if (rule.kind === 'slug' && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) return `${rule.label} yalnız küçük harf (a-z), rakam ve tire içermeli; tire başta, sonda ya da art arda olamaz.`;
       if (rule.kind === 'uuid' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return `${rule.label} geçersiz; sayfayı yenileyip tekrar deneyin.`;
       if ((rule.kind === 'url' || rule.kind === 'link') && !isSafeLink(value, rule.kind === 'link')) return `${rule.label} geçerli bir ${rule.kind === 'url' ? 'http:// veya https:// adresi' : 'site yolu veya bağlantı'} olmalıdır.`;
       if (rule.kind === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return `${rule.label} geçerli bir e-posta adresi olmalıdır.`;
@@ -119,7 +121,7 @@ export function validateAdminForm(form: FormData, rules: FormRules): string | nu
 
 const link = { ...text('Bağlantı', true, 2048), kind: 'link' as const };
 const navigation = { label: text('Etiket', true, 300), href: link, target: choice('Açılma şekli', ['_self', '_blank']) };
-const faq = { question: text('Soru', true, 3000), answer: text('Yanıt', true), category: text('Kategori', true, 300), sort_order: integer('Sıra', false, 0, 2147483647), source_page: integer('Kaynak sayfa', false, 1, 2147483647), is_published: choice('Yayın durumu', ['on']) };
+const faq = { question: text('Soru', true, 3000), answer: text('Yanıt', true, 20000), category_id: uuid('Kategori'), slug: slug('Adres (slug)'), sort_order: integer('Sıra', false, 0, 2147483647), source_page: integer('Kaynak sayfa', false, 1, 2147483647), is_featured: choice('Öne çıkan', ['on']), is_published: choice('Yayın durumu', ['on']) };
 const blogPost: FormRules = {
   id: uuid('Kayıt', false), title: text('Başlık', true, 200), slug: text('Adres (slug)', false, 120),
   excerpt: text('Özet', true, 300), body: text('Yazı metni', true, 100000), category: text('Kategori', true, 60),
@@ -147,6 +149,18 @@ export const contentFormRules: Record<string, FormRules> = {
   updateFooterSectionTitle: { partners_title: text('Bölüm başlığı', true, 300) },
   createFooterLink: { section_title: text('Bölüm adı', true, 300), label: navigation.label, href: link },
   deleteFooterLink: { id: uuid('Kayıt') }, createSocialLink: { platform: text('Platform', true, 100), url: { ...url('Sosyal medya adresi'), required: true } }, deleteSocialLink: { id: uuid('Kayıt') },
+};
+
+// Soru-cevap merkezi: ziyaretçi soruları ve kategoriler. Alan sınırları
+// supabase/migrations/021_qa_center.sql ile aynıdır.
+export const qaFormRules: Record<string, FormRules> = {
+  answerSubmission: { id: uuid('Soru'), answer: text('Yanıt', true, 6000), note: text('Not', false, 600) },
+  rejectSubmission: { id: uuid('Soru'), note: text('Not', false, 600), related_faq_id: uuid('İlgili soru', false) },
+  reopenSubmission: { id: uuid('Soru') },
+  publishSubmission: { id: uuid('Soru'), question: text('Soru', true, 3000), answer: text('Yanıt', true, 6000), category_id: uuid('Kategori'), slug: slug('Adres (slug)') },
+  deleteSubmission: { id: uuid('Soru') },
+  saveCategory: { id: uuid('Kategori', false), title: text('Başlık', true, 80), slug: slug('Adres (slug)', 90), description: text('Açıklama', false, 300), sort_order: integer('Sıra', false, 0, 2147483647), is_published: choice('Yayın durumu', ['on']) },
+  deleteCategory: { id: uuid('Kategori') },
 };
 
 export function validateAdminValues(values: Record<string, unknown>, rules: FormRules): string | null {

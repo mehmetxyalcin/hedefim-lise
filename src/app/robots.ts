@@ -7,6 +7,8 @@ import { getSiteUrl } from "@/lib/site";
 // admin yüzeyleri ve oturum uçları zaten kimlik doğrulama arkasında, arama
 // motorunun oraya girmesinin bir karşılığı yok; /tercihlerim ise listeyi
 // tarayıcıda (localStorage) tuttuğu için bot yalnızca boş bir sayfa görür.
+// /soru-cevap/takip/ adresleri kişiye özel takip anahtarı taşır; sayfa zaten
+// noindex, burada taranması da kapatılır.
 //
 // /okullar'ın filtre parametreleri (ilce, tur, yuzdelik_min...) kasıtlı olarak
 // AÇIK bırakıldı: sayfa zaten `canonical: "/okullar"` veriyor, yani kombinasyonlar
@@ -17,7 +19,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/login", "/auth/", "/api/", "/tercihlerim"],
+      disallow: ["/admin", "/login", "/auth/", "/api/", "/tercihlerim", "/soru-cevap/takip/"],
     },
     sitemap: new URL("/sitemap.xml", getSiteUrl()).toString(),
   };
