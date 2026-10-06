@@ -47,9 +47,9 @@ export function SourceNote({ className }: { className?: string }) {
       )}
     >
       Yanıtları rehber öğretmen ve psikolojik danışmanlar hazırlıyor. Kurallar
-      yıldan yıla değişebilir; tercih yapmadan önce güncel MEB ve e-Okul
-      duyurularını da kontrol et. Hedefim Lise bağımsız bir rehberdir; MEB adına
-      işlem yapmaz.
+      yıldan yıla değişebilir. Tercih yapmadan önce güncel MEB ve e-Okul
+      duyurularını da kontrol et. Hedefim Lise bağımsız bir rehberdir ve MEB
+      adına işlem yapmaz.
     </p>
   );
 }

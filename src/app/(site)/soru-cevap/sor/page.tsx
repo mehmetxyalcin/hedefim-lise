@@ -134,7 +134,7 @@ export default async function SoruSorPage({ searchParams }: PageProps) {
             </div>
 
             <p className="border-t border-[var(--line)] pt-5 font-mono text-[11px] leading-relaxed text-[var(--ink-faint)]">
-              Hedefim Lise bağımsız bir rehberdir; MEB veya okullar adına işlem yapmaz.
+              Hedefim Lise bağımsız bir rehberdir ve MEB veya okullar adına işlem yapmaz.
               Tercih yapmadan önce güncel MEB ve e-Okul duyurularını kontrol et.
             </p>
           </aside>
