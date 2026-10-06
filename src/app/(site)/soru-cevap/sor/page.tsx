@@ -118,7 +118,7 @@ export default async function SoruSorPage({ searchParams }: PageProps) {
               <ul className="mt-3 space-y-2.5 text-[15px] leading-relaxed text-[var(--ink-soft)]">
                 <li className="flex gap-2.5">
                   <span aria-hidden="true" className="mt-[0.6em] h-1.5 w-1.5 shrink-0 rounded-[1px] bg-[var(--teal)]" />
-                  Yanıtları güncel tercih ve yerleştirme kılavuzuna bakarak yazıyoruz.
+                  Soruları rehber öğretmen ve psikolojik danışmanlar yanıtlıyor.
                 </li>
                 <li className="flex gap-2.5">
                   <span aria-hidden="true" className="mt-[0.6em] h-1.5 w-1.5 shrink-0 rounded-[1px] bg-[var(--teal)]" />

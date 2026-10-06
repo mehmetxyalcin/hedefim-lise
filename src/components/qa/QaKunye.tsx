@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { DT, FOCUS } from "@/components/school/doc-styles";
-import { GUIDE_TITLE, QA_ASK } from "./qa-format";
+import { QA_ASK } from "./qa-format";
 
 // Soru-cevap künyesinin ortak satırları: soru sorma çağrısı ve kaynak notu.
 
@@ -47,9 +47,10 @@ export function SourceNote({ className }: { className?: string }) {
         className,
       )}
     >
-      Yanıtlar {GUIDE_TITLE} esas alınarak hazırlandı. Tercih yapmadan önce güncel
-      MEB ve e-Okul duyurularını da kontrol et. Hedefim Lise bağımsız bir
-      rehberdir; MEB adına işlem yapmaz.
+      Yanıtları rehber öğretmen ve psikolojik danışmanlar hazırlıyor. Kurallar
+      yıldan yıla değişebilir; tercih yapmadan önce güncel MEB ve e-Okul
+      duyurularını da kontrol et. Hedefim Lise bağımsız bir rehberdir; MEB adına
+      işlem yapmaz.
     </p>
   );
 }
