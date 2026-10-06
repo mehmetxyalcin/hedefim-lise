@@ -28,8 +28,7 @@ export function AskPrompt({
     >
       <h2 className={DT}>{title}</h2>
       <p className="mt-2 text-[15px] leading-relaxed text-[var(--ink-soft)]">
-        Sorunu yaz, yanıtı sana özel bir bağlantıdan oku. Ad, e-posta ya da
-        telefon istemiyoruz.
+        Sorunu yaz, yanıtı sana özel bir bağlantıdan oku.
       </p>
       <Link href={QA_ASK} className={cn(PRIMARY_BUTTON, "mt-4 w-full")}>
         Soru sor
