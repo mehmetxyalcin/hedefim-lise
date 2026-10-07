@@ -148,7 +148,7 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
                 Bütün konular
               </h2>
               <ul className="mt-2">
-                {groups.map(({ category: item }) => {
+                {groups.map(({ category: item, faqs: list }) => {
                   const current = item.id === category.id;
                   return (
                     <li key={item.id}>
@@ -173,6 +173,9 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
                           )}
                         >
                           {item.title}
+                        </span>
+                        <span className="tabular shrink-0 font-mono text-[11px] font-medium text-[var(--ink-faint)]">
+                          {list.length} soru
                         </span>
                       </Link>
                     </li>

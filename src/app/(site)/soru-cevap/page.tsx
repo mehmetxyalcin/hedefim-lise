@@ -119,7 +119,7 @@ export default async function SoruCevapPage() {
                 </h2>
               </div>
               <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] border-t border-[var(--line)] px-2 pb-2 sm:px-3">
-                {groups.map(({ category }) => (
+                {groups.map(({ category, faqs: list }) => (
                   <li key={category.id}>
                     <Link
                       href={`/soru-cevap/${category.slug}`}
@@ -135,10 +135,16 @@ export default async function SoruCevapPage() {
                           </span>
                         )}
                       </span>
-                      <ArrowRight
-                        aria-hidden="true"
-                        className="mt-1 h-4 w-4 text-[var(--ink-faint)] transition duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--teal)] motion-reduce:transition-none"
-                      />
+                      <span className="flex items-center gap-2 pt-0.5">
+                        <span className="tabular font-display text-[1.125rem] leading-none font-extrabold tracking-tight text-[var(--ink)]">
+                          {list.length}
+                          <span className="font-reading text-[13px] font-normal tracking-normal text-[var(--ink-faint)]"> soru</span>
+                        </span>
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="h-4 w-4 text-[var(--ink-faint)] transition duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--teal)] motion-reduce:transition-none"
+                        />
+                      </span>
                     </Link>
                   </li>
                 ))}
