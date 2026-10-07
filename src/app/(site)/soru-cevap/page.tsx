@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { getQaContent } from "@/lib/faqs";
 import { groupByCategory } from "@/lib/qa";
 import { faqHref, type Faq } from "@/types/faq";
-import { DT, FOCUS, MICRO, SECTION_TITLE } from "@/components/school/doc-styles";
+import { DT, FOCUS, SECTION_TITLE } from "@/components/school/doc-styles";
 import { CommunityTag } from "@/components/qa/CommunityTag";
 import { FaqItem } from "@/components/qa/FaqItem";
 import { MyQuestions } from "@/components/qa/MyQuestions";
@@ -27,8 +27,6 @@ export const metadata: Metadata = {
     url: "/soru-cevap",
   },
 };
-
-const pad = (n: number) => String(n).padStart(2, "0");
 
 // Soru-cevap merkezi, anasayfanın belge dünyasında (.landing) durur: afiş
 // başlık ve tek büyük arama, hairline'ın altında 8 sütun konu dizini ve öne
@@ -54,24 +52,7 @@ export default async function SoruCevapPage() {
 
   const aside = (
     <>
-      <dl>
-        {visible.length > 0 && (
-          <div className="border-t border-[var(--ink)] pt-5 pb-7">
-            <dt className={DT}>Bu sayfada</dt>
-            <dd className="mt-3">
-              <span className="tabular font-display text-5xl leading-none font-extrabold tracking-tight text-[var(--ink)]">
-                {visible.length}
-              </span>
-              <span className="ml-2 font-display text-lg font-bold text-[var(--ink)]">soru ve yanıt</span>
-              <p className="mt-3 text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                <span className="tabular">{groups.length}</span> konuda toplandı.
-              </p>
-            </dd>
-          </div>
-        )}
-      </dl>
-
-      <AskPrompt rule={visible.length === 0 ? "ink" : "line"} />
+      <AskPrompt rule="ink" />
 
       <MyQuestions className="hidden lg:block" />
 
@@ -129,34 +110,21 @@ export default async function SoruCevapPage() {
               aria-labelledby="konular-baslik"
               className="rounded-2xl border border-[var(--line)] bg-[var(--doc-panel)] shadow-sm"
             >
-              <div className="flex items-baseline justify-between gap-4 px-4 pt-5 pb-4 sm:px-5 sm:pt-6">
+              <div className="px-4 pt-5 pb-4 sm:px-5 sm:pt-6">
                 <h2
                   id="konular-baslik"
                   className="font-display text-2xl font-extrabold tracking-tight text-[var(--ink)] md:text-[1.75rem]"
                 >
                   Konular
                 </h2>
-                <p className={`tabular ${MICRO}`}>
-                  {groups.length} konu · {visible.length} soru
-                </p>
               </div>
-              <div
-                aria-hidden="true"
-                className={`flex justify-between border-t border-[var(--line)] px-4 pt-3 pb-1 sm:px-5 ${MICRO}`}
-              >
-                <span>No · konu</span>
-                <span>Soru</span>
-              </div>
-              <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] px-2 pb-2 sm:px-3">
-                {groups.map(({ category, faqs: list }, i) => (
+              <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] border-t border-[var(--line)] px-2 pb-2 sm:px-3">
+                {groups.map(({ category }) => (
                   <li key={category.id}>
                     <Link
                       href={`/soru-cevap/${category.slug}`}
-                      className={`group grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-start gap-x-3 rounded-lg px-2 py-4 transition-colors hover:bg-[var(--doc-ground)] sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:gap-x-4 ${FOCUS}`}
+                      className={`group grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 rounded-lg px-2 py-4 transition-colors hover:bg-[var(--doc-ground)] ${FOCUS}`}
                     >
-                      <span aria-hidden="true" className="tabular pt-[6px] font-mono text-[11px] font-medium text-[var(--ink-faint)]">
-                        {pad(i + 1)}
-                      </span>
                       <span className="min-w-0">
                         <span className="block font-display text-[1.125rem] leading-snug font-bold text-[var(--ink)] transition-colors group-hover:text-[var(--teal)]">
                           {category.title}
@@ -167,16 +135,10 @@ export default async function SoruCevapPage() {
                           </span>
                         )}
                       </span>
-                      <span className="flex items-center gap-2 pt-0.5">
-                        <span className="tabular font-display text-[1.375rem] leading-none font-extrabold tracking-tight text-[var(--ink)]">
-                          {list.length}
-                          <span className="sr-only"> soru</span>
-                        </span>
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="hidden h-4 w-4 -translate-x-1 text-[var(--teal)] opacity-0 transition duration-200 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none sm:block"
-                        />
-                      </span>
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="mt-1 h-4 w-4 text-[var(--ink-faint)] transition duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--teal)] motion-reduce:transition-none"
+                      />
                     </Link>
                   </li>
                 ))}
@@ -185,12 +147,11 @@ export default async function SoruCevapPage() {
 
             <section aria-labelledby="one-cikan-baslik" className="mt-14">
               <div className="border-t border-[var(--ink)] pt-5">
-                <p className={MICRO}>Öne çıkanlar</p>
-                <h2 id="one-cikan-baslik" className={`mt-1.5 ${SECTION_TITLE}`}>
+                <h2 id="one-cikan-baslik" className={SECTION_TITLE}>
                   Önce bunlara bak
                 </h2>
                 <p className="mt-1.5 text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                  Tercih yapmadan önce bilmen gerekenler. Yanıtı görmek için soruyu aç.
+                  Tercih yapmadan önce bilmen gerekenler.
                 </p>
               </div>
               <ul className="-mx-2 mt-4 divide-y divide-[color-mix(in_srgb,var(--line)_80%,transparent)] border-y border-[var(--line)]">

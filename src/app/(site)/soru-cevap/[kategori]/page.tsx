@@ -6,7 +6,7 @@ import { getQaContent } from "@/lib/faqs";
 import { groupByCategory } from "@/lib/qa";
 import { getSiteUrlWithPath } from "@/lib/site";
 import { cn } from "@/lib/cn";
-import { DT, FOCUS, MICRO, TEXT_ACTION } from "@/components/school/doc-styles";
+import { DT, FOCUS, TEXT_ACTION } from "@/components/school/doc-styles";
 import { FaqItem } from "@/components/qa/FaqItem";
 import { HashOpener } from "@/components/qa/HashOpener";
 import { AskPrompt, SourceNote } from "@/components/qa/QaKunye";
@@ -54,7 +54,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-const pad = (n: number) => String(n).padStart(2, "0");
 
 // Kategori sayfası hub'ın dizininin devamı: başlık ve dek, hairline'ın altında
 // 8 sütun soru paneli (her soru kendi çapasıyla açılır), 4 sütun künye.
@@ -64,7 +63,6 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
   if (!group) notFound();
 
   const { category, faqs } = group;
-  const community = faqs.filter((faq) => faq.origin === "community").length;
   const url = getSiteUrlWithPath(`/soru-cevap/${category.slug}`);
 
   const jsonLd = [
@@ -111,17 +109,11 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
           <h1 className="font-display text-[clamp(2.25rem,5vw,4rem)] leading-[1.04] font-extrabold tracking-[-0.02em] text-balance text-[var(--ink)] lg:col-span-7">
             {category.title}
           </h1>
-          <div className="lg:col-span-5 lg:pb-2">
-            {category.description && (
-              <p className="max-w-xl text-lg leading-relaxed text-[var(--ink-soft)] md:text-xl">
-                {category.description}
-              </p>
-            )}
-            <p className={cn("tabular", MICRO, category.description && "mt-3")}>
-              {faqs.length} soru
-              {community > 0 && ` · ${community} ziyaretçi sorusu`}
+          {category.description && (
+            <p className="max-w-xl text-lg leading-relaxed text-[var(--ink-soft)] md:text-xl lg:col-span-5 lg:pb-2">
+              {category.description}
             </p>
-          </div>
+          )}
         </div>
       </section>
 
@@ -134,14 +126,10 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
             <h2 id="sorular-baslik" className="sr-only">
               {category.title}: sorular ve yanıtlar
             </h2>
-            <p aria-hidden="true" className={`flex justify-between px-4 pt-4 pb-2 sm:px-5 ${MICRO}`}>
-              <span>No · soru</span>
-              <span>Yanıt için soruyu aç</span>
-            </p>
-            <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] border-t border-[var(--line)] px-2 py-1 sm:px-3">
-              {faqs.map((faq, i) => (
+            <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] px-2 py-1 sm:px-3">
+              {faqs.map((faq) => (
                 <li key={faq.id}>
-                  <FaqItem faq={faq} categorySlug={category.slug} anchor number={pad(i + 1)} />
+                  <FaqItem faq={faq} categorySlug={category.slug} anchor />
                 </li>
               ))}
             </ol>
@@ -160,7 +148,7 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
                 Bütün konular
               </h2>
               <ul className="mt-2">
-                {groups.map(({ category: item, faqs: list }) => {
+                {groups.map(({ category: item }) => {
                   const current = item.id === category.id;
                   return (
                     <li key={item.id}>
@@ -185,9 +173,6 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
                           )}
                         >
                           {item.title}
-                        </span>
-                        <span className="tabular font-mono text-[11px] font-medium text-[var(--ink-faint)]">
-                          {list.length}
                         </span>
                       </Link>
                     </li>
