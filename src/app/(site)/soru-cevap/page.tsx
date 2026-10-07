@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { getQaContent } from "@/lib/faqs";
 import { groupByCategory } from "@/lib/qa";
 import { faqHref, type Faq } from "@/types/faq";
-import { DT, FOCUS, SECTION_TITLE } from "@/components/school/doc-styles";
+import { DT, FOCUS, MICRO, SECTION_TITLE } from "@/components/school/doc-styles";
 import { CommunityTag } from "@/components/qa/CommunityTag";
 import { FaqItem } from "@/components/qa/FaqItem";
 import { MyQuestions } from "@/components/qa/MyQuestions";
@@ -118,7 +118,14 @@ export default async function SoruCevapPage() {
                   Konular
                 </h2>
               </div>
-              <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] border-t border-[var(--line)] px-2 pb-2 sm:px-3">
+              <div
+                aria-hidden="true"
+                className={`flex justify-between border-t border-[var(--line)] px-4 pt-3 pb-1 sm:px-5 ${MICRO}`}
+              >
+                <span>Konu</span>
+                <span className="pr-6">Soru</span>
+              </div>
+              <ol className="divide-y divide-[color-mix(in_srgb,var(--line)_70%,transparent)] px-2 pb-2 sm:px-3">
                 {groups.map(({ category, faqs: list }) => (
                   <li key={category.id}>
                     <Link
@@ -136,9 +143,9 @@ export default async function SoruCevapPage() {
                         )}
                       </span>
                       <span className="flex items-center gap-2 pt-0.5">
-                        <span className="tabular font-display text-[1.125rem] leading-none font-extrabold tracking-tight text-[var(--ink)]">
+                        <span className="tabular font-display text-[1.375rem] leading-none font-extrabold tracking-tight text-[var(--ink)]">
                           {list.length}
-                          <span className="font-reading text-[13px] font-normal tracking-normal text-[var(--ink-faint)]"> soru</span>
+                          <span className="sr-only"> soru</span>
                         </span>
                         <ArrowRight
                           aria-hidden="true"

@@ -144,9 +144,14 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
 
           <aside className="lg:sticky lg:top-24 lg:col-span-4 lg:self-start">
             <nav aria-labelledby="konular-baslik" className="border-t border-[var(--ink)] pt-5 pb-5">
-              <h2 id="konular-baslik" className={DT}>
-                Bütün konular
-              </h2>
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 id="konular-baslik" className={DT}>
+                  Bütün konular
+                </h2>
+                <span aria-hidden="true" className={DT}>
+                  Soru
+                </span>
+              </div>
               <ul className="mt-2">
                 {groups.map(({ category: item, faqs: list }) => {
                   const current = item.id === category.id;
@@ -175,7 +180,8 @@ export default async function SoruCevapKategoriPage({ params }: PageProps) {
                           {item.title}
                         </span>
                         <span className="tabular shrink-0 font-mono text-[11px] font-medium text-[var(--ink-faint)]">
-                          {list.length} soru
+                          {list.length}
+                          <span className="sr-only"> soru</span>
                         </span>
                       </Link>
                     </li>
